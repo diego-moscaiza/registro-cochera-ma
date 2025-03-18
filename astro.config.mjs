@@ -1,7 +1,7 @@
-import { defineConfig } from "astro/config";
-import vercel from "@astrojs/vercel";
 import tailwind from "@astrojs/tailwind";
-import authMiddleware from "./src/middleware/auth";
+import vercel from "@astrojs/vercel";
+import { defineConfig } from "astro/config";
+import authMiddleware from "./src/middleware/index.ts";
 
 
 // https://astro.build/config
