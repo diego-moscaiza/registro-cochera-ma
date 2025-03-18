@@ -1,65 +1,8 @@
 ---
 import Base from "../layout/Base.astro";
-export const prerender = true;
-const title = "Supabase and Astro Demo";
-
-import { defineMiddleware } from "astro:middleware";
-import { supabase } from "../lib/supabase";
-import micromatch from "micromatch";
-
-const protectedRoutes = ["/payments(|/)"];
-const redirectRoutes = ["/signin(|/)", "/register(|/)"];
-
-export const onRequest = defineMiddleware(
-  async ({ cookies, url, redirect }, next) => {
-    const accessToken = cookies.get("sb-access-token");
-    const refreshToken = cookies.get("sb-refresh-token");
-
-    if (accessToken && refreshToken) {
-      const { error } = await supabase.auth.setSession({
-        access_token: accessToken.value,
-        refresh_token: refreshToken.value,
-      });
-
-      if (error) {
-        cookies.delete("sb-access-token", { path: "/" });
-        cookies.delete("sb-refresh-token", { path: "/" });
-        return redirect("/signin");
-      }
-    }
-
-    if (
-      micromatch.isMatch(url.pathname, protectedRoutes) &&
-      (!accessToken || !refreshToken)
-    ) {
-      return redirect("/signin");
-    }
-
-    if (
-      micromatch.isMatch(url.pathname, redirectRoutes) &&
-      accessToken &&
-      refreshToken
-    ) {
-      return redirect("/payments");
-    }
-
-    return next();
-  },
-);
+export const prerender = false;
+const title = "Pantalla principal";
 ---
-
-<script>
-  document.addEventListener("DOMContentLoaded", async () => {
-    const accessToken = document.cookie.includes("sb-access-token");
-    const refreshToken = document.cookie.includes("sb-refresh-token");
-
-    if (accessToken && refreshToken) {
-      window.location.href = "/payments";
-    } else {
-      window.location.href = "/signin";
-    }
-  });
-</script>
 
 <Base title={title}>
   <section class="contenedor">
@@ -102,44 +45,11 @@ export const onRequest = defineMiddleware(
   }
 
   @keyframes shimmer {
-    0% { background-position: -200% 0; }
-    100% { background-position: 200% 0; }
-  }
-
-  .bienvenida {
-    flex: 1;
-    text-align: center;
-    padding: 50px;
-    background: white;
-    border-radius: 10px 0 0 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  }
-  .imagen-container {
-    flex: 1;
-    background: linear-gradient(to right, #6a11cb, #2575fc);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 0 10px 10px 0;
-  }
-  .imagen-bienvenida {
-    max-width: 80%;
-    height: auto;
-    border-radius: 10px;
-  }
-  .boton {
-    display: inline-block;
-    margin-top: 20px;
-    padding: 12px 24px;
-    background-color: #ff9800;
-    color: white;
-    text-decoration: none;
-    font-size: 18px;
-    font-weight: bold;
-    border-radius: 5px;
-    transition: background 0.3s;
-  }
-  .boton:hover {
-    background-color: #e68900;
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
   }
 </style>
