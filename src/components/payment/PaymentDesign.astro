@@ -1,0 +1,54 @@
+---
+interface Props {
+  fecha: string;
+  pagos: {
+    id: string;
+    nombre_pagador: string;
+    fecha_pago: string;
+    monto: number;
+    realizo_pago: boolean;
+  }[];
+}
+
+const { fecha, pagos } = Astro.props;
+---
+
+<div class="space-y-8">
+  <div>
+    <h3 class="text-lg font-semibold dark:text-gray-200 mb-3">{fecha}</h3>
+
+    <div class="overflow-x-auto">
+      <table class="w-full border border-gray-300">
+        <thead class="bg-gray-200">
+          <tr class="text-gray-800 border-gray-400">
+            <th class="border border-gray-400 px-4 py-2">Nombre Pagador</th>
+            <th class="border border-gray-400 px-4 py-2">Fecha de pago</th>
+            <th class="border border-gray-400 px-4 py-2">Monto</th>
+            <th class="border border-gray-400 px-4 py-2">Realizó Pago</th>
+          </tr>
+        </thead>
+        <tbody>
+          {pagos.map((pago) => {
+            const payment = {
+              id: pago.id ?? "null",
+              nombre_pagador: pago.nombre_pagador ?? "null",
+              fecha: pago.fecha_pago ?? "null",
+              fecha_pago: pago.fecha_pago ?? "null",
+              monto: pago.monto ?? "null",
+              realizo_pago: pago.realizo_pago ? "Sí pagó" : "Aún no",
+            };
+
+            return (
+              <tr class="bg-white border border-gray-300 text-gray-800">
+                <td class="px-4 py-2 border">{payment.nombre_pagador}</td>
+                <td class="px-4 py-2 border">{payment.fecha_pago}</td>
+                <td class="px-4 py-2 border">S/.{payment.monto.toString()}</td>
+                <td class="px-4 py-2 border">{payment.realizo_pago}</td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

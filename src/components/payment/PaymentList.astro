@@ -1,0 +1,50 @@
+---
+import PaymentDesign from "./PaymentDesign.astro";
+
+const baseUrl = import.meta.env.SITE || "http://localhost:4321"; // URL base
+
+async function getPagos() {
+  const res = await fetch(`${baseUrl}/api/record/payments`);
+  return res.json();
+}
+
+const pagos = await getPagos();
+
+export interface PaymentEntry {
+  id: string;
+  nombre_pagador: string;
+  fecha_pago: string;
+  monto: number;
+  realizo_pago: boolean;
+}
+
+// Agrupar pagos por fecha
+const pagosPorFecha: Record<string, PaymentEntry[]> = pagos.reduce(
+  (acc: any, pago: any) => {
+    const fecha = new Date(pago.created_at).toLocaleDateString();
+    if (!acc[fecha]) acc[fecha] = [];
+    acc[fecha].push(pago);
+    return acc;
+  },
+  {} as Record<string, PaymentEntry[]>,
+);
+---
+
+<div class="space-y-8">
+  {
+    Object.entries(pagosPorFecha).map(
+      ([fecha, pagos]: [string, PaymentEntry[]]) => (
+        <PaymentDesign
+          fecha={fecha}
+          pagos={pagos.map((pago) => ({
+            id: pago.id,
+            nombre_pagador: pago.nombre_pagador,
+            fecha_pago: pago.fecha_pago,
+            monto: pago.monto,
+            realizo_pago: pago.realizo_pago,
+          }))}
+        />
+      ),
+    )
+  }
+</div>
