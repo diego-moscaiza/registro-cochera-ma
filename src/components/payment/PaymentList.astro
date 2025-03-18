@@ -21,7 +21,7 @@ export interface PaymentEntry {
 // Agrupar pagos por fecha
 const pagosPorFecha: Record<string, PaymentEntry[]> = pagos.reduce(
   (acc: any, pago: any) => {
-    const fecha = new Date(pago.created_at).toLocaleDateString();
+    const fecha = new Date(pago.created_at).toLocaleDateString('es-ES');
     if (!acc[fecha]) acc[fecha] = [];
     acc[fecha].push(pago);
     return acc;
