@@ -1,7 +1,7 @@
 ---
 import PaymentDesign from "./PaymentDesign.astro";
 
-const baseUrl = import.meta.env.SITE || "http://localhost:4321"; // URL base
+const baseUrl = import.meta.env.PUBLIC_WEBSITE_URL || "http://localhost:4321";
 
 async function getPagos() {
   const res = await fetch(`${baseUrl}/api/record/payments`);
