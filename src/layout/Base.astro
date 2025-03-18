@@ -29,35 +29,6 @@ const canonicalURL = new URL(Astro.url).href;
   <body
     class="flex flex-col h-full w-full dark:bg-zinc-900 bg-zinc-50 dark:text-zinc-100"
   >
-    <nav class="border-b bg-white dark:bg-zinc-800 dark:border-zinc-700">
-      <div
-        class="flex items-baseline justify-end sm:justify-between p-4 max-w-screen-xl mx-auto"
-      >
-        <a href="/" class="hidden sm:block font-semibold dark:text-white"
-          >Registro de cocheras</a
-        >
-        <div>
-          <ul class="font-medium flex items-baseline gap-8">
-            <li>
-              <a
-                href="/payments"
-                class="block text-zinc-900 dark:text-gray-200">Pagos</a
-              >
-            </li>
-            <li>
-              <a href="/signin" class="block text-zinc-900 dark:text-gray-200"
-                >Iniciar Sesión</a
-              >
-            </li>
-            <li>
-              <a href="/api/auth/signout" class="block text-zinc-900 dark:text-gray-200"
-                >Cerrar Sesión</a
-              >
-            </li>
-          </ul>
-        </div>
-      </div>
-    </nav>
     <slot />
   </body>
 </html>
