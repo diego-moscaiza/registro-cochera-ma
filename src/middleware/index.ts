@@ -1,88 +1,98 @@
 import { defineMiddleware } from "astro:middleware";
-import { supabase } from "../lib/supabase";
 import micromatch from "micromatch";
+import { supabase } from "../lib/supabase";
 
 const protectedRoutes = ["/payments(|/)"];
 const redirectRoutes = ["/signin(|/)", "/register(|/)"];
-const proptectedAPIRoutes = ["/api/guestbook(|/)"];
+const protectedAPIRoutes = ["/api/guestbook(|/)"];
 
-export const onRequest = defineMiddleware(
-  async ({ locals, url, cookies, redirect }, next) => {
-    if (micromatch.isMatch(url.pathname, protectedRoutes)) {
-      const accessToken = cookies.get("sb-access-token");
-      const refreshToken = cookies.get("sb-refresh-token");
+const getSession = async (cookies: any) => {
+  const accessToken = cookies.get("sb-access-token");
+  const refreshToken = cookies.get("sb-refresh-token");
 
-      if (!accessToken || !refreshToken) {
-        return redirect("/signin");
-      }
+  if (!accessToken || !refreshToken) return null;
 
-      const { data, error } = await supabase.auth.setSession({
-        refresh_token: refreshToken.value,
-        access_token: accessToken.value,
-      });
+  const { data, error } = await supabase.auth.setSession({
+    refresh_token: refreshToken.value,
+    access_token: accessToken.value,
+  });
 
-      if (error) {
-        cookies.delete("sb-access-token", {
-          path: "/",
-        });
-        cookies.delete("sb-refresh-token", {
-          path: "/",
-        });
-        return redirect("/signin");
-      }
+  if (error) return null;
 
-      locals.email = data.user?.email!;
-      cookies.set("sb-access-token", data?.session?.access_token!, {
-        sameSite: "strict",
-        path: "/",
-        secure: true,
-      });
-      cookies.set("sb-refresh-token", data?.session?.refresh_token!, {
-        sameSite: "strict",
-        path: "/",
-        secure: true,
-      });
-    }
+  return { session: data.session, email: data.user?.email };
+};
 
-    if (micromatch.isMatch(url.pathname, redirectRoutes)) {
-      const accessToken = cookies.get("sb-access-token");
-      const refreshToken = cookies.get("sb-refresh-token");
+const handleProtectedRoute = async ({ cookies, redirect, locals }: any) => {
+  const sessionData = await getSession(cookies);
 
-      if (accessToken && refreshToken) {
-        return redirect("/payments");
-      }
-    }
+  if (!sessionData) {
+    cookies.delete("sb-access-token", { path: "/" });
+    cookies.delete("sb-refresh-token", { path: "/" });
+    return redirect("/signin");
+  }
 
-    if (micromatch.isMatch(url.pathname, proptectedAPIRoutes)) {
-      const accessToken = cookies.get("sb-access-token");
-      const refreshToken = cookies.get("sb-refresh-token");
+  locals.email = sessionData.email;
+  cookies.set("sb-access-token", sessionData?.session?.access_token ?? "", {
+    sameSite: "strict",
+    path: "/",
+    secure: true,
+  });
+  cookies.set("sb-refresh-token", sessionData?.session?.refresh_token ?? "", {
+    sameSite: "strict",
+    path: "/",
+    secure: true,
+  });
+  return null;
+};
 
-      // Check for tokens
-      if (!accessToken || !refreshToken) {
-        return new Response(
-          JSON.stringify({
-            error: "Unauthorized",
-          }),
-          { status: 401 },
-        );
-      }
+const handleRedirectRoute = ({ cookies, redirect }: any) => {
+  const accessToken = cookies.get("sb-access-token");
+  const refreshToken = cookies.get("sb-refresh-token");
 
-      // Verify the tokens
-      const { error } = await supabase.auth.setSession({
-        access_token: accessToken.value,
-        refresh_token: refreshToken.value,
-      });
+  if (accessToken && refreshToken) {
+    return redirect("/payments");
+  }
+  return null;
+};
 
-      if (error) {
-        return new Response(
-          JSON.stringify({
-            error: "Unauthorized",
-          }),
-          { status: 401 },
-        );
-      }
-    }
+const handleProtectedAPI = async ({ cookies }: any) => {
+  const sessionData = await getSession(cookies);
+  if (!sessionData) {
+    return new Response(
+      JSON.stringify({ error: "Unauthorized" }),
+      { status: 401 }
+    );
+  }
+  return null;
+};
 
-    return next();
-  },
-);
+// Nueva función para manejar el index "/"
+const handleIndexRedirect = async ({ cookies, redirect }: any) => {
+  const sessionData = await getSession(cookies);
+
+  if (sessionData) {
+    return redirect("/payments");
+  } else {
+    return redirect("/signin");
+  }
+};
+
+export const onRequest = defineMiddleware(async (context: any, next: any) => {
+  const { url, cookies, redirect, locals } = context;
+
+  let response;
+  if (url.pathname === "/") {
+    response = await handleIndexRedirect({ cookies, redirect });
+  }
+  if (!response && micromatch.isMatch(url.pathname, protectedRoutes)) {
+    response = await handleProtectedRoute({ cookies, redirect, locals });
+  }
+  if (!response && micromatch.isMatch(url.pathname, redirectRoutes)) {
+    response = handleRedirectRoute({ cookies, redirect });
+  }
+  if (!response && micromatch.isMatch(url.pathname, protectedAPIRoutes)) {
+    response = await handleProtectedAPI({ cookies });
+  }
+
+  return response || next();
+});
