@@ -1,5 +1,6 @@
 import type { Provider } from "@supabase/supabase-js";
 import type { APIRoute } from "astro";
+import { baseUrl } from "../../../config";
 import { supabase } from "../../../lib/supabase";
 
 export const POST: APIRoute = async ({ request, cookies, redirect }) => {
@@ -8,7 +9,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const password = formData.get("password")?.toString();
   const provider = formData.get("provider")?.toString();
 
-  const redirectTo = import.meta.env.PUBLIC_WEBSITE_URL || "http://localhost:4321/api/auth/callback";
+  const redirectTo = `${baseUrl}/api/record/payments`;
 
   if (provider) {
     const { data, error } = await supabase.auth.signInWithOAuth({
