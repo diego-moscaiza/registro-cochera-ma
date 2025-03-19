@@ -13,42 +13,66 @@ interface Props {
 const { fecha, pagos } = Astro.props;
 ---
 
-<div class="space-y-8">
-  <div>
-    <h3 class="text-lg font-semibold dark:text-gray-200 mb-3">{fecha}</h3>
-
-    <div class="overflow-x-auto">
-      <table class="w-full border border-gray-300">
-        <thead class="bg-gray-200">
-          <tr class="text-gray-800 border-gray-400">
-            <th class="border border-gray-400 px-4 py-2">Nombre Pagador</th>
-            <th class="border border-gray-400 px-4 py-2">Fecha de pago</th>
-            <th class="border border-gray-400 px-4 py-2">Monto</th>
-            <th class="border border-gray-400 px-4 py-2">Realizó Pago</th>
-          </tr>
-        </thead>
-        <tbody>
-          {pagos.map((pago) => {
+<section class="flex flex-col gap-3">
+  <h3 class="text-xl font-medium text-gray-800 dark:text-gray-200">{fecha}</h3>
+  <div class="overflow-x-auto border border-gray-300 rounded-lg shadow-lg">
+    <table class="w-full min-w-max p-2 m-1 bg-white">
+      <thead class="bg-gray-200">
+        <tr class="text-gray-800">
+          <th class="px-4 py-2 text-center text-sm sm:text-base">Acciones</th>
+          <th class="px-4 py-2 text-left text-sm sm:text-base"
+            >Nombre Pagador</th
+          >
+          <th class="px-4 py-2 text-left text-sm sm:text-base">Monto</th>
+          <th class="px-4 py-2 text-center text-sm sm:text-base"
+            >Realizó Pago</th
+          >
+        </tr>
+      </thead>
+      <tbody>
+        {
+          pagos.map((pago) => {
             const payment = {
-              id: pago.id ?? "null",
-              nombre_pagador: pago.nombre_pagador ?? "null",
-              fecha: pago.fecha_pago ?? "null",
-              fecha_pago: pago.fecha_pago ?? "null",
-              monto: pago.monto ?? "null",
+              id: pago.id ?? "-",
+              nombre_pagador: pago.nombre_pagador ?? "-",
+              monto: pago.monto ?? "-",
               realizo_pago: pago.realizo_pago ? "Sí pagó" : "Aún no",
             };
 
             return (
-              <tr class="bg-white border border-gray-300 text-gray-800">
-                <td class="px-4 py-2 border">{payment.nombre_pagador}</td>
-                <td class="px-4 py-2 border">{payment.fecha_pago}</td>
-                <td class="px-4 py-2 border">S/.{payment.monto.toString()}</td>
-                <td class="px-4 py-2 border">{payment.realizo_pago}</td>
+              <tr class="odd:bg-gray-50 even:bg-white hover:bg-gray-100 transition-colors duration-200">
+                <td class="px-4 py-2 text-center">
+                  <button
+                    type="button"
+                    class="flex items-center justify-center px-2 py-1 rounded transition-all
+                      underline text-blue-700 hover:text-white focus:text-white
+                      bg-transparent hover:bg-blue-500 focus:bg-blue-600
+                      ring-2 ring-transparent hover:ring-blue-300 focus:ring-4"
+                  >
+                    Editar
+                  </button>
+                  <td class="px-4 py-2 text-sm sm:text-base">
+                    {payment.nombre_pagador}
+                  </td>
+                  <td class="px-4 py-2 text-sm sm:text-base">
+                    S/.{payment.monto.toString()}
+                  </td>
+                  <td
+                    class={`px-4 py-2 font-medium text-center text-sm sm:text-base
+                        ${
+                          payment.realizo_pago === "Sí pagó"
+                            ? "text-green-800 bg-green-300"
+                            : "text-red-800 bg-red-300"
+                        }`}
+                  >
+                    {payment.realizo_pago}
+                  </td>
+                </td>
               </tr>
             );
-          })}
-        </tbody>
-      </table>
-    </div>
+          })
+        }
+      </tbody>
+    </table>
   </div>
-</div>
+</section>

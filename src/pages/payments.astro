@@ -1,15 +1,22 @@
 ---
 import PaymentList from "../components/payment/PaymentList.astro";
 import Navbar from "../layout/Navbar.astro";
+
+const paymentPageTitle: string = "Pagos";
 ---
 
-<Navbar title="Pagos">
-  <section class="py-24 px-4 w-full flex flex-col items-center gap-2">
-    <h2 class="text-2xl font-semibold text-indigo-600 dark:text-indigo-400">
+<Navbar title={paymentPageTitle}>
+  <section
+    class="pt-10 pb-20 xl:px-10 md:px-8 px-6
+    w-full min-h-screen max-w-screen-lg mx-auto
+    flex flex-col justify-center items-stretch gap-2"
+  >
+    <h2
+      class="text-2xl text-center
+      font-medium text-indigo-600 dark:text-indigo-400"
+    >
       Pagos Diarios
     </h2>
-    <PaymentList/>
+    <PaymentList />
   </section>
 </Navbar>
-
-
