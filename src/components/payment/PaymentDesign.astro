@@ -15,9 +15,11 @@ const { fecha, pagos } = Astro.props;
 
 <section class="flex flex-col gap-3">
   <h3 class="text-xl font-medium text-gray-800 dark:text-gray-200">{fecha}</h3>
-  <div class="overflow-x-auto border border-gray-300 rounded-lg shadow-lg">
-    <table class="w-full min-w-max p-2 m-1 bg-white">
-      <thead class="bg-gray-200">
+  <div
+    class="relative overflow-x-auto sm:overflow-x-visible border border-gray-300 rounded-lg shadow-lg"
+  >
+    <table class="w-full min-w-full bg-white rounded-lg overflow-hidden">
+      <thead class="bg-gray-200 rounded-t-lg">
         <tr class="text-gray-800">
           <th class="px-4 py-2 text-center text-sm sm:text-base">Acciones</th>
           <th class="px-4 py-2 text-left text-sm sm:text-base"
@@ -29,7 +31,7 @@ const { fecha, pagos } = Astro.props;
           >
         </tr>
       </thead>
-      <tbody>
+      <tbody class="rounded-b-lg">
         {
           pagos.map((pago) => {
             const payment = {
@@ -51,22 +53,22 @@ const { fecha, pagos } = Astro.props;
                   >
                     Editar
                   </button>
-                  <td class="px-4 py-2 text-sm sm:text-base">
-                    {payment.nombre_pagador}
-                  </td>
-                  <td class="px-4 py-2 text-sm sm:text-base">
-                    S/.{payment.monto.toString()}
-                  </td>
-                  <td
-                    class={`px-4 py-2 font-medium text-center text-sm sm:text-base
+                </td>
+                <td class="px-4 py-2 text-sm sm:text-base">
+                  {payment.nombre_pagador}
+                </td>
+                <td class="px-4 py-2 text-sm sm:text-base">
+                  S/.{parseFloat(payment.monto.toString()).toFixed(2)}
+                </td>
+                <td
+                  class={`px-4 py-2 font-medium text-center text-sm sm:text-base
                         ${
                           payment.realizo_pago === "Sí pagó"
                             ? "text-green-800 bg-green-300"
                             : "text-red-800 bg-red-300"
                         }`}
-                  >
-                    {payment.realizo_pago}
-                  </td>
+                >
+                  {payment.realizo_pago}
                 </td>
               </tr>
             );
