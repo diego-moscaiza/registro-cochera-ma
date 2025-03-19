@@ -1,0 +1,39 @@
+---
+import Base from "../layout/Base.astro";
+const notFound404: string = "404 Not Found";
+---
+
+<Base title={notFound404}>
+  <section class="flex flex-col justify-center items-center gap-4 mt-20 px-10">
+    <h1 class="text-black dark:text-white xl:text-3xl md:text-2xl text-xl text-center">
+      Esta pagina no existe
+    </h1>
+    <img
+      class="pt-4"
+      src="https://midu.dev/images/this-is-fine-404.gif"
+      alt="gif-this-is-fine"
+    />
+    <div class="flex flex-col gap-4">
+      <a
+        href="/"
+        class="flex items-center justify-around px-2 py-3 text-base font-medium text-center text-white bg-blue-600 rounded-lg hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-900"
+      >
+        <span>Regresar</span>
+        <svg
+          class="w-4 h-4 ml-2 rtl:rotate-180"
+          aria-hidden="true"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 14 10"
+        >
+          <path
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M1 5h12m0 0L9 1m4 4L9 9"></path>
+        </svg>
+      </a>
+    </div>
+  </section>
+</Base>
