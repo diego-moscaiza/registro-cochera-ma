@@ -3,53 +3,121 @@ import type { APIRoute } from "astro";
 import { baseUrl } from "../../../config";
 import { supabase } from "../../../lib/supabase";
 
-export const POST: APIRoute = async ({ request, cookies, redirect }) => {
-  const formData = await request.formData();
-  const email = formData.get("email")?.toString();
-  const password = formData.get("password")?.toString();
-  const provider = formData.get("provider")?.toString();
+/**
+ * Interfaz para estrategias de autenticación.
+ */
+interface AuthStrategy {
+	authenticate(): Promise<Response>;
+}
 
-  const redirectTo = `${baseUrl}/api/record/payments`;
+/**
+ * Estrategia para autenticación con OAuth.
+ */
+class OAuthStrategy implements AuthStrategy {
+	private provider: Provider;
 
-  if (provider) {
-    const { data, error } = await supabase.auth.signInWithOAuth({
-      provider: provider as Provider,
-      options: {
-        redirectTo,
-      },
-    });
+	constructor(provider: Provider) {
+		this.provider = provider;
+	}
 
-    if (error) {
-      return new Response(error.message, { status: 500 });
-    }
+	async authenticate(): Promise<Response> {
+		const redirectTo = `${baseUrl}/dashboard/payments`;
 
-    return redirect(data.url);
-  }
+		const { data, error } = await supabase.auth.signInWithOAuth({
+			provider: this.provider,
+			options: { redirectTo },
+		});
 
-  if (!email || !password) {
-    return new Response("Email and password are required", { status: 400 });
-  }
+		if (error) {
+			return new Response(error.message, { status: 500 });
+		}
 
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
+		return Response.redirect(data.url, 302);
+	}
+}
 
-  if (error) {
-    return new Response(error.message, { status: 500 });
-  }
+/**
+ * Estrategia para autenticación con email y contraseña.
+ */
+class EmailAuthStrategy implements AuthStrategy {
+	private email: string;
+	private password: string;
+	private cookies: any;
 
-  const { access_token, refresh_token } = data.session;
-  cookies.set("sb-access-token", access_token, {
-    sameSite: "strict",
-    path: "/",
-    secure: true,
-  });
-  cookies.set("sb-refresh-token", refresh_token, {
-    sameSite: "strict",
-    path: "/",
-    secure: true,
-  });
+	constructor(email: string, password: string, cookies: any) {
+		this.email = email;
+		this.password = password;
+		this.cookies = cookies;
+	}
 
-  return redirect("/dashboard/payments");
+	async authenticate(): Promise<Response> {
+		if (!this.email || !this.password) {
+			return new Response("Email and password are required", { status: 400 });
+		}
+
+		const { data, error } = await supabase.auth.signInWithPassword({
+			email: this.email,
+			password: this.password,
+		});
+
+		if (error) {
+			return new Response(error.message, { status: 500 });
+		}
+
+		const { access_token, refresh_token } = data.session;
+		this.cookies.set("sb-access-token", access_token, {
+			path: "/",
+			sameSite: "strict",
+			secure: process.env.NODE_ENV === "production",
+			httpOnly: true,
+		});
+		this.cookies.set("sb-refresh-token", refresh_token, {
+			path: "/",
+			sameSite: "strict",
+			secure: process.env.NODE_ENV === "production",
+			httpOnly: true,
+		});
+
+		return Response.redirect(`${baseUrl}/dashboard/payments`, 302);
+	}
+}
+
+/**
+ * Contexto para manejar estrategias de autenticación.
+ */
+class AuthContext {
+	private strategy: AuthStrategy | null = null;
+
+	setStrategy(strategy: AuthStrategy) {
+		this.strategy = strategy;
+	}
+
+	async authenticate(): Promise<Response> {
+		if (!this.strategy) {
+			return new Response("No authentication strategy set", { status: 400 });
+		}
+		return await this.strategy.authenticate();
+	}
+}
+
+/**
+ * Endpoint de autenticación.
+ */
+export const POST: APIRoute = async ({ request, cookies }) => {
+	const formData = await request.formData();
+	const email = formData.get("email")?.toString();
+	const password = formData.get("password")?.toString();
+	const provider = formData.get("provider")?.toString() as Provider | undefined;
+
+	const authContext = new AuthContext();
+
+	if (provider) {
+		authContext.setStrategy(new OAuthStrategy(provider));
+	} else if (email && password) {
+		authContext.setStrategy(new EmailAuthStrategy(email, password, cookies));
+	} else {
+		return new Response("Invalid authentication method", { status: 400 });
+	}
+
+	return await authContext.authenticate();
 };
