@@ -78,5 +78,5 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
 	const { access_token, refresh_token } = data.session;
 	setAuthCookies(cookies, access_token, refresh_token);
 
-	return redirect(relativeRedirectTo);
+	return redirect(redirectTo);
 };
