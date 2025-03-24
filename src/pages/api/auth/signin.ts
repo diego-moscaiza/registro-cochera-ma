@@ -66,13 +66,11 @@ class EmailAuthStrategy implements AuthStrategy {
 
 		const { access_token, refresh_token } = data.session;
 		this.cookies.set("sb-access-token", access_token, {
-			path: "/",
 			sameSite: "strict",
 			secure: process.env.NODE_ENV === "production",
 			httpOnly: true,
 		});
 		this.cookies.set("sb-refresh-token", refresh_token, {
-			path: "/",
 			sameSite: "strict",
 			secure: process.env.NODE_ENV === "production",
 			httpOnly: true,
