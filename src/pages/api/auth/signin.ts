@@ -3,7 +3,7 @@ import type { APIRoute } from "astro";
 import { baseUrl } from "../../../config";
 import { supabase } from "../../../lib/supabase";
 
-const handleErrorResponse = (message: string, status: number) => {
+const handleErrorResponse = (message: string, status: number): Response => {
 	return new Response(message, { status });
 };
 
@@ -22,20 +22,26 @@ const setAuthCookies = (cookies: any, accessToken: string, refreshToken: string)
 	});
 };
 
-const signInWithOAuth = async (provider: Provider, redirectTo: string) => {
+const signInWithOAuth = async (provider: Provider, redirectTo: string): Promise<Response> => {
 	const { data, error } = await supabase.auth.signInWithOAuth({
 		provider,
 		options: { redirectTo },
 	});
-	return { data, error };
+	if (error) {
+		return handleErrorResponse(error.message, 500);
+	}
+	return new Response(null, { status: 302, headers: { Location: data.url } });
 };
 
-const signInWithPassword = async (email: string, password: string) => {
+const signInWithPassword = async (email: string, password: string): Promise<Response> => {
 	const { data, error } = await supabase.auth.signInWithPassword({
 		email,
 		password,
 	});
-	return { data, error };
+	if (error) {
+		return handleErrorResponse(error.message, 500);
+	}
+	return new Response(JSON.stringify(data), { status: 200 });
 };
 
 export const POST: APIRoute = async ({ request, cookies, redirect }) => {
@@ -45,25 +51,26 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
 	const provider = formData.get("provider")?.toString();
 
 	const redirectTo = `${baseUrl}/dashboard/payments`;
+	const relativeRedirectTo = "/dashboard/payments";
 
 	if (provider) {
-		const { data, error }: any = await signInWithOAuth(provider as Provider, redirectTo);
-		if (error) {
-			return handleErrorResponse(error.message, 500);
+		const response = await signInWithOAuth(provider as Provider, redirectTo);
+		if (response.status === 302) {
+			return response; // Redirigir si es un Response de redirección
 		}
-		return redirect(data.url);
+		return response; // Devuelve la respuesta de error si existe
 	}
 
 	if (!email || !password) {
 		return handleErrorResponse("Email and password are required", 400);
 	}
 
-	const { data, error } = await signInWithPassword(email, password);
-	if (error) {
-		return handleErrorResponse(error.message, 500);
+	const response = await signInWithPassword(email, password);
+	if (response.status !== 200) {
+		return response; // Devuelve la respuesta de error si existe
 	}
 
-	// Verificar que data.session no sea null
+	const data = JSON.parse(await response.text());
 	if (!data.session) {
 		return handleErrorResponse("Session not found", 500);
 	}
@@ -71,5 +78,5 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
 	const { access_token, refresh_token } = data.session;
 	setAuthCookies(cookies, access_token, refresh_token);
 
-	return redirect("/dashboard/payments");
+	return redirect(relativeRedirectTo);
 };
