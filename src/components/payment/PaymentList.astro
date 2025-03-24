@@ -2,48 +2,64 @@
 import { baseUrl } from "../../config";
 import PaymentDesign from "./PaymentDesign.astro";
 
+export interface PaymentEntry {
+	id: string;
+	nombre_pagador: string;
+	fecha_pago: string;
+	monto: number;
+	estado_pago: boolean;
+}
+
 async function getPagos() {
-  const res = await fetch(`${baseUrl}/api/record/payments`);
-  return res.json();
+	const res = await fetch(`${baseUrl}/api/record/payments`);
+	return res.json();
 }
 
 const pagos = await getPagos();
 
-export interface PaymentEntry {
-  id: string;
-  nombre_pagador: string;
-  fecha_pago: string;
-  monto: number;
-  realizo_pago: boolean;
+const opciones: Intl.DateTimeFormatOptions = {
+	day: "numeric",
+	month: "long",
+	year: "numeric",
+};
+
+function convertirFechaPeru(fechaStr: any) {
+	const fechaUTC = new Date(fechaStr + "T00:00:00Z"); // Se fuerza a UTC
+	const fechaLocal = new Date(fechaUTC.getTime() + 5 * 60 * 60 * 1000); // Ajuste a UTC-5
+	return fechaLocal.toLocaleDateString("es-PE", opciones);
 }
 
 // Agrupar pagos por fecha
 const pagosPorFecha: Record<string, PaymentEntry[]> = pagos.reduce(
-  (acc: any, pago: any) => {
-    const fecha = new Date(pago.created_at).toLocaleDateString("es-ES");
-    if (!acc[fecha]) acc[fecha] = [];
-    acc[fecha].push(pago);
-    return acc;
-  },
-  {} as Record<string, PaymentEntry[]>,
+	(acc: Record<string, PaymentEntry[]>, pago: PaymentEntry) => {
+		const fechaPago = convertirFechaPeru(pago.fecha_pago);
+		if (!acc[fechaPago]) acc[fechaPago] = [];
+		acc[fechaPago].push(pago);
+		return acc;
+	},
+	{},
 );
+
+Object.keys(pagosPorFecha).forEach((fecha) => {
+	pagosPorFecha[fecha]?.sort((a, b) => Number(a.id) - Number(b.id));
+});
 ---
 
 <div class="space-y-8">
-  {
-    Object.entries(pagosPorFecha).map(
-      ([fecha, pagos]: [string, PaymentEntry[]]) => (
-        <PaymentDesign
-          fecha={fecha}
-          pagos={pagos.map((pago) => ({
-            id: pago.id,
-            nombre_pagador: pago.nombre_pagador,
-            fecha_pago: pago.fecha_pago,
-            monto: pago.monto,
-            realizo_pago: pago.realizo_pago,
-          }))}
-        />
-      ),
-    )
-  }
+	{
+		Object.entries(pagosPorFecha).map(
+			([fecha, pagos]: [string, PaymentEntry[]]) => (
+				<PaymentDesign
+					fecha={fecha}
+					pagos={pagos.map((pago) => ({
+						id: pago.id,
+						nombre_pagador: pago.nombre_pagador,
+						fecha_pago: pago.fecha_pago,
+						monto: pago.monto,
+						estado_pago: pago.estado_pago,
+					}))}
+				/>
+			),
+		)
+	}
 </div>

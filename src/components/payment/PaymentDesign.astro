@@ -1,80 +1,89 @@
 ---
 interface Props {
-  fecha: string;
-  pagos: {
-    id: string;
-    nombre_pagador: string;
-    fecha_pago: string;
-    monto: number;
-    realizo_pago: boolean;
-  }[];
+	fecha: string;
+	pagos: {
+		id: string;
+		nombre_pagador: string;
+		fecha_pago: string;
+		monto: number;
+		estado_pago: boolean;
+	}[];
 }
 
 const { fecha, pagos } = Astro.props;
 ---
 
 <section class="flex flex-col gap-3">
-  <h3 class="text-xl font-medium text-gray-800 dark:text-gray-200">{fecha}</h3>
-  <div
-    class="relative overflow-x-auto sm:overflow-x-visible border border-gray-300 rounded-lg shadow-lg"
-  >
-    <table class="w-full min-w-full bg-white rounded-lg overflow-hidden">
-      <thead class="bg-gray-200 rounded-t-lg">
-        <tr class="text-gray-800">
-          <th class="px-4 py-2 text-center text-sm sm:text-base">Acciones</th>
-          <th class="px-4 py-2 text-left text-sm sm:text-base"
-            >Nombre Pagador</th
-          >
-          <th class="px-4 py-2 text-left text-sm sm:text-base">Monto</th>
-          <th class="px-4 py-2 text-center text-sm sm:text-base"
-            >Realizó Pago</th
-          >
-        </tr>
-      </thead>
-      <tbody class="rounded-b-lg">
-        {
-          pagos.map((pago) => {
-            const payment = {
-              id: pago.id ?? "-",
-              nombre_pagador: pago.nombre_pagador ?? "-",
-              monto: pago.monto ?? "-",
-              realizo_pago: pago.realizo_pago ? "Sí pagó" : "Aún no",
-            };
+	<h3 class="text-xl font-medium text-black dark:text-neutral-200">
+		Pagos del "{fecha}"
+	</h3>
+	<div class="relative overflow-x-auto sm:overflow-x-visible">
+		<table
+			class="w-full min-w-full bg-white dark:bg-slate-800 rounded-lg overflow-hidden"
+		>
+			<thead class="bg-gray-200 dark:bg-sky-950 rounded-t-lg text-nowrap">
+				<tr class="text-black dark:text-neutral-200">
+					<th class="px-4 py-2 text-center text-sm sm:text-base">Acciones</th>
+					<th class="px-4 py-2 text-left text-sm sm:text-base"
+						>Nombre Pagador</th
+					>
+					<th class="px-4 py-2 text-left text-sm sm:text-base">Monto</th>
+					<th class="px-4 py-2 text-center text-sm sm:text-base"
+						>Estado del Pago</th
+					>
+				</tr>
+			</thead>
+			<tbody class="rounded-b-lg">
+				{
+					pagos.map((pago) => {
+						const payment = {
+							id: pago.id ?? "-",
+							nombre_pagador: pago.nombre_pagador ?? "-",
+							monto: pago.monto ?? "-",
+							realizo_pago: pago.estado_pago ? "Canceló" : "No pagó",
+						};
 
-            return (
-              <tr class="odd:bg-gray-50 even:bg-white hover:bg-gray-100 transition-colors duration-200">
-                <td class="px-4 py-2 text-center">
-                  <button
-                    type="button"
-                    class="flex items-center justify-center px-2 py-1 rounded transition-all
-                      underline text-blue-700 hover:text-white focus:text-white
+						return (
+							<tr class="text-black dark:text-neutral-100 hover:bg-gray-100 dark:hover:bg-slate-600 transition-colors duration-200">
+								<td class="px-4 py-2 text-center">
+									<button
+										type="button"
+										class="flex items-center justify-center px-2 py-1 rounded transition-all
+                      underline text-blue-600 hover:text-neutral-100 focus:text-neutral-100
                       bg-transparent hover:bg-blue-500 focus:bg-blue-600
-                      ring-2 ring-transparent hover:ring-blue-300 focus:ring-4"
-                  >
-                    Editar
-                  </button>
-                </td>
-                <td class="px-4 py-2 text-sm sm:text-base">
-                  {payment.nombre_pagador}
-                </td>
-                <td class="px-4 py-2 text-sm sm:text-base">
-                  S/.{parseFloat(payment.monto.toString()).toFixed(2)}
-                </td>
-                <td
-                  class={`px-4 py-2 font-medium text-center text-sm sm:text-base
+                      ring-2 ring-transparent hover:ring-blue-300 focus:ring-4
+											dark:text-teal-400"
+									>
+										Editar
+									</button>
+								</td>
+								<td class="px-4 py-2 text-sm sm:text-base text-nowrap">
+									{payment.nombre_pagador}
+								</td>
+								<td class="px-4 py-2 text-sm sm:text-base text-nowrap">
+									S/.{parseFloat(payment.monto.toString()).toFixed(2)}
+								</td>
+								<td class="text-center text-nowrap">
+									<span
+										class:list={`px-4 py-1 rounded border font-medium text-center text-sm sm:text-base
                         ${
-                          payment.realizo_pago === "Sí pagó"
-                            ? "text-green-800 bg-green-300"
-                            : "text-red-800 bg-red-300"
-                        }`}
-                >
-                  {payment.realizo_pago}
-                </td>
-              </tr>
-            );
-          })
-        }
-      </tbody>
-    </table>
-  </div>
+													payment.realizo_pago === "Canceló"
+														? [
+																"text-green-800 bg-green-300 border-green-700 dark:text-[#4fd94f] dark:bg-[#294026] dark:border-[#4fd94f]",
+															]
+														: [
+																"text-red-800 bg-red-300 border-red-700 dark:text-[#d94f59] dark:bg-[#40263e] dark:border-[#d94f59]",
+															]
+												}`}
+									>
+										{payment.realizo_pago}
+									</span>
+								</td>
+							</tr>
+						);
+					})
+				}
+			</tbody>
+		</table>
+	</div>
 </section>
