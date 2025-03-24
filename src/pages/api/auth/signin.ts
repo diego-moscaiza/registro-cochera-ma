@@ -76,7 +76,9 @@ class EmailAuthStrategy implements AuthStrategy {
 			httpOnly: true,
 		});
 
-		return Response.redirect(`${baseUrl}/dashboard/payments`, 302);
+		let redirecTo = `${baseUrl}/dashboard/payments` || "/dashboard/payments";
+
+		return Response.redirect(redirecTo, 302);
 	}
 }
 
