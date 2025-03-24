@@ -1,71 +1,95 @@
 ---
+import Navbar from "../components/Navbar.astro";
 import Base from "../layout/Base.astro";
+
 const title = "Iniciar sesión";
 ---
 
 <Base title={title}>
-  <main class="flex-1 flex flex-col gap-4 items-center p-4 justify-center">
-    <section class="w-full max-w-md">
-      <h1
-        class="font-semibold text-2xl dark:text-zinc-100 text-zinc-900 w-full mb-1"
-      >
-        {title}
-      </h1>
+	<Navbar />
+	<main
+		class="flex flex-col items-center justify-center px-6 min-h-[60vh] xl:min-h-[80vh]"
+	>
+		<section class="w-full max-w-md mx-auto flex flex-col gap-4">
+			<h1 class="w-full font-semibold text-2xl text-black dark:text-white">
+				Iniciar sesión
+			</h1>
 
-      <form
-        action="/api/auth/signin"
-        method="post"
-        class="grid grid-cols-1 gap-3 w-full"
-      >
-        <div class="grid grid-cols-1 gap-2">
-          <label
-            for="email"
-            class="font-medium dark:text-zinc-300 text-zinc-900 text-sm"
-            >Correo electrónico</label
-          >
-          <input
-            id="email"
-            type="email"
-            name="email"
-            class="rounded-md py-1 px-3 dark:bg-zinc-800 dark:text-zinc-300 border bg-zinc-50 border-zinc-300 dark:border-zinc-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-600 dark:focus:bg-zinc-900 focus:bg-white focus:ring-opacity-60"
-          />
-        </div>
-        <label
-          for="password"
-          class="font-medium dark:text-zinc-300 text-zinc-900 text-sm"
-          >Contraseña</label
-        >
-        <input
-          id="password"
-          type="password"
-          name="password"
-          class="rounded-md py-1 px-3 dark:bg-zinc-800 dark:text-zinc-300 border bg-zinc-50 border-zinc-300 dark:border-zinc-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-600 dark:focus:bg-zinc-900 focus:bg-white focus:ring-opacity-60"
-        />
+			<form
+				action="/api/auth/signin"
+				method="post"
+				class="grid grid-cols-1 gap-3 w-full"
+			>
+				<div id="emailContainer" class="grid grid-cols-1 gap-2">
+					<label
+						for="email"
+						class="text-sm font-medium text-black dark:text-white"
+						>Correo electrónico</label
+					>
+					<input
+						id="email"
+						type="email"
+						name="email"
+						placeholder="ejemplo@dominio.com"
+						autocomplete="on"
+						class:list={[
+							"rounded-md py-1 px-3",
+							"dark:text-neutral-100",
+							"border bg-neutral-100 dark:bg-slate-700 border-neutral-300 dark:border-slate-500",
+							"focus:outline-none focus:ring-2 focus:ring-opacity-60 focus:bg-white dark:focus:bg-slate-800 focus:border-blue-500 focus:ring-blue-600",
+						]}
+					/>
+				</div>
 
-        <label class="flex items-center gap-2 mt-2">
-          <input type="checkbox" id="showPassword" class="cursor-pointer" />
-          <span id="checkText">Mostrar contraseña 👁️</span>
-        </label>
+				<div id="passwordContainer" class="grid grid-cols-1 gap-2">
+					<label
+						for="password"
+						class="text-sm font-medium text-black dark:text-white"
+						>Contraseña</label
+					>
+					<input
+						id="password"
+						type="password"
+						name="password"
+						placeholder="********"
+						autocomplete="on"
+						class:list={[
+							"rounded-md py-1 px-3",
+							"dark:text-neutral-100",
+							"border bg-gray-100 dark:bg-slate-700 border-neutral-300 dark:border-slate-500",
+							"focus:outline-none focus:ring-2 focus:ring-opacity-60 focus:bg-white dark:focus:bg-slate-800 focus:border-blue-500 focus:ring-blue-600",
+						]}
+					/>
+				</div>
 
-        <button
-          type="submit"
-          class="dark:bg-zinc-100 bg-zinc-900 border-zinc-900 py-1.5 border dark:border-zinc-100 rounded-md mt-2 dark:text-zinc-900 text-zinc-100 font-medium text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-zinc-900 disabled:opacity-50 disabled:cursor-not-allowed"
-          >Ingresar</button
-        >
-      </form>
-    </section>
-  </main>
+				<label class="flex items-center gap-2">
+					<input type="checkbox" id="showPassword" class="cursor-pointer" />
+					<span id="checkText">Mostrar contraseña 👁️</span>
+				</label>
+
+				<button
+					type="submit"
+					class:list={[
+						"py-1.5 dark:text-black text-neutral-100 font-medium text-sm",
+						"rounded-md dark:bg-stone-50 bg-neutral-900 border-neutral-900 border dark:border-neutral-100",
+						"focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-neutral-900",
+						"disabled:opacity-50 disabled:cursor-not-allowed",
+					]}>Ingresar</button
+				>
+			</form>
+		</section>
+	</main>
 </Base>
 
 <script>
-  const passwordInput: any = document.getElementById("password");
-  const showPassword: any = document.getElementById("showPassword");
-  const checkText: any = document.getElementById("checkText");
+	const passwordInput: any = document.getElementById("password");
+	const showPassword: any = document.getElementById("showPassword");
+	const checkText: any = document.getElementById("checkText");
 
-  showPassword.addEventListener("change", () => {
-    passwordInput.type = showPassword.checked ? "text" : "password";
-    checkText.textContent = showPassword.checked
-      ? "Ocultar contraseña 🙈"
-      : "Mostrar contraseña 👁️";
-  });
+	showPassword.addEventListener("change", () => {
+		passwordInput.type = showPassword.checked ? "text" : "password";
+		checkText.textContent = showPassword.checked
+			? "Ocultar contraseña 🙈"
+			: "Mostrar contraseña 👁️";
+	});
 </script>

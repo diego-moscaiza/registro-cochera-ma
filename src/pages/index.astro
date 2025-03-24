@@ -1,55 +1,56 @@
 ---
 import Base from "../layout/Base.astro";
+
 export const prerender = false;
 const title = "Pantalla principal";
 ---
 
 <Base title={title}>
-  <section class="contenedor">
-    <div class="skeleton-loader">
-      <div class="skeleton-box"></div>
-      <div class="skeleton-box"></div>
-    </div>
-  </section>
+	<section class="contenedor">
+		<div class="skeleton-loader">
+			<div class="skeleton-box"></div>
+			<div class="skeleton-box"></div>
+		</div>
+	</section>
 </Base>
 
 <style>
-  .contenedor {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-    background: #f4f6f9;
-    position: relative;
-  }
+	.contenedor {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		height: 100vh;
+		background: #f4f6f9;
+		position: relative;
+	}
 
-  .skeleton-loader {
-    display: none;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-  }
+	.skeleton-loader {
+		display: none;
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 10px;
+	}
 
-  .skeleton-box {
-    width: 200px;
-    height: 20px;
-    background: linear-gradient(90deg, #e0e0e0 25%, #f0f0f0 50%, #e0e0e0 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.5s infinite linear;
-    border-radius: 4px;
-  }
+	.skeleton-box {
+		width: 200px;
+		height: 20px;
+		background: linear-gradient(90deg, #e0e0e0 25%, #f0f0f0 50%, #e0e0e0 75%);
+		background-size: 200% 100%;
+		animation: shimmer 1.5s infinite linear;
+		border-radius: 4px;
+	}
 
-  @keyframes shimmer {
-    0% {
-      background-position: -200% 0;
-    }
-    100% {
-      background-position: 200% 0;
-    }
-  }
+	@keyframes shimmer {
+		0% {
+			background-position: -200% 0;
+		}
+		100% {
+			background-position: 200% 0;
+		}
+	}
 </style>
