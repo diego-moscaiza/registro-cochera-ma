@@ -1,6 +1,6 @@
 ---
 interface Props {
-  title: string;
+	title: string;
 }
 
 const description = "Sistema de registro de cocheras";
@@ -9,25 +9,37 @@ const ogImageURL = new URL("hero.png", Astro.site).href;
 const canonicalURL = new URL(Astro.url).href;
 ---
 
-<html lang="en" class="h-full w-full">
-  <head>
-    <title>{title}</title>
-    <meta charset="utf-8" />
-    <link rel="icon" type="image/svg+xml" href="/carreta.svg" />
-    <meta name="viewport" content="width=device-width" />
-    <meta name="generator" content={Astro.generator} />
-    <meta name="description" content={description} />
-    <meta property="twitter:image" content={ogImageURL} />
-    <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:title" content={title} />
-    <meta property="twitter:description" content={description} />
-    <meta property="og:image" content={ogImageURL} />
-    <meta property="og:title" content={title} />
-    <meta property="og:description" content={description} />
-    <meta property="og:url" content={canonicalURL} />
-  </head>
-  <body class="flex flex-col min-h-screen w-full dark:bg-zinc-900 bg-zinc-50 dark:text-zinc-100">
-
-    <slot />
-  </body>
+<html lang="es-ES">
+	<head>
+		<title>{title}</title>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/svg+xml" href="/carreta.svg" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta name="generator" content={Astro.generator} />
+		<meta name="description" content={description} />
+		<meta property="twitter:image" content={ogImageURL} />
+		<meta property="twitter:card" content="summary_large_image" />
+		<meta property="twitter:title" content={title} />
+		<meta property="twitter:description" content={description} />
+		<meta property="og:image" content={ogImageURL} />
+		<meta property="og:title" content={title} />
+		<meta property="og:description" content={description} />
+		<meta property="og:url" content={canonicalURL} />
+		<script src="../themes/darkMode.ts"></script>
+	</head>
+	<body
+		class:list={[
+			"flex flex-col",
+			"bg-white dark:bg-slate-900 dark:text-neutral-50",
+			"scrollbar scrollbar-w-3 scrollbar-thumb-rounded-[0.25rem]",
+			"scrollbar-track-slate-200  scrollbar-thumb-gray-400",
+			"dark:scrollbar-track-gray-900 dark:scrollbar-thumb-gray-700",
+		]}
+	>
+		<slot />
+	</body>
 </html>
+
+<style is:global>
+	@import url("https://fonts.cdnfonts.com/css/inter");
+</style>
