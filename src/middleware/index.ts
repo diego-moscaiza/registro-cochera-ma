@@ -2,9 +2,9 @@ import { defineMiddleware } from "astro:middleware";
 import micromatch from "micromatch";
 import { supabase } from "../lib/supabase";
 
-const protectedRoutes = ["/payments(|/)", "/payments/**"];
-const redirectRoutes = ["/signin(|/)", "/register(|/)"];
-const protectedAPIRoutes = ["/api/guestbook(|/)"];
+const protectedRoutes = ["/dashboard(|/)", "/dashboard/**"];
+const redirectRoutes = ["/signin(|/)"];
+const protectedAPIRoutes = ["/api/record/payments/(|/)"];
 
 const getSession = async (cookies: any) => {
   const accessToken = cookies.get("sb-access-token");
@@ -50,7 +50,7 @@ const handleRedirectRoute = ({ cookies, redirect }: any) => {
   const refreshToken = cookies.get("sb-refresh-token");
 
   if (accessToken && refreshToken) {
-    return redirect("/payments");
+    return redirect("/dashboard/payments");
   }
   return null;
 };
@@ -71,7 +71,7 @@ const handleIndexRedirect = async ({ cookies, redirect }: any) => {
   const sessionData = await getSession(cookies);
 
   if (sessionData) {
-    return redirect("/payments");
+    return redirect("/dashboard/payments");
   } else {
     return redirect("/signin");
   }

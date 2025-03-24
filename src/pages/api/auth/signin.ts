@@ -51,5 +51,5 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     secure: true,
   });
 
-  return redirect("/payments");
+  return redirect("/dashboard/payments");
 };
