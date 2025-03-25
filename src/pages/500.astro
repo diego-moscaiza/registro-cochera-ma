@@ -1,28 +1,29 @@
 ---
-import png404 from "../assets/404.png";
+import png500 from "../assets/500.png";
 import Base from "../layout/Base.astro";
 
-const notFound404: string = "404 Not Found";
-const astronaut404png = png404.src;
+const error505Ttitle: string = "500 Something went wrong";
+const astronaut500png = png500.src;
 ---
 
-<Base title={notFound404}>
+<Base title={error505Ttitle}>
 	<div
-		class="flex flex-col justify-center items-center px-6 mx-auto xl:min-h-[90vh] min-h-[80vh] xl:px-0 dark:bg-gray-900"
+		class="flex flex-col justify-center items-center px-6 mx-auto h-screen xl:px-0 dark:bg-gray-900"
 	>
-		<div class="block md:max-w-lg max-w-md">
-			<img src={astronaut404png} alt="astronaut image" />
+		<div class="block md:max-w-lg">
+			<img src={astronaut500png} alt="astronaut image" />
 		</div>
 		<div class="text-center xl:max-w-4xl">
 			<h1
 				class="mb-3 text-2xl font-bold leading-tight text-gray-900 sm:text-4xl lg:text-5xl dark:text-white"
 			>
-				Página no encontrada
+				Algo ha salido muy mal
 			</h1>
 			<p
 				class="mb-5 text-base font-normal text-gray-500 md:text-lg dark:text-gray-400"
 			>
-				Parece que seguiste un mal enlace.
+				Algo salió mal, pero no te preocupes, estamos trabajando en ello.
+				Intenta nuevamente más tarde.
 			</p>
 			<a
 				href="/"
