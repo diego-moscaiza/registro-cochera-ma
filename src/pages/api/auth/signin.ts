@@ -1,6 +1,5 @@
 import type { Provider } from "@supabase/supabase-js";
 import type { APIRoute } from "astro";
-import { baseUrl } from "../../../config";
 import { supabase } from "../../../lib/supabase";
 
 const handleErrorResponse = (message: string, status: number): Response => {
@@ -50,11 +49,10 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
 	const password = formData.get("password")?.toString() || ""; // Valor predeterminado
 	const provider = formData.get("provider")?.toString();
 
-	const redirectTo = `${baseUrl}/dashboard/payments`;
-	const relativeRedirectTo = "/dashboard/payments";
+	const redirectToDashboard = "/panel/pagos-hoy";
 
 	if (provider) {
-		const response = await signInWithOAuth(provider as Provider, redirectTo);
+		const response = await signInWithOAuth(provider as Provider, redirectToDashboard);
 		if (response.status === 302) {
 			return response; // Redirigir si es un Response de redirección
 		}
@@ -78,5 +76,5 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
 	const { access_token, refresh_token } = data.session;
 	setAuthCookies(cookies, access_token, refresh_token);
 
-	return redirect(redirectTo);
+	return redirect(redirectToDashboard);
 };

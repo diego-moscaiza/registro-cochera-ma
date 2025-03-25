@@ -26,5 +26,5 @@ export const GET: APIRoute = async ({ url, cookies, redirect }) => {
 		secure: process.env.NODE_ENV === "production",
 		httpOnly: true,
 	});
-	return redirect("/dashboard/payments");
+	return redirect("/panel/pagos-hoy");
 };
