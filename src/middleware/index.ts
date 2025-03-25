@@ -2,9 +2,10 @@ import { defineMiddleware } from "astro:middleware";
 import micromatch from "micromatch";
 import { supabase } from "../lib/supabase";
 
-const protectedRoutes = ["/dashboard(|/)", "/dashboard/**"];
-const redirectRoutes = ["/signin(|/)"];
-const protectedAPIRoutes = ["/api/record/payments/(|/)"];
+const protectedRoutes = ["/panel(|/)", "/panel/**"];
+const redirectRoutes = ["/inicio-sesion(|/)"];
+const protectedAPIRoutes = ["/api/record/payments/(|/)", "/api/record/listPayments/(|/)"];
+const redirectToDashboard = "/panel/pagos-hoy";
 
 const getSession = async (cookies: any) => {
 	const accessToken = cookies.get("sb-access-token");
@@ -22,8 +23,17 @@ const getSession = async (cookies: any) => {
 		return null;
 	};
 
-	return { session: data.session, email: data.user?.email };
+	// Extraer más datos del usuario
+	const user = data.user;
+	return {
+		session: data.session,
+		email: user?.email,
+		displayName: user?.user_metadata?.display_name ?? "Usuario",
+		phone: user?.user_metadata?.phone ?? "Sin número",
+		otherInfo: user?.user_metadata // Guarda todos los datos adicionales en caso de necesitarlos
+	};
 };
+
 
 const handleProtectedRoute = async ({ cookies, redirect, locals }: any) => {
 	const sessionData = await getSession(cookies);
@@ -31,10 +41,16 @@ const handleProtectedRoute = async ({ cookies, redirect, locals }: any) => {
 	if (!sessionData?.session) {
 		cookies.delete("sb-access-token", { path: "/" });
 		cookies.delete("sb-refresh-token", { path: "/" });
-		return redirect("/signin");
+		return redirect("/inicio-sesion");
 	}
 
-	locals.email = sessionData?.email;
+	// Guardamos los datos en locals para usarlos en cualquier parte del servidor
+	locals.email = sessionData.email;
+	locals.displayName = sessionData.displayName;
+	locals.phone = sessionData.phone;
+	locals.otherInfo = sessionData.otherInfo; // Todos los metadatos
+
+	// Guardar los tokens en cookies para mantener la sesión
 	cookies.set("sb-access-token", sessionData?.session?.access_token ?? "", {
 		sameSite: "strict",
 		path: "/",
@@ -50,12 +66,13 @@ const handleProtectedRoute = async ({ cookies, redirect, locals }: any) => {
 	return null;
 };
 
+
 const handleRedirectRoute = ({ cookies, redirect }: any) => {
 	const accessToken = cookies.get("sb-access-token");
 	const refreshToken = cookies.get("sb-refresh-token");
 
 	if (accessToken && refreshToken) {
-		return redirect("/dashboard/payments");
+		return redirect(redirectToDashboard);
 	}
 	return null;
 };
@@ -76,9 +93,9 @@ const handleIndexRedirect = async ({ cookies, redirect }: any) => {
 	const sessionData = await getSession(cookies);
 
 	if (sessionData) {
-		return redirect("/dashboard/payments");
+		return redirect(redirectToDashboard);
 	} else {
-		return redirect("/signin");
+		return redirect("/inicio-sesion");
 	}
 };
 
