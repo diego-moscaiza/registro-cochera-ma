@@ -22,10 +22,10 @@ export const GET: APIRoute = async () => {
 };
 
 export const POST: APIRoute = async ({ request }) => {
-	const { dueno_id, nombre_pagador } = await request.json();
+	const { dueno_id, nombre_dueno } = await request.json();
 	const { data, error } = await supabase
 		.from("pagos_diarios")
-		.insert({ dueno_id, nombre_pagador })
+		.insert({ dueno_id, nombre_dueno })
 		.select();
 
 	if (error) {
