@@ -1,0 +1,22 @@
+---
+import LayoutSidebar from "../../app/layout/LayoutSidebar.astro";
+import PaymentListToday from "../../components/payment/PaymentListToday.astro";
+const paymentPageTitle: string = "Pagos";
+const fechaActual = new Date().toLocaleDateString("es-PE");
+---
+
+<LayoutSidebar title={paymentPageTitle}>
+	<section
+		class="pt-10 pb-20 xl:px-10 md:px-8 px-4
+    w-full min-h-[60hv] mx-auto
+    flex flex-col justify-center items-stretch gap-6"
+	>
+		<h2
+			class="text-3xl text-center
+      font-semibold text-indigo-600 dark:text-indigo-400"
+		>
+			Pagos de hoy {fechaActual}
+		</h2>
+		<PaymentListToday />
+	</section>
+</LayoutSidebar>
