@@ -25,7 +25,18 @@ const paymentPageTitle: string = "Pagos";
 		};
 
 		updateDateTime();
-		setInterval(updateDateTime, 3600000); // 1 hour = 3600000 milliseconds
+
+		// Calculate the time remaining until midnight
+		const now = new Date();
+		const timeUntilMidnight =
+			new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).getTime() -
+			now.getTime();
+
+		// Update at midnight and then every 24 hours
+		setTimeout(() => {
+			updateDateTime();
+			setInterval(updateDateTime, 86400000); // 24 hours = 86400000 milliseconds
+		}, timeUntilMidnight);
 	});
 </script>
 
