@@ -1,3 +1,11 @@
+---
+const fullHourToday = new Date().toLocaleTimeString([], {
+	hour: "2-digit",
+	minute: "2-digit",
+	second: "2-digit",
+});
+---
+
 <aside
 	id="sidebar"
 	class:list={[
@@ -30,6 +38,12 @@
 				]}
 			>
 				<ul class="pb-2 space-y-2">
+					<li
+						class="px-2 py-2 text-sm font-semibold text-gray-500 dark:text-gray-400"
+					>
+						{fullHourToday}
+					</li>
+
 					<!-- Search label -->
 					<li>
 						<form action="#" method="GET" class="lg:hidden">
