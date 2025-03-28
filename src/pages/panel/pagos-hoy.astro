@@ -2,7 +2,16 @@
 import LayoutSidebar from "../../app/layout/LayoutSidebar.astro";
 import PaymentListToday from "../../components/payment/PaymentListToday.astro";
 const paymentPageTitle: string = "Pagos";
-const fechaActual = new Date().toLocaleDateString("es-PE");
+const fechaActual = getFullDayToday();
+
+function getFullDayToday() {
+	return new Date().toLocaleDateString("es-PE", {
+		weekday: "long",
+		day: "2-digit",
+		month: "long",
+		year: "numeric",
+	});
+}
 ---
 
 <LayoutSidebar title={paymentPageTitle}>
