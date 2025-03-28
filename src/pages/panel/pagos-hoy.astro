@@ -5,7 +5,7 @@ const paymentPageTitle: string = "Pagos";
 const fechaActual = getFullDayToday();
 
 function getFullDayToday() {
-	return new Date().toLocaleDateString("es-PE", {
+	return new Date().toLocaleDateString([], {
 		weekday: "long",
 		day: "2-digit",
 		month: "long",
