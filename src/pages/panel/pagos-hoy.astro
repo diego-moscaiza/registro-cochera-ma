@@ -1,17 +1,7 @@
 ---
 import LayoutSidebar from "../../app/layout/LayoutSidebar.astro";
-import PaymentListToday from "../../components/payment/PaymentListToday.astro";
+import PaymentListToday from "../../components/payment/today/PaymentListToday.astro";
 const paymentPageTitle: string = "Pagos";
-const fechaActual = getFullDayToday();
-
-function getFullDayToday() {
-	return new Date().toLocaleDateString([], {
-		weekday: "long",
-		day: "2-digit",
-		month: "long",
-		year: "numeric",
-	});
-}
 ---
 
 <script>
@@ -35,7 +25,7 @@ function getFullDayToday() {
 		};
 
 		updateDateTime();
-		setInterval(updateDateTime, 1000);
+		setInterval(updateDateTime, 3600000); // 1 hour = 3600000 milliseconds
 	});
 </script>
 
@@ -46,17 +36,11 @@ function getFullDayToday() {
     flex flex-col justify-center items-stretch gap-6"
 	>
 		<h2
-			class="text-3xl text-center
+			class="px-4 text-3xl text-center
       font-semibold text-indigo-600 dark:text-indigo-400"
 		>
-			Pagos de hoy {fechaActual}
+			Pagos de hoy - <span id="fullDayToday1"> </span>
 		</h2>
-		<span
-			id="fullDayToday1"
-			class="text-3xl text-center
-		font-semibold text-indigo-600 dark:text-indigo-400"
-		>
-		</span>
 		<PaymentListToday />
 	</section>
 </LayoutSidebar>

@@ -1,0 +1,74 @@
+---
+import { getPagos } from "../../../pages/api/record/listPayments";
+import PaymentDesignToday from "../today/PaymentDesignToday.astro";
+
+export interface PaymentEntry {
+	id: string;
+	nombre_dueno: string;
+	fecha_pago: string;
+	retiro_coche: boolean;
+	monto_total: number;
+	estado_pago: boolean;
+}
+
+const listaPagos = await getPagos();
+
+const opciones: Intl.DateTimeFormatOptions = {
+	day: "numeric",
+	month: "long",
+	year: "numeric",
+};
+
+const convertirFechaPeru = (fechaStr: string) =>
+	new Date(
+		new Date(fechaStr + "T00:00:00Z").getTime() + 5 * 60 * 60 * 1000,
+	).toLocaleDateString("es-PE", opciones);
+
+const fechaUltimoDia = new Date(
+	new Date().setDate(new Date().getDate() - 1),
+).toLocaleDateString("es-PE", opciones);
+
+const pagosUltimoDia = listaPagos.filter(
+	(pago: PaymentEntry) =>
+		convertirFechaPeru(pago.fecha_pago) === fechaUltimoDia,
+);
+
+const pagosPorFecha = new Map<string, PaymentEntry[]>();
+
+pagosUltimoDia.forEach((pago: PaymentEntry) => {
+	const fechaPago = convertirFechaPeru(pago.fecha_pago);
+	if (!pagosPorFecha.has(fechaPago)) {
+		pagosPorFecha.set(fechaPago, []);
+	}
+	pagosPorFecha.get(fechaPago)?.push(pago);
+});
+
+pagosPorFecha.forEach((pagos) =>
+	pagos.sort((a, b) => Number(a.id) - Number(b.id)),
+);
+---
+
+<div>
+	{
+		pagosUltimoDia.length > 0 ? (
+			Array.from(pagosPorFecha.values()).map((dbDetallesPagos) => (
+				<div>
+					<PaymentDesignToday
+						listaPagos={dbDetallesPagos.map((detallePago) => ({
+							id: detallePago.id,
+							nombreDueno: detallePago.nombre_dueno,
+							fechaPago: detallePago.fecha_pago,
+							retiroCoche: detallePago.retiro_coche,
+							montoTotal: detallePago.monto_total,
+							estadoPago: detallePago.estado_pago,
+						}))}
+					/>
+				</div>
+			))
+		) : (
+			<p class="px-6 py-4 text-2xl text-center bg-white dark:bg-slate-700 rounded-lg border border-slate-400 dark:border-slate-600">
+				No hay registros el día de hoy.
+			</p>
+		)
+	}
+</div>

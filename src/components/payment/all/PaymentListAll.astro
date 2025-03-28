@@ -1,6 +1,6 @@
 ---
-import { getPagos } from "../../pages/api/record/listPayments";
-import PaymentDesign from "./PaymentDesign.astro";
+import { getPagos } from "../../../pages/api/record/listPayments";
+import PaymentDesignAll from "./../all/PaymentDesignAll.astro";
 
 export interface PaymentEntry {
 	id: string;
@@ -45,7 +45,7 @@ Object.keys(pagosPorFecha).forEach((fecha) => {
 	{
 		Object.entries(pagosPorFecha).map(
 			([dbFechaPago, dbDetallesPagos]: [string, PaymentEntry[]]) => (
-				<PaymentDesign
+				<PaymentDesignAll
 					fechaPago={dbFechaPago}
 					listaPagos={dbDetallesPagos.map((detallePago) => ({
 						id: detallePago.id,
