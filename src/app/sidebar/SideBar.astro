@@ -1,10 +1,41 @@
----
-const fullHourToday = new Date().toLocaleTimeString([], {
-	hour: "2-digit",
-	minute: "2-digit",
-	second: "2-digit",
-});
----
+<script>
+	let fullHourToday;
+	let fullDayToday;
+	function getFullHourToday() {
+		return new Date().toLocaleTimeString([], {
+			hour: "2-digit",
+			minute: "2-digit",
+			second: "2-digit",
+			hour12: true,
+		});
+	}
+
+	function getFullDayToday() {
+		return new Date().toLocaleDateString([], {
+			weekday: "long",
+			day: "2-digit",
+			month: "long",
+			year: "numeric",
+		});
+	}
+
+	document.addEventListener("DOMContentLoaded", () => {
+		const updateDateTime = () => {
+			const fullHourElement = document.getElementById("fullHourToday");
+			fullHourElement
+				? (fullHourToday = fullHourElement.textContent = getFullHourToday())
+				: null;
+
+			const fullDayElement = document.getElementById("fullDayToday");
+			fullDayElement
+				? (fullDayToday = fullDayElement.textContent = getFullDayToday())
+				: null;
+		};
+
+		updateDateTime();
+		setInterval(updateDateTime, 1000);
+	});
+</script>
 
 <aside
 	id="sidebar"
@@ -37,13 +68,17 @@ const fullHourToday = new Date().toLocaleTimeString([], {
 					"divide-y bg-white divide-gray-200 dark:bg-slate-900 dark:divide-gray-700",
 				]}
 			>
-				<ul class="pb-2 space-y-2">
-					<li
+				<div class="flex flex-col justify-between px-2 py-2">
+					<span
+						id="fullHourToday"
+						class="px-2 py-2 text-lg font-semibold text-gray-500 dark:text-gray-400"
+					></span>
+					<span
+						id="fullDayToday"
 						class="px-2 py-2 text-sm font-semibold text-gray-500 dark:text-gray-400"
-					>
-						{fullHourToday}
-					</li>
-
+					></span>
+				</div>
+				<ul class="pb-2 space-y-2">
 					<!-- Search label -->
 					<li>
 						<form action="#" method="GET" class="lg:hidden">
