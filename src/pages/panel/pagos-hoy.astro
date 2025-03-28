@@ -17,7 +17,7 @@ function getFullDayToday() {
 <script>
 	let fullDayToday;
 
-	function getFullDayToday() {
+	function getFullDayToday1() {
 		return new Date().toLocaleDateString([], {
 			weekday: "long",
 			day: "2-digit",
@@ -30,7 +30,7 @@ function getFullDayToday() {
 		const updateDateTime = () => {
 			const fullDayElement = document.getElementById("fullDayToday");
 			fullDayElement
-				? (fullDayToday = fullDayElement.textContent = getFullDayToday())
+				? (fullDayToday = fullDayElement.textContent = getFullDayToday1())
 				: null;
 		};
 
