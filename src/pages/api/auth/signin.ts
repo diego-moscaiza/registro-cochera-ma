@@ -6,19 +6,25 @@ const handleErrorResponse = (message: string, status: number): Response => {
 	return new Response(message, { status });
 };
 
-const setAuthCookies = (cookies: any, accessToken: string, refreshToken: string) => {
-	cookies.set("sb-access-token", accessToken, {
-		sameSite: "strict",
-		path: "/",
-		secure: process.env.NODE_ENV === "production",
-		httpOnly: true,
-	});
-	cookies.set("sb-refresh-token", refreshToken, {
-		sameSite: "strict",
-		path: "/",
-		secure: process.env.NODE_ENV === "production",
-		httpOnly: true,
-	});
+const setAuthCookies = (cookies: any, accessToken: string, refreshToken: string): boolean => {
+	try {
+		cookies.set("sb-access-token", accessToken, {
+			sameSite: "strict",
+			path: "/",
+			secure: process.env.NODE_ENV === "production",
+			httpOnly: true,
+		});
+		cookies.set("sb-refresh-token", refreshToken, {
+			sameSite: "strict",
+			path: "/",
+			secure: process.env.NODE_ENV === "production",
+			httpOnly: true,
+		});
+		return true;
+	} catch (error) {
+		console.error("Error setting auth cookies:", error);
+		return false;
+	}
 };
 
 const signInWithOAuth = async (provider: Provider, redirectTo: string): Promise<Response> => {
@@ -44,37 +50,48 @@ const signInWithPassword = async (email: string, password: string): Promise<Resp
 };
 
 export const POST: APIRoute = async ({ request, cookies, redirect }) => {
-	const formData = await request.formData();
-	const email = formData.get("email")?.toString() || ""; // Valor predeterminado
-	const password = formData.get("password")?.toString() || ""; // Valor predeterminado
-	const provider = formData.get("provider")?.toString();
+	try {
+		const formData = await request.formData();
+		const email = formData.get("email")?.toString() || "";
+		const password = formData.get("password")?.toString() || "";
+		const provider = formData.get("provider")?.toString();
 
-	const redirectToDashboard = "/panel/pagos-hoy";
+		const redirectToDashboard = "/panel/pagos-hoy";
 
-	if (provider) {
-		const response = await signInWithOAuth(provider as Provider, redirectToDashboard);
-		if (response.status === 302) {
-			return response; // Redirigir si es un Response de redirección
+		if (provider) {
+			const response = await signInWithOAuth(provider as Provider, redirectToDashboard);
+			if (response.status === 302) {
+				return response;
+			}
+			console.error("OAuth sign-in error:", await response.text());
+			return response;
 		}
-		return response; // Devuelve la respuesta de error si existe
+
+		if (!email || !password) {
+			return handleErrorResponse("Email and password are required", 400);
+		}
+
+		const response = await signInWithPassword(email, password);
+		if (response.status !== 200) {
+			console.error("Password sign-in error:", await response.text());
+			return response;
+		}
+
+		const data = JSON.parse(await response.text());
+		if (!data.session) {
+			return handleErrorResponse("Session not found", 500);
+		}
+
+		const { access_token, refresh_token } = data.session;
+		const cookiesSet = setAuthCookies(cookies, access_token, refresh_token);
+
+		if (!cookiesSet) {
+			return handleErrorResponse("Failed to set authentication cookies", 500);
+		}
+
+		return redirect(redirectToDashboard);
+	} catch (error) {
+		console.error("Unexpected error in POST /signin:", error);
+		return handleErrorResponse("Internal server error", 500);
 	}
-
-	if (!email || !password) {
-		return handleErrorResponse("Email and password are required", 400);
-	}
-
-	const response = await signInWithPassword(email, password);
-	if (response.status !== 200) {
-		return response; // Devuelve la respuesta de error si existe
-	}
-
-	const data = JSON.parse(await response.text());
-	if (!data.session) {
-		return handleErrorResponse("Session not found", 500);
-	}
-
-	const { access_token, refresh_token } = data.session;
-	setAuthCookies(cookies, access_token, refresh_token);
-
-	return redirect(redirectToDashboard);
 };

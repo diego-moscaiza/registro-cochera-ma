@@ -39,8 +39,13 @@ const handleProtectedRoute = async ({ cookies, redirect, locals }: any) => {
 	const sessionData = await getSession(cookies);
 
 	if (!sessionData?.session) {
-		cookies.delete("sb-access-token", { path: "/" });
-		cookies.delete("sb-refresh-token", { path: "/" });
+		// Evita redirecciones repetitivas eliminando cookies solo si existen
+		if (cookies.has("sb-access-token")) {
+			cookies.delete("sb-access-token", { path: "/" });
+		}
+		if (cookies.has("sb-refresh-token")) {
+			cookies.delete("sb-refresh-token", { path: "/" });
+		}
 		return redirect("/inicio-sesion");
 	}
 
@@ -71,7 +76,8 @@ const handleRedirectRoute = ({ cookies, redirect }: any) => {
 	const accessToken = cookies.get("sb-access-token");
 	const refreshToken = cookies.get("sb-refresh-token");
 
-	if (accessToken && refreshToken) {
+	// Evita redirecciones innecesarias si ya estás en el dashboard
+	if (accessToken && refreshToken && redirectToDashboard !== "/panel/pagos-hoy") {
 		return redirect(redirectToDashboard);
 	}
 	return null;
@@ -92,6 +98,7 @@ const handleProtectedAPI = async ({ cookies }: any) => {
 const handleIndexRedirect = async ({ cookies, redirect }: any) => {
 	const sessionData = await getSession(cookies);
 
+	// Evita redirecciones repetitivas si ya estás autenticado
 	if (sessionData) {
 		return redirect(redirectToDashboard);
 	} else {

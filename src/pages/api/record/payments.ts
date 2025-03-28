@@ -17,7 +17,10 @@ export const GET: APIRoute = async () => {
 	}
 
 	return new Response(JSON.stringify(data ?? []), {
-		headers: { "Content-Type": "application/json" },
+		headers: {
+			"Content-Type": "application/json",
+			"Cache-Control": "no-store", // Evita el almacenamiento en caché de datos sensibles
+		},
 	});
 };
 
@@ -37,5 +40,10 @@ export const POST: APIRoute = async ({ request }) => {
 		);
 	}
 
-	return new Response(JSON.stringify(data));
+	return new Response(JSON.stringify(data), {
+		headers: {
+			"Content-Type": "application/json",
+			"Cache-Control": "no-store", // Evita el almacenamiento en caché de datos sensibles
+		},
+	});
 };
