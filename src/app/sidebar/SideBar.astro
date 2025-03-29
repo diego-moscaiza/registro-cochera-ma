@@ -1,6 +1,4 @@
 <script>
-	let fullHourToday;
-	let fullDayToday;
 	function getFullHourToday() {
 		return new Date().toLocaleTimeString([], {
 			hour: "2-digit",
@@ -22,14 +20,14 @@
 	document.addEventListener("DOMContentLoaded", () => {
 		const updateDateTime = () => {
 			const fullHourElement = document.getElementById("fullHourToday");
-			fullHourElement
-				? (fullHourToday = fullHourElement.textContent = getFullHourToday())
-				: null;
+			if (fullHourElement) {
+				fullHourElement.textContent = getFullHourToday();
+			}
 
 			const fullDayElement = document.getElementById("fullDayToday");
-			fullDayElement
-				? (fullDayToday = fullDayElement.textContent = getFullDayToday())
-				: null;
+			if (fullDayElement) {
+				fullDayElement.textContent = getFullDayToday();
+			}
 		};
 
 		updateDateTime();
@@ -64,26 +62,26 @@
 		>
 			<section
 				class:list={[
-					"flex-1 px-3 space-y-1",
+					"flex-1 px-3 gap-3",
 					"divide-y bg-white divide-gray-200 dark:bg-slate-900 dark:divide-gray-700",
 				]}
 			>
-				<div class="flex flex-col justify-between px-2 py-2">
+				<div class="flex flex-col gap-2 py-2">
 					<span
 						id="fullHourToday"
-						class="px-2 py-2 text-lg font-semibold text-gray-500 dark:text-gray-400"
+						class="px-2 py-1 text-lg font-semibold text-gray-500 dark:text-gray-400"
 					></span>
 					<span
 						id="fullDayToday"
-						class="px-2 py-2 text-sm font-semibold text-gray-500 dark:text-gray-400"
+						class="px-2 py-1 text-sm font-semibold text-gray-500 dark:text-gray-400"
 					></span>
 				</div>
-				<ul class="pb-2 space-y-2">
+				<ul class="flex flex-col gap-2 py-2">
 					<!-- Search label -->
 					<li>
 						<form action="#" method="GET" class="lg:hidden">
 							<label for="mobile-search" class="sr-only">Search</label>
-							<div class="relative">
+							<div class="relative p-2">
 								<div
 									class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none"
 								>
@@ -158,7 +156,7 @@
 									d="M12 5.432l8.159 8.159c.03.03.06.058.091.086v6.198c0 1.035-.84 1.875-1.875 1.875H15a.75.75 0 01-.75-.75v-4.5a.75.75 0 00-.75-.75h-3a.75.75 0 00-.75.75V21a.75.75 0 01-.75.75H5.625a1.875 1.875 0 01-1.875-1.875v-6.198a2.29 2.29 0 00.091-.086L12 5.43z"
 								></path>
 							</svg>
-							<span class="ml-3" sidebar-toggle-item>Pagos del dia</span>
+							<span class="ml-3" sidebar-toggle-item>Pagos del dia</span>-
 						</a>
 					</li>
 
@@ -402,7 +400,7 @@
 					</li>
 				</ul>
 				<!-- Settings -->
-				<div class="pt-2 space-y-2">
+				<div class="flex flex-col gap-2 py-2">
 					<a
 						href=""
 						class="flex items-center p-2 text-base text-black rounded-lg hover:bg-gray-100 group dark:text-gray-200 dark:hover:bg-gray-700"
