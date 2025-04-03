@@ -3,9 +3,7 @@ import { supabase } from "../../../../lib/supabase";
 
 export const GET: APIRoute = async () => {
 	const { data, error } = await supabase
-		.from("dueno_carreta")
-		.select("*")
-		.order("id", { ascending: false });
+		.rpc("obtener_duenos_carretas");
 
 	if (error || !data) {
 		return new Response(
