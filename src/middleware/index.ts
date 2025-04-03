@@ -94,17 +94,6 @@ const handleProtectedAPI = async ({ cookies }: any) => {
 };
 
 // Nueva función para manejar el index "/"
-const handleIndexRedirect = async ({ cookies, redirect }: any) => {
-	const sessionData = await getSession(cookies);
-
-	// Evita redirecciones repetitivas si ya estás autenticado
-	if (sessionData) {
-		return redirect(redirectToDashboard);
-	} else {
-		return redirect("/inicio-sesion");
-	}
-};
-
 export const onRequest = defineMiddleware(async (context: any, next: any) => {
 	const { url, cookies, redirect, locals } = context;
 
@@ -113,6 +102,7 @@ export const onRequest = defineMiddleware(async (context: any, next: any) => {
 	// Verificar si ya se realizó una redirección
 	if (cookies.get("redirected")) {
 		console.log("Redirección ya realizada, continuando...");
+		cookies.delete("redirected", { path: "/" }); // Eliminar la cookie para evitar bloqueos
 		return next();
 	}
 
@@ -120,7 +110,16 @@ export const onRequest = defineMiddleware(async (context: any, next: any) => {
 
 	// Manejar la redirección para la raíz "/"
 	if (url.pathname === "/") {
-		response = await handleIndexRedirect({ cookies, redirect });
+		const sessionData = await getSession(cookies);
+		if (sessionData) {
+			// Si el usuario ya está autenticado, redirigir al dashboard
+			if (url.pathname !== redirectToDashboard) {
+				response = redirect(redirectToDashboard);
+			}
+		} else {
+			// Si no está autenticado, redirigir a inicio de sesión
+			response = redirect("/inicio-sesion");
+		}
 	}
 
 	// Manejar rutas protegidas
