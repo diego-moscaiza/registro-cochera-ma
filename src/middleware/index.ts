@@ -4,7 +4,7 @@ import { supabase } from "../lib/supabase";
 
 const protectedRoutes = ["/panel(|/)", "/panel/**"];
 const redirectRoutes = ["/inicio-sesion(|/)"];
-const protectedAPIRoutes = ["/api/record/payment/apiPayments/(|/)", "/api/record/payment/listPayments/(|/)"];
+const protectedAPIRoutes = ["/api/record/payment/**/", "/api/record/owner/**/"];
 const redirectToDashboard = "/panel/pagos-del-dia";
 
 const getSession = async (cookies: any) => {
@@ -97,15 +97,6 @@ const handleProtectedAPI = async ({ cookies }: any) => {
 export const onRequest = defineMiddleware(async (context: any, next: any) => {
 	const { url, cookies, redirect, locals } = context;
 
-	console.log("Request URL:", url.pathname);
-
-	// Verificar si ya se realizó una redirección
-	if (cookies.get("redirected")) {
-		console.log("Redirección ya realizada, continuando...");
-		cookies.delete("redirected", { path: "/" }); // Eliminar la cookie para evitar bloqueos
-		return next();
-	}
-
 	let response;
 
 	// Manejar la redirección para la raíz "/"
@@ -139,7 +130,7 @@ export const onRequest = defineMiddleware(async (context: any, next: any) => {
 
 	// Si se realizó una redirección, establecer la cookie de control
 	if (response) {
-		cookies.set("redirected", "true", { path: "/", maxAge: 10 }); // Expira en 10 segundos
+		cookies.set("redirected", "true", { path: "/" });
 	}
 
 	return response || next();
