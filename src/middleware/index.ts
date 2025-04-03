@@ -4,8 +4,7 @@ import { supabase } from "../lib/supabase";
 
 const protectedRoutes = ["/panel(|/)", "/panel/**"];
 const redirectRoutes = ["/inicio-sesion(|/)"];
-const protectedAPIRoutes = ["/api/record/payment/**", "/api/record/owner/**"];
-
+const protectedAPIRoutes = ["/api/record/payment/apiPayments/(|/)", "/api/record/payment/listPayments/(|/)"];
 const redirectToDashboard = "/panel/pagos-del-dia";
 
 const getSession = async (cookies: any) => {
@@ -34,6 +33,7 @@ const getSession = async (cookies: any) => {
 		otherInfo: user?.user_metadata // Guarda todos los datos adicionales en caso de necesitarlos
 	};
 };
+
 
 const handleProtectedRoute = async ({ cookies, redirect, locals }: any) => {
 	const sessionData = await getSession(cookies);
@@ -108,18 +108,39 @@ const handleIndexRedirect = async ({ cookies, redirect }: any) => {
 export const onRequest = defineMiddleware(async (context: any, next: any) => {
 	const { url, cookies, redirect, locals } = context;
 
+	console.log("Request URL:", url.pathname);
+
+	// Verificar si ya se realizó una redirección
+	if (cookies.get("redirected")) {
+		console.log("Redirección ya realizada, continuando...");
+		return next();
+	}
+
 	let response;
+
+	// Manejar la redirección para la raíz "/"
 	if (url.pathname === "/") {
 		response = await handleIndexRedirect({ cookies, redirect });
 	}
+
+	// Manejar rutas protegidas
 	if (!response && micromatch.isMatch(url.pathname, protectedRoutes)) {
 		response = await handleProtectedRoute({ cookies, redirect, locals });
 	}
+
+	// Manejar rutas de redirección
 	if (!response && micromatch.isMatch(url.pathname, redirectRoutes)) {
 		response = handleRedirectRoute({ cookies, redirect });
 	}
+
+	// Manejar rutas protegidas de la API
 	if (!response && micromatch.isMatch(url.pathname, protectedAPIRoutes)) {
 		response = await handleProtectedAPI({ cookies });
+	}
+
+	// Si se realizó una redirección, establecer la cookie de control
+	if (response) {
+		cookies.set("redirected", "true", { path: "/", maxAge: 10 }); // Expira en 10 segundos
 	}
 
 	return response || next();
