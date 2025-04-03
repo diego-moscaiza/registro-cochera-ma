@@ -1,6 +1,6 @@
 ---
-import { getPagos } from "../../../pages/api/record/listPayments";
-import PaymentDesignToday from "../today/PaymentDesignToday.astro";
+import { getPagos } from "../../../pages/api/record/payment/listPayments";
+import PaymentTableDesign from "../today/PaymentTableDesign.astro";
 
 export interface PaymentEntry {
 	id: string;
@@ -53,7 +53,7 @@ pagosPorFecha.forEach((pagos) =>
 		pagosUltimoDia.length > 0 ? (
 			Array.from(pagosPorFecha.values()).map((dbDetallesPagos) => (
 				<div>
-					<PaymentDesignToday
+					<PaymentTableDesign
 						listaPagos={dbDetallesPagos.map((detallePago) => ({
 							id: detallePago.id,
 							nombreDueno: detallePago.nombre_dueno,

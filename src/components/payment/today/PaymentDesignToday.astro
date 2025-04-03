@@ -1,97 +1,61 @@
 ---
-interface Props {
-	listaPagos: {
-		id: string;
-		nombreDueno: string;
-		fechaPago: string;
-		retiroCoche: boolean;
-		montoTotal: number;
-		estadoPago: boolean;
-	}[];
-}
-
-const { listaPagos } = Astro.props;
+import PaymentListToday from "./PaymentListToday.astro";
 ---
 
-<section class="flex flex-col gap-3">
-	<div class="relative overflow-x-auto sm:overflow-x-visible">
-		<table
-			class="w-full min-w-full bg-white dark:bg-slate-800 rounded-lg overflow-hidden"
-		>
-			<thead class="bg-gray-200 dark:bg-sky-950 rounded-t-lg text-nowrap">
-				<tr class="text-black dark:text-neutral-200">
-					<th class="px-4 py-2 text-left text-sm sm:text-base">Acciones</th>
-					<th class="px-4 py-2 text-left text-sm sm:text-base">Dueño</th>
-					<th class="px-4 py-2 text-left text-sm sm:text-base">Monto</th>
-					<th class="px-4 py-2 text-left text-sm sm:text-base">Saco carreta?</th
-					>
-					<th class="px-4 py-2 text-left text-sm sm:text-base"
-						>Estado del Pago</th
-					>
-				</tr>
-			</thead>
-			<tbody class="rounded-b-lg">
-				{
-					listaPagos.map((pago) => {
-						const formatoPago = {
-							id: pago.id ?? "-",
-							nombreDueno: pago.nombreDueno ?? "-",
-							montoTotal: pago.montoTotal ?? "-",
-							retiroCoche: pago.retiroCoche ? "Sí vino" : "No vino",
-							estadoPago: pago.estadoPago ? "Canceló" : "No pagó",
-						};
+<script>
+	let fullDayToday;
 
-						return (
-							<tr class="text-black dark:text-neutral-100 hover:bg-gray-100 dark:hover:bg-slate-600 transition-colors duration-200">
-								<td class="px-4 py-2 text-left">
-									<button
-										type="button"
-										class:list={[
-											"flex items-baseline justify-center px-2 py-1 rounded transition-all",
-											"text-neutral-100 hover:text-neutral-100 focus:text-neutral-100",
-											"bg-blue-600 hover:bg-blue-500 focus:bg-blue-600 ",
-											"ring-2 ring-transparent focus:ring-4 hover:ring-blue-400 dark:hover:ring-blue-300",
-										]}
-									>
-										Editar
-									</button>
-								</td>
-								<td class="px-4 py-2 text-left text-sm sm:text-base">
-									{formatoPago.nombreDueno}
-								</td>
-								<td class="px-4 py-2 text-left text-sm sm:text-base text-nowrap">
-									S/.
-									{parseFloat(formatoPago.montoTotal.toString()).toFixed(2)}
-								</td>
-								<td class="px-4 py-2 text-left text-nowrap">
-									<span
-										class={`px-4 py-1 rounded border font-medium text-left text-sm sm:text-base
-											${
-												formatoPago.retiroCoche === "No vino"
-													? "text-neutral-800 bg-neutral-300 border-neutral-700 dark:text-[#cacaca] dark:bg-[#32373f] dark:border-neutral-500"
-													: "text-blue-800 bg-blue-300 border-blue-700 dark:text-[#5294ff] dark:bg-[#162542] dark:border-blue-600"
-											}`}
-									>
-										{formatoPago.retiroCoche}
-									</span>
-								</td>
-								<td class="px-4 py-2 text-left text-nowrap">
-									<span
-										class={`px-4 py-1 rounded border font-medium text-left text-sm sm:text-base
-                      ${
-												formatoPago.estadoPago === "Canceló"
-													? "text-green-800 bg-green-300 border-green-700 dark:text-[#4fd94f] dark:bg-[#294026] dark:border-[#4fd94f]"
-													: "text-red-800 bg-red-300 border-red-700 dark:text-[#d94f59] dark:bg-[#40263e] dark:border-[#d94f59]"
-											}`}
-									>
-										{formatoPago.estadoPago}
-									</span>
-								</td>
-							</tr>
-						);
-					})
-				}
-			</tbody>
-		</table>
+	const opciones: Intl.DateTimeFormatOptions = {
+		weekday: "long",
+		day: "2-digit",
+		month: "long",
+		year: "numeric",
+	};
+
+	function getFullDayToday1() {
+		return new Date().toLocaleDateString([], opciones);
+	}
+
+	document.addEventListener("DOMContentLoaded", () => {
+		const updateDateTime = () => {
+			const fullDayElement = document.getElementById("fullDayToday1");
+			fullDayElement
+				? (fullDayToday = fullDayElement.textContent = getFullDayToday1())
+				: null;
+		};
+
+		updateDateTime();
+
+		// Calculate the time remaining until midnight
+		const now = new Date();
+		const timeUntilMidnight =
+			new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).getTime() -
+			now.getTime();
+
+		// Update at midnight and then every 24 hours
+		setTimeout(() => {
+			updateDateTime();
+			setInterval(updateDateTime, 86400000); // 24 hours = 86400000 milliseconds
+		}, timeUntilMidnight);
+	});
+</script>
+
+<section>
+	<div
+		class:list={[
+			"flex flex-col gap-1 w-full",
+			"px-10 pb-10",
+			"bg-slate-50 dark:bg-slate-900",
+			"block sm:flex justify-between shadow-md",
+		]}
+	>
+		<div class="py-8">
+			<h1
+				class="text-xl font-semibold text-black sm:text-2xl dark:text-blue-100"
+			>
+				Pagos de hoy - <span id="fullDayToday1"> </span>
+			</h1>
+		</div>
+		<PaymentListToday />
 	</div>
 </section>
