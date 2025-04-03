@@ -1,0 +1,132 @@
+---
+interface Props {
+	fechaPago: string;
+	listaPagos: {
+		id: string;
+		nombreDueno: string;
+		fechaPago: string;
+		retiroCoche: boolean;
+		montoTotal: number;
+		estadoPago: boolean;
+	}[];
+}
+
+const { fechaPago, listaPagos } = Astro.props;
+---
+
+<section class="flex flex-col gap-3">
+	<h3 class="text-xl font-medium text-black dark:text-white">
+		Pagos del "{fechaPago}"
+	</h3>
+	<div class="overflow-x-auto rounded-2xl">
+		<table
+			class:list={[
+				"w-full min-w-full overflow-x-auto",
+				"bg-white dark:bg-slate-800 rounded-lg",
+				"divide-y divide-gray-200 dark:divide-gray-800",
+			]}
+		>
+			<thead class="bg-gray-100 dark:bg-slate-700 rounded-t-lg text-nowrap">
+				<tr>
+					<th
+						scope="col"
+						class="p-4 text-sm font-semibold text-left text-gray-700 uppercase dark:text-gray-300"
+						>Dueño</th
+					>
+					<th
+						scope="col"
+						class="p-4 text-sm font-semibold text-left text-gray-700 uppercase dark:text-gray-300"
+						>Monto</th
+					>
+					<th
+						scope="col"
+						class="p-4 text-sm font-semibold text-left text-gray-700 uppercase dark:text-gray-300"
+						>Saco carreta?</th
+					>
+					<th
+						scope="col"
+						class="p-4 text-sm font-semibold text-left text-gray-700 uppercase dark:text-gray-300"
+						>Estado del Pago</th
+					>
+					<th
+						scope="col"
+						class="p-4 text-sm font-semibold text-left text-gray-700 uppercase dark:text-gray-300"
+						>Acciones</th
+					>
+				</tr>
+			</thead>
+			<tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+				{
+					listaPagos.map((pago) => {
+						const formatoPago = {
+							id: pago.id ?? "-",
+							nombreDueno: pago.nombreDueno ?? "-",
+							montoTotal: pago.montoTotal ?? "-",
+							retiroCoche: pago.retiroCoche ? "Sí vino" : "No vino",
+							estadoPago: pago.estadoPago ? "Canceló" : "No pagó",
+						};
+
+						return (
+							<tr class="hover:bg-gray-100 dark:hover:bg-gray-700 transition duration-200">
+								<td class="p-4 text-base font-medium text-gray-900 dark:text-gray-200">
+									{formatoPago.nombreDueno}
+								</td>
+								<td class="p-4 text-base font-semibold text-gray-900 dark:text-gray-200">
+									S/.{" "}
+									{parseFloat((formatoPago.montoTotal ?? 0).toString()).toFixed(
+										2,
+									)}
+								</td>
+								<td class="p-4 text-sm text-nowrap font-medium">
+									<span
+										class:list={[
+											"px-3 py-1 rounded-full text-sm sm:text-base",
+											formatoPago.retiroCoche === "No vino"
+												? "text-neutral-800 bg-neutral-300 dark:text-[#cacaca] dark:bg-[#32373f]"
+												: "text-blue-800 bg-blue-300 dark:text-[#5294ff] dark:bg-[#162542]",
+										]}
+									>
+										{formatoPago.retiroCoche}
+									</span>
+								</td>
+								<td class="p-4 text-sm text-nowrap font-medium">
+									<span
+										class:list={[
+											"px-3 py-1 rounded-full text-sm sm:text-base",
+											formatoPago.estadoPago === "Canceló"
+												? "text-green-800 bg-green-300 dark:text-green-300 dark:bg-green-800"
+												: "text-red-800 bg-red-200 dark:text-red-200 dark:bg-red-800",
+										]}
+									>
+										{formatoPago.estadoPago}
+									</span>
+								</td>
+								<td class="p-4 space-x-2">
+									<button
+										type="button"
+										class="flex items-center gap-2 text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 rounded-lg text-sm px-3 py-1.5 transition duration-200 dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-blue-800"
+									>
+										<svg
+											class="w-5 h-5"
+											fill="currentColor"
+											viewBox="0 0 20 20"
+											xmlns="http://www.w3.org/2000/svg"
+										>
+											<path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" />
+											<path
+												fill-rule="evenodd"
+												d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"
+												clip-rule="evenodd"
+											/>
+										</svg>
+										Editar
+									</button>
+								</td>
+							</tr>
+						);
+					})
+				}
+			</tbody>
+		</table>
+	</div>
+</section>
