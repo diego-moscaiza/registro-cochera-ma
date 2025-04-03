@@ -2,10 +2,10 @@ import { defineMiddleware } from "astro:middleware";
 import micromatch from "micromatch";
 import { supabase } from "../lib/supabase";
 
-const protectedRoutes = ["/panel(|/)", "/panel/**"];
+const protectedRoutes = ["/panel(|/)", "/panel/**/"];
 const redirectRoutes = ["/inicio-sesion(|/)"];
-const protectedAPIRoutes = ["/api/record/payments/(|/)", "/api/record/listPayments/(|/)"];
-const redirectToDashboard = "/panel/pagos-hoy";
+const protectedAPIRoutes = ["/api/record/payment/**/", "/api/record/owner/**/"];
+const redirectToDashboard = "/panel/pagos-del-dia";
 
 const getSession = async (cookies: any) => {
 	const accessToken = cookies.get("sb-access-token");
@@ -33,7 +33,6 @@ const getSession = async (cookies: any) => {
 		otherInfo: user?.user_metadata // Guarda todos los datos adicionales en caso de necesitarlos
 	};
 };
-
 
 const handleProtectedRoute = async ({ cookies, redirect, locals }: any) => {
 	const sessionData = await getSession(cookies);
@@ -71,13 +70,12 @@ const handleProtectedRoute = async ({ cookies, redirect, locals }: any) => {
 	return null;
 };
 
-
 const handleRedirectRoute = ({ cookies, redirect }: any) => {
 	const accessToken = cookies.get("sb-access-token");
 	const refreshToken = cookies.get("sb-refresh-token");
 
 	// Evita redirecciones innecesarias si ya estás en el dashboard
-	if (accessToken && refreshToken && redirectToDashboard !== "/panel/pagos-hoy") {
+	if (accessToken && refreshToken && redirectToDashboard !== "/panel/pagos-del-dia") {
 		return redirect(redirectToDashboard);
 	}
 	return null;

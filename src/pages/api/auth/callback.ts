@@ -48,7 +48,7 @@ export const GET: APIRoute = async ({ url, cookies, redirect }) => {
 			httpOnly: true,
 		});
 
-		return redirect("/panel/pagos-hoy");
+		return redirect("/panel/pagos-del-dia");
 	} catch (error) {
 		console.error("Unexpected error in GET /callback:", error);
 		return new Response("Internal server error", { status: 500 });

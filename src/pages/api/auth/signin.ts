@@ -56,7 +56,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
 		const password = formData.get("password")?.toString() || "";
 		const provider = formData.get("provider")?.toString();
 
-		const redirectToDashboard = "/panel/pagos-hoy";
+		const redirectToDashboard = "/panel/pagos-del-dia";
 
 		if (provider) {
 			const response = await signInWithOAuth(provider as Provider, redirectToDashboard);
@@ -91,7 +91,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
 
 		return redirect(redirectToDashboard);
 	} catch (error) {
-		console.error("Unexpected error in POST /signin:", error);
+		console.error("Unexpected error in POST /inicio-sesion:", error);
 		return handleErrorResponse("Internal server error", 500);
 	}
 };
