@@ -7,7 +7,12 @@ const redirectRoutes = ["/inicio-sesion(|/)"];
 const protectedAPIRoutes = ["/api/record/payment/**/", "/api/record/owner/**/"];
 const redirectToDashboard = "/panel/pagos-del-dia";
 
-const getSession = async (cookies: any) => {
+const getSession = async (cookies: any, locals: any) => {
+	// Usa la sesión almacenada en locals si ya existe
+	if (locals.sessionData) {
+		return locals.sessionData;
+	}
+
 	const accessToken = cookies.get("sb-access-token");
 	const refreshToken = cookies.get("sb-refresh-token");
 
@@ -21,21 +26,25 @@ const getSession = async (cookies: any) => {
 	if (error) {
 		console.log("Error setting session:", error);
 		return null;
-	};
+	}
 
 	// Extraer más datos del usuario
 	const user = data.user;
-	return {
+	const sessionData = {
 		session: data.session,
 		email: user?.email,
 		displayName: user?.user_metadata?.display_name ?? "Usuario",
 		phone: user?.user_metadata?.phone ?? "Sin número",
-		otherInfo: user?.user_metadata // Guarda todos los datos adicionales en caso de necesitarlos
+		otherInfo: user?.user_metadata,
 	};
+
+	// Almacena la sesión en locals para evitar solicitudes repetidas
+	locals.sessionData = sessionData;
+	return sessionData;
 };
 
 const handleProtectedRoute = async ({ cookies, redirect, locals }: any) => {
-	const sessionData = await getSession(cookies);
+	const sessionData = await getSession(cookies, locals);
 
 	if (!sessionData?.session) {
 		// Evita redirecciones repetitivas eliminando cookies solo si existen
@@ -52,7 +61,7 @@ const handleProtectedRoute = async ({ cookies, redirect, locals }: any) => {
 	locals.email = sessionData.email;
 	locals.displayName = sessionData.displayName;
 	locals.phone = sessionData.phone;
-	locals.otherInfo = sessionData.otherInfo; // Todos los metadatos
+	locals.otherInfo = sessionData.otherInfo;
 
 	// Guardar los tokens en cookies para mantener la sesión
 	cookies.set("sb-access-token", sessionData?.session?.access_token ?? "", {
@@ -75,14 +84,14 @@ const handleRedirectRoute = ({ cookies, redirect }: any) => {
 	const refreshToken = cookies.get("sb-refresh-token");
 
 	// Evita redirecciones innecesarias si ya estás en el dashboard
-	if (accessToken && refreshToken && redirectToDashboard !== "/panel/pagos-del-dia") {
+	if (accessToken && refreshToken) {
 		return redirect(redirectToDashboard);
 	}
 	return null;
 };
 
-const handleProtectedAPI = async ({ cookies }: any) => {
-	const sessionData = await getSession(cookies);
+const handleProtectedAPI = async ({ cookies, locals }: any) => {
+	const sessionData = await getSession(cookies, locals);
 	if (!sessionData) {
 		return new Response(
 			JSON.stringify({ error: "Unauthorized" }),
@@ -93,8 +102,8 @@ const handleProtectedAPI = async ({ cookies }: any) => {
 };
 
 // Nueva función para manejar el index "/"
-const handleIndexRedirect = async ({ cookies, redirect }: any) => {
-	const sessionData = await getSession(cookies);
+const handleIndexRedirect = async ({ cookies, redirect, locals }: any) => {
+	const sessionData = await getSession(cookies, locals);
 
 	// Evita redirecciones repetitivas si ya estás autenticado
 	if (sessionData) {
@@ -109,7 +118,7 @@ export const onRequest = defineMiddleware(async (context: any, next: any) => {
 
 	let response;
 	if (url.pathname === "/") {
-		response = await handleIndexRedirect({ cookies, redirect });
+		response = await handleIndexRedirect({ cookies, redirect, locals });
 	}
 	if (!response && micromatch.isMatch(url.pathname, protectedRoutes)) {
 		response = await handleProtectedRoute({ cookies, redirect, locals });
@@ -118,7 +127,7 @@ export const onRequest = defineMiddleware(async (context: any, next: any) => {
 		response = handleRedirectRoute({ cookies, redirect });
 	}
 	if (!response && micromatch.isMatch(url.pathname, protectedAPIRoutes)) {
-		response = await handleProtectedAPI({ cookies });
+		response = await handleProtectedAPI({ cookies, locals });
 	}
 
 	return response || next();
