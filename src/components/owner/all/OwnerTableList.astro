@@ -1,0 +1,29 @@
+---
+import { getPropietarios } from "../../../pages/api/record/owner/listOwners";
+import OwnerTableDesign from "./OwnerTableDesign.astro";
+
+export interface Owners {
+	id: string;
+	nombre_dueno: string;
+	guarda_carreta: boolean;
+	monto_diario: number;
+	monto_tarifa_agua: number;
+}
+
+const listaPropietarios = await getPropietarios();
+
+// Ordenar la lista de propietarios por id
+listaPropietarios.sort((a: any, b: any) => Number(a.id) - Number(b.id));
+---
+
+<div class="space-y-8">
+	<OwnerTableDesign
+		listaPropietarios={listaPropietarios.map((propietario: any) => ({
+			idDueno: propietario.id,
+			nombreDueno: propietario.nombre_dueno,
+			guardaCarreta: propietario.guarda_carreta,
+			montoDiario: propietario.monto_diario,
+			montoTarifaAgua: propietario.monto_tarifa_agua,
+		}))}
+	/>
+</div>
