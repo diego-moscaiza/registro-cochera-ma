@@ -26,57 +26,63 @@ function convertirFechaPeru(fechaStr: any) {
 	return fechaLocal.toLocaleDateString("es-PE", opciones);
 }
 
-// Agrupar pagos por fecha
-const pagosPorFecha: Record<string, PaymentEntry[]> = listaPagos.reduce(
-	(acc: Record<string, PaymentEntry[]>, pago: PaymentEntry) => {
-		const fechaPago = convertirFechaPeru(pago.fecha_pago);
-		if (!acc[fechaPago]) acc[fechaPago] = [];
-		acc[fechaPago].push(pago);
-		return acc;
-	},
-	{},
+// Crear un Set para almacenar las fechas únicas
+const fechasPagos = new Set(
+	listaPagos.map((pago: any) => convertirFechaPeru(pago.fecha_pago)),
 );
 
-Object.keys(pagosPorFecha).forEach((fecha) => {
-	pagosPorFecha[fecha]?.sort((a, b) => Number(a.id) - Number(b.id));
+// Agrupar pagos por fecha utilizando Map
+const pagosPorFecha = new Map<string, PaymentEntry[]>();
+listaPagos.forEach((pago: any) => {
+	const fechaPago = convertirFechaPeru(pago.fecha_pago);
+	if (!pagosPorFecha.has(fechaPago)) {
+		pagosPorFecha.set(fechaPago, []);
+	}
+	pagosPorFecha.get(fechaPago)?.push(pago);
+});
+
+// Ordenar los pagos dentro de cada fecha
+pagosPorFecha.forEach((pagos) => {
+	pagos.sort((a, b) => Number(a.id) - Number(b.id));
 });
 
 // Obtener la fecha de hoy en el formato utilizado
 const hoy = new Date().toLocaleDateString("es-PE", opciones);
 
 // Excluir el día de hoy
-const fechasSinHoy = Object.keys(pagosPorFecha).filter(
-	(fecha) => fecha !== hoy,
-);
+const fechasSinHoy = Array.from(fechasPagos).filter((fecha) => fecha !== hoy);
 
 // Filtrar pagos por las fechas seleccionadas
-const pagosFiltradosPorFecha = fechasSinHoy.reduce(
-	(acc: Record<string, PaymentEntry[]>, fecha: string) => {
-		if (pagosPorFecha[fecha]) {
-			acc[fecha] = pagosPorFecha[fecha];
-		}
-		return acc;
-	},
-	{} as Record<string, PaymentEntry[]>,
-);
+const pagosFiltradosPorFecha = new Map<string, PaymentEntry[]>();
+fechasSinHoy.forEach((fecha: any) => {
+	if (pagosPorFecha.has(fecha)) {
+		pagosFiltradosPorFecha.set(fecha, pagosPorFecha.get(fecha)!);
+	}
+});
 ---
 
 <div class="space-y-8">
 	{
-		Object.entries(pagosFiltradosPorFecha).map(
-			([dbFechaPago, dbDetallesPagos]: [string, PaymentEntry[]]) => (
-				<PaymentTableDesignAll
-					fechaPago={dbFechaPago}
-					listaPagos={dbDetallesPagos.map((detallePago) => ({
-						id: detallePago.id,
-						nombreDueno: detallePago.nombre_dueno,
-						fechaPago: detallePago.fecha_pago,
-						retiroCoche: detallePago.retiro_coche,
-						montoTotal: detallePago.monto_total,
-						estadoPago: detallePago.estado_pago,
-					}))}
-				/>
-			),
+		fechasPagos.size > 0 ? (
+			Array.from(pagosFiltradosPorFecha.entries()).map(
+				([dbFechaPago, dbDetallesPagos]: [string, PaymentEntry[]]) => (
+					<PaymentTableDesignAll
+						fechaPago={dbFechaPago}
+						listaPagos={dbDetallesPagos.map((detallePago) => ({
+							id: detallePago.id,
+							nombreDueno: detallePago.nombre_dueno,
+							fechaPago: detallePago.fecha_pago,
+							retiroCoche: detallePago.retiro_coche,
+							montoTotal: detallePago.monto_total,
+							estadoPago: detallePago.estado_pago,
+						}))}
+					/>
+				),
+			)
+		) : (
+			<div class="px-6 py-4 text-2xl text-center bg-white dark:bg-slate-700 rounded-lg border border-slate-400 dark:border-slate-600">
+				No hay registros por mostrar.
+			</div>
 		)
 	}
 </div>
