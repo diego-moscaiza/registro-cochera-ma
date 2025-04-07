@@ -41,10 +41,10 @@ const handleProtectedRoute = async ({ cookies, redirect, locals }: any) => {
 	if (!sessionData?.session) {
 		// Evita redirecciones repetitivas eliminando cookies solo si existen
 		if (cookies.has("sb-access-token")) {
-			cookies.delete("sb-access-token", { path: "/" });
+			cookies.delete("sb-access-token");
 		}
 		if (cookies.has("sb-refresh-token")) {
-			cookies.delete("sb-refresh-token", { path: "/" });
+			cookies.delete("sb-refresh-token");
 		}
 		return redirect("/inicio-sesion");
 	}
@@ -93,24 +93,14 @@ const handleProtectedAPI = async ({ cookies }: any) => {
 	return null;
 };
 
-// Nueva función para manejar el index "/"
 export const onRequest = defineMiddleware(async (context: any, next: any) => {
 	const { url, cookies, redirect, locals } = context;
 
 	let response;
 
-	// Manejar la redirección para la raíz "/"
+	// Manejar la ruta "/"
 	if (url.pathname === "/") {
-		const sessionData = await getSession(cookies);
-		if (sessionData) {
-			// Si el usuario ya está autenticado, redirigir al dashboard
-			if (url.pathname !== redirectToDashboard) {
-				response = redirect(redirectToDashboard);
-			}
-		} else {
-			// Si no está autenticado, redirigir a inicio de sesión
-			response = redirect("/inicio-sesion");
-		}
+		return new Response(null, { status: 204 });
 	}
 
 	// Manejar rutas protegidas
@@ -126,11 +116,6 @@ export const onRequest = defineMiddleware(async (context: any, next: any) => {
 	// Manejar rutas protegidas de la API
 	if (!response && micromatch.isMatch(url.pathname, protectedAPIRoutes)) {
 		response = await handleProtectedAPI({ cookies });
-	}
-
-	// Si se realizó una redirección, establecer la cookie de control
-	if (response) {
-		cookies.set("redirected", "true", { path: "/" });
 	}
 
 	return response || next();

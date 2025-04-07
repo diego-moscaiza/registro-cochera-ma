@@ -36,18 +36,6 @@ export const GET: APIRoute = async ({ url, cookies, redirect }) => {
 			return new Response("Failed to set authentication cookies", { status: 500 });
 		}
 
-		// Verificar si hay un bucle de redirección
-		const redirectCount = parseInt(cookies.get("redirect-count")?.value || "0", 10);
-		if (redirectCount > 5) {
-			console.error("Bucle de redirección detectado");
-			return new Response("Too many redirects", { status: 500 });
-		}
-
-		cookies.set("redirect-count", (redirectCount + 1).toString(), {
-			path: "/",
-			httpOnly: true,
-		});
-
 		return redirect("/panel/pagos-del-dia");
 	} catch (error) {
 		console.error("Unexpected error in GET /callback:", error);
