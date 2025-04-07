@@ -3,7 +3,7 @@ import micromatch from "micromatch";
 import { supabase } from "../lib/supabase";
 
 const loginRedirects = ["/inicio-sesion(|/)"];
-const protectedRoutes = ["/panel(|/)", "/panel/**"];
+const protectedRoutes = ["/", "/panel(|/)", "/panel/**"];
 const protectedAPIRoutes = ["/api/record/payment/**/", "/api/record/owner/**/"];
 const redirectToDashboard = "/panel/pagos-del-dia";
 
