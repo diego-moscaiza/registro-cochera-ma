@@ -63,8 +63,9 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
 			if (response.status === 302) {
 				return response;
 			}
-			console.error("OAuth sign-in error:", await response.text());
-			return response;
+			const errorText = await response.text(); // Leer el texto una vez
+			console.error("OAuth sign-in error:", errorText);
+			return handleErrorResponse(errorText, response.status);
 		}
 
 		if (!email || !password) {
@@ -73,8 +74,9 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
 
 		const response = await signInWithPassword(email, password);
 		if (response.status !== 200) {
-			console.error("Password sign-in error:", await response.text());
-			return response;
+			const errorText = await response.text(); // Leer el texto una vez
+			console.error("Password sign-in error:", errorText);
+			return handleErrorResponse(errorText, response.status);
 		}
 
 		const data = JSON.parse(await response.text());
