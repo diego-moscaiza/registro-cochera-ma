@@ -17,13 +17,21 @@ listaPropietarios.sort((a: any, b: any) => Number(a.id) - Number(b.id));
 ---
 
 <div class="space-y-8">
-	<OwnerTableDesign
-		listaPropietarios={listaPropietarios.map((propietario: any) => ({
-			idDueno: propietario.id,
-			nombreDueno: propietario.nombre_dueno,
-			guardaCarreta: propietario.guarda_carreta,
-			montoDiario: propietario.monto_diario,
-			montoTarifaAgua: propietario.monto_tarifa_agua,
-		}))}
-	/>
+	{
+		listaPropietarios.length > 0 ? (
+			<OwnerTableDesign
+				listaPropietarios={listaPropietarios.map((propietario: any) => ({
+					idDueno: propietario.id,
+					nombreDueno: propietario.nombre_dueno,
+					guardaCarreta: propietario.guarda_carreta,
+					montoDiario: propietario.monto_diario,
+					montoTarifaAgua: propietario.monto_tarifa_agua,
+				}))}
+			/>
+		) : (
+			<div class="px-6 py-4 text-2xl text-center bg-white dark:bg-slate-700 rounded-lg border border-slate-400 dark:border-slate-600">
+				No hay registros de los dueños.
+			</div>
+		)
+	}
 </div>
