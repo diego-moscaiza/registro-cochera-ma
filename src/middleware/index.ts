@@ -2,7 +2,7 @@ import { defineMiddleware } from "astro:middleware";
 import micromatch from "micromatch";
 import { supabase } from "../lib/supabase";
 
-const userLoginRedirects = ["/inicio-sesion(|/)"];
+const loginRedirects = ["/inicio-sesion(|/)"];
 const protectedRoutes = ["/panel(|/)", "/panel/**"];
 const protectedAPIRoutes = ["/api/record/payment/**/", "/api/record/owner/**/"];
 const redirectToDashboard = "/panel/pagos-del-dia";
@@ -102,25 +102,26 @@ export const onRequest = defineMiddleware(async (context: any, next: any) => {
 	let response;
 
 	const isProtected = micromatch.isMatch(pathname, protectedRoutes);
-	const isLogin = micromatch.isMatch(pathname, userLoginRedirects);
+	const isLogin = micromatch.isMatch(pathname, loginRedirects);
 	const isProtectedAPI = micromatch.isMatch(pathname, protectedAPIRoutes);
 
-	// Manejar la sesión para rutas de inicio de sesión
+
+	// Manejar rutas relacionadas con el inicio de sesión
 	if (isLogin) {
 		await handleSession({ cookies, locals });
 	}
 
-	// Redirigir a usuarios autenticados desde rutas de inicio de sesión
-	if (!response && isLogin) {
-		response = handleRedirectRoute({ cookies, redirect });
-	}
-
-	// Requerir autenticación para rutas protegidas
+	// Manejar rutas protegidas
 	if (!response && isProtected) {
 		response = await handleProtectedRoute({ cookies, redirect, locals });
 	}
 
-	// Requerir autenticación para rutas protegidas de la API
+	// Manejar redirección para usuarios autenticados
+	if (!response && isLogin) {
+		response = handleRedirectRoute({ cookies, redirect });
+	}
+
+	// Manejar rutas protegidas de la API
 	if (isProtectedAPI) {
 		response = await handleProtectedAPI({ cookies });
 	}
