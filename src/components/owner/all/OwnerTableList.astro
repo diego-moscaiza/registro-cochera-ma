@@ -1,5 +1,5 @@
 ---
-import { getPropietarios } from "../../../pages/api/record/owner/listOwners";
+import { getAllOwners } from "../../../pages/api/record/owner/apiOwners";
 import OwnerTableDesign from "./OwnerTableDesign.astro";
 
 export interface Owners {
@@ -10,7 +10,7 @@ export interface Owners {
 	monto_tarifa_agua: number;
 }
 
-const listaPropietarios = await getPropietarios();
+const listaPropietarios = await getAllOwners();
 
 // Ordenar la lista de propietarios por id
 listaPropietarios.sort((a: any, b: any) => Number(a.id) - Number(b.id));

@@ -1,5 +1,5 @@
 ---
-import { getPagos } from "../../../pages/api/record/payment/listPayments";
+import { getAllPayments } from "../../../pages/api/record/payment/apiPayments";
 import PaymentTableDesignAll from "./../all/PaymentTableDesignAll.astro";
 
 export interface PaymentEntry {
@@ -11,7 +11,7 @@ export interface PaymentEntry {
 	estado_pago: boolean;
 }
 
-const listaPagos = await getPagos();
+const listaPagos = await getAllPayments();
 
 const opciones: Intl.DateTimeFormatOptions = {
 	weekday: "long",
