@@ -3,8 +3,6 @@ import PaymentListToday from "./PaymentListToday.astro";
 ---
 
 <script>
-	let fullDayToday;
-
 	const opciones: Intl.DateTimeFormatOptions = {
 		weekday: "long",
 		day: "2-digit",
@@ -12,18 +10,16 @@ import PaymentListToday from "./PaymentListToday.astro";
 		year: "numeric",
 	};
 
-	function getFullDayToday1() {
+	const getFullDayToday1 = () => {
 		return new Date().toLocaleDateString([], opciones);
-	}
+	};
+
+	const updateDateTime = () => {
+		const fullDayElement = document.getElementById("fullDayToday1");
+		fullDayElement ? (fullDayElement.textContent = getFullDayToday1()) : null;
+	};
 
 	document.addEventListener("DOMContentLoaded", () => {
-		const updateDateTime = () => {
-			const fullDayElement = document.getElementById("fullDayToday1");
-			fullDayElement
-				? (fullDayToday = fullDayElement.textContent = getFullDayToday1())
-				: null;
-		};
-
 		updateDateTime();
 
 		// Calculate the time remaining until midnight
