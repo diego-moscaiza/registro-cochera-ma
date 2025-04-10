@@ -21,12 +21,13 @@ const { fechaPago, listaPagos } = Astro.props;
 	<div class="overflow-x-auto rounded-2xl">
 		<table
 			class:list={[
-				"w-full min-w-full overflow-x-auto",
-				"bg-white dark:bg-slate-800 rounded-lg",
-				"divide-y divide-gray-200 dark:divide-gray-800",
+				"min-w-full overflow-x-auto",
+				"divide-y rounded-lg",
+				"bg-white dark:bg-slate-800",
+				"divide-gray-300 dark:divide-slate-700",
 			]}
 		>
-			<thead class="bg-gray-100 dark:bg-slate-700 rounded-t-lg text-nowrap">
+			<thead class="bg-slate-200 dark:bg-slate-700 rounded-t-lg text-nowrap">
 				<tr>
 					<th
 						scope="col"
