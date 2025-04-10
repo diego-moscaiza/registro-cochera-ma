@@ -18,9 +18,16 @@ const { listaPagos } = Astro.props;
 		<div class="inline-block min-w-full align-middle">
 			<div class="overflow-hidden shadow-lg rounded-2xl">
 				<table
-					class="w-full min-w-full divide-y divide-gray-200 bg-white dark:bg-slate-800 dark:divide-gray-700"
+					class:list={[
+						"min-w-full overflow-x-auto",
+						"divide-y rounded-lg",
+						"bg-white dark:bg-slate-800",
+						"divide-gray-300 dark:divide-slate-700",
+					]}
 				>
-					<thead class="bg-gray-100 dark:bg-slate-700 rounded-t-lg text-nowrap">
+					<thead
+						class="bg-slate-200 dark:bg-slate-700 rounded-t-lg text-nowrap"
+					>
 						<tr>
 							<th
 								scope="col"
