@@ -104,15 +104,24 @@ const { listaPropietarios } = Astro.props;
 														.toUpperCase()}
 												</span>
 											</div>
-											<div class="text-base font-medium text-gray-900 dark:text-gray-200">
+											<div
+												id="table-nombre-dueno-value"
+												class="text-base font-medium text-gray-900 dark:text-gray-200"
+											>
 												{formatoPropietario.nombreDueno}
 											</div>
 										</td>
-										<td class="p-4 text-base font-semibold text-gray-900 whitespace-nowrap dark:text-gray-200">
+										<td
+											id="table-monto-diario"
+											class="p-4 text-base font-semibold text-gray-900 whitespace-nowrap dark:text-gray-200"
+										>
 											S/. {formatoPropietario.montoDiario.toFixed(2)}
 										</td>
 										<td class="p-4 text-base font-semibold text-gray-900 dark:text-gray-200">
-											<div class="flex items-center">
+											<div
+												id="table-propietaro-value"
+												class="flex items-center"
+											>
 												{propietario.guardaCarreta ? (
 													<div class="h-2.5 w-2.5 rounded-full bg-green-500 mr-2" />
 												) : (
@@ -127,7 +136,7 @@ const { listaPropietarios } = Astro.props;
 												data-modal-toggle="edit-user-modal"
 												onclick={`sessionStorage.setItem('editData', JSON.stringify({
 													            id: '${formatoPropietario.idDueno}',
-													            nombre: '${formatoPropietario.nombreDueno}',
+													            nombrePropietario: '${formatoPropietario.nombreDueno}',
 													            montoDiario: '${formatoPropietario.montoDiario}',
 													            guardaCarreta: '${formatoPropietario.guardaCarreta}'
 													        }));`}
@@ -175,6 +184,7 @@ const { listaPropietarios } = Astro.props;
 					</tbody>
 				</table>
 			</div>
+
 			<!-- Edit User Modal -->
 			<div
 				class="fixed inset-0 z-50 items-center justify-center bg-black bg-opacity-50 transition-opacity duration-300 ease-in-out hidden"
@@ -213,8 +223,8 @@ const { listaPropietarios } = Astro.props;
 						</div>
 
 						<!-- Modal body -->
-						<div class="p-6 space-y-6">
-							<form action="#">
+						<div>
+							<form id="update-owner-form" class="p-6 space-y-6">
 								<div class="grid grid-cols-6 gap-6">
 									<div class="col-span-6 sm:col-span-6">
 										<label
@@ -238,7 +248,7 @@ const { listaPropietarios } = Astro.props;
 											>Monto diario</label
 										>
 										<input
-											type="numeric"
+											type="text"
 											name="monto-diario"
 											id="edit-monto-diario"
 											class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
@@ -258,24 +268,28 @@ const { listaPropietarios } = Astro.props;
 											class="shadow-sm bg-gray-50 rounded-lg border border-gray-300 text-gray-900 sm:text-sm focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500 appearance-none"
 											required
 										>
+											<option value="" disabled selected>
+												Seleccione el estado</option
+											>
 											<option value="Sí guarda">Sí guarda</option>
 											<option value="Ya no guarda">Ya no guarda</option>
 										</select>
 									</div>
 								</div>
+								<!-- Modal footer -->
+								<div
+									class="flex items-center justify-end px-6 pt-4 border-t border-gray-200 rounded-b dark:border-gray-700"
+								>
+									<button
+										id="close-edit-owner-modal-2"
+										class="text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-blue-800"
+										type="submit"
+										data-modal-toggle="edit-user-modal"
+									>
+										Guardar
+									</button>
+								</div>
 							</form>
-						</div>
-
-						<!-- Modal footer -->
-						<div
-							class="flex items-center justify-end p-6 border-t border-gray-200 rounded-b dark:border-gray-700"
-						>
-							<button
-								class="text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-blue-800"
-								type="submit"
-							>
-								Guardar
-							</button>
 						</div>
 					</div>
 				</div>
@@ -483,110 +497,293 @@ const { listaPropietarios } = Astro.props;
 
 			<!-- barra de paginación de usuarios -->
 			<!-- <NavPagination /> -->
-
-			<!-- Script para habilitar los modales con animación -->
-			<script>
-				// Función para abrir un modal
-				function abrirModal(modalId: any) {
-					const modal = document.getElementById(modalId);
-					if (modal) {
-						const modalContent = modal.querySelector(".transform");
-						if (modal.classList.contains("hidden")) {
-							modal.classList.remove("hidden");
-							modal.classList.add("flex");
-							setTimeout(() => {
-								modal.classList.add("opacity-100");
-								modalContent?.classList.add("scale-100", "opacity-100");
-								modalContent?.classList.remove("scale-95", "opacity-0");
-							}, 10);
-						}
-					}
-				}
-
-				// Función para cerrar un modal
-				function cerrarModal(modalId: any) {
-					const modal = document.getElementById(modalId);
-					if (modal) {
-						const modalContent = modal.querySelector(".transform");
-						modal.classList.remove("opacity-100");
-						modalContent?.classList.remove("scale-100", "opacity-100");
-						modalContent?.classList.add("scale-95", "opacity-0");
-						setTimeout(() => {
-							modal.classList.remove("flex");
-							modal.classList.add("hidden");
-						}, 300);
-					}
-				}
-
-				document
-					.getElementById("edit-monto-diario")
-					.addEventListener("input", (event) => {
-						const input: any = event.target;
-						const regex = /^\d{0,2}$/; // Permite solo números de hasta 2 cifras
-						const previousValue =
-							input.getAttribute("data-previous-value") || ""; // Obtiene el valor anterior
-
-						if (!regex.test(input.value)) {
-							input.value = previousValue; // Restaura el valor anterior si no es válido
-						} else {
-							input.setAttribute("data-previous-value", input.value); // Guarda el valor actual como válido
-						}
-					});
-
-				//
-				document.addEventListener("DOMContentLoaded", () => {
-					// Función para establecer los parámetros en los inputs del modal
-					function setParams() {
-						const editData = sessionStorage.getItem("editData");
-						if (editData) {
-							const { id, nombre, montoDiario, guardaCarreta } =
-								JSON.parse(editData);
-
-							// Asignar valores a los inputs
-							const inputNombre: any =
-								document.getElementById("edit-full-name");
-							const inputMonto: any =
-								document.getElementById("edit-monto-diario");
-							const inputEstado: any = document.getElementById("edit-estado");
-
-							if (inputNombre) inputNombre.value = nombre;
-							if (inputMonto) inputMonto.value = montoDiario;
-							if (inputEstado) inputEstado.value = guardaCarreta;
-						}
-					}
-
-					// Función para eliminar los parámetros del modal
-					function deleteParams() {
-						sessionStorage.removeItem("editData");
-					}
-
-					// Función para alternar el estado del modal
-					function toggleModal() {
-						const modalToggles = document.querySelectorAll(
-							'[data-modal-toggle="edit-user-modal"]',
-						);
-						modalToggles.forEach((toggle) => {
-							toggle.addEventListener("click", () => {
-								const modalId = toggle.getAttribute("data-modal-toggle");
-								if (modalId) {
-									const modal = document.getElementById(modalId);
-									if (modal && modal.classList.contains("hidden")) {
-										setParams();
-										abrirModal(modalId);
-									} else {
-										deleteParams();
-										cerrarModal(modalId);
-									}
-								}
-							});
-						});
-					}
-
-					// Inicializar funciones
-					setParams();
-					toggleModal();
-				});
-			</script>
 		</div>
 	</div>
 </div>
+
+<script>
+	// Input nonto_diario
+	const editMontoDiarioElement = document.getElementById("edit-monto-diario");
+	if (editMontoDiarioElement) {
+		editMontoDiarioElement.addEventListener("input", (event) => {
+			const input: any = event.target;
+			const regex = /^\d{0,2}(\.\d{0,2})?$/; // Permite hasta 2 cifras enteras y 2 decimales
+			const previousValue = input.getAttribute("data-previous-value") || ""; // Obtiene el valor anterior
+
+			if (!regex.test(input.value)) {
+				input.value = previousValue; // Restaura el valor anterior si no es válido
+			} else {
+				input.setAttribute("data-previous-value", input.value); // Guarda el valor actual como válido
+			}
+		});
+	}
+
+	// Espera a que cargue toda la pagina para ejecutarse
+	document.addEventListener("DOMContentLoaded", () => {
+		// Función para alternar el estado del modal
+		function toggleModalVisibility(modalId: string, show: boolean) {
+			const modal = document.getElementById(modalId);
+			if (modal) {
+				const modalContent = modal.querySelector(".transform");
+				if (show) {
+					modal.classList.remove("hidden");
+					modal.classList.add("flex");
+					setTimeout(() => {
+						modal.classList.add("opacity-100");
+						modalContent?.classList.add("scale-100", "opacity-100");
+						modalContent?.classList.remove("scale-95", "opacity-0");
+					}, 10);
+				} else {
+					modal.classList.remove("opacity-100");
+					modalContent?.classList.remove("scale-100", "opacity-100");
+					modalContent?.classList.add("scale-95", "opacity-0");
+					setTimeout(() => {
+						modal.classList.remove("flex");
+						modal.classList.add("hidden");
+					}, 300);
+				}
+			}
+		}
+
+		// Función para abrir un modal
+		function abrirModal(modalId: string) {
+			toggleModalVisibility(modalId, true);
+		}
+
+		// Función para cerrar un modal
+		function cerrarModal(modalId: string) {
+			toggleModalVisibility(modalId, false);
+		}
+
+		// Función para inicializar los eventos de los botones de toggle
+		function initializeModalToggles() {
+			const modalToggles = document.querySelectorAll("[data-modal-toggle]");
+			modalToggles.forEach((toggle) => {
+				toggle.addEventListener("click", () => {
+					const modalId = toggle.getAttribute("data-modal-toggle");
+					if (modalId) {
+						const modal = document.getElementById(modalId);
+						if (modal && modal.classList.contains("hidden")) {
+							abrirModal(modalId);
+							setParamsFromSession();
+						} else {
+							cerrarModal(modalId);
+						}
+					}
+				});
+			});
+		}
+		// Inicializar los eventos de los botones de toggle
+		initializeModalToggles();
+
+		// Función para establecer los parámetros en los inputs del modal
+		function setParamsFromSession() {
+			const editData = sessionStorage.getItem("editData");
+			if (editData) {
+				const { nombrePropietario, montoDiario, guardaCarreta } =
+					JSON.parse(editData);
+
+				const inputNombre = document.getElementById(
+					"edit-full-name",
+				) as HTMLInputElement;
+				const inputMonto = document.getElementById(
+					"edit-monto-diario",
+				) as HTMLInputElement;
+				const inputEstado = document.getElementById(
+					"edit-estado",
+				) as HTMLSelectElement;
+
+				if (inputNombre) inputNombre.value = nombrePropietario;
+				if (inputMonto) inputMonto.value = montoDiario;
+				if (inputEstado) inputEstado.value = guardaCarreta;
+			}
+		}
+
+		// Función para eliminar los parámetros del modal
+		function clearSessionData() {
+			sessionStorage.removeItem("editData");
+		}
+
+		async function execUpdateOwner(event: any) {
+			event.preventDefault();
+			const editData = sessionStorage.getItem("editData");
+			if (!editData) return console.error("No hay datos en sessionStorage");
+
+			const { id, nombrePropietario, montoDiario, guardaCarreta } =
+				JSON.parse(editData);
+
+			const inputNombre = document.getElementById(
+				"edit-full-name",
+			) as HTMLInputElement;
+			const inputMonto = document.getElementById(
+				"edit-monto-diario",
+			) as HTMLInputElement;
+			const inputEstado = document.getElementById(
+				"edit-estado",
+			) as HTMLSelectElement;
+
+			if (!inputNombre || !inputMonto || !inputEstado) {
+				console.error("No se encontraron todos los elementos del formulario");
+				return;
+			}
+
+			const nombreValue = inputNombre.value;
+			const montoValue = inputMonto.value;
+			const guardaCarretaValue = inputEstado.value;
+			let guardaCarretaBoolean: boolean;
+
+			if (guardaCarretaValue === "Sí guarda") {
+				guardaCarretaBoolean = true;
+			} else if (guardaCarretaValue === "Ya no guarda") {
+				guardaCarretaBoolean = false;
+			} else {
+				console.error("Valor de estado no válido");
+				return;
+			}
+
+			// Comprobar si los datos no han cambiado
+			if (
+				nombrePropietario === nombreValue &&
+				montoDiario === montoValue &&
+				guardaCarreta === guardaCarretaValue
+			) {
+				alert("No hay cambios en los datos, no se enviará el POST.");
+				return; // No hacer nada si los datos son los mismos
+			}
+
+			try {
+				const res = await fetch("/api/record/owner/updateOwner", {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({
+						id: Number(id),
+						nombre_dueno: String(nombreValue),
+						monto_diario: Number(montoValue),
+						guarda_carreta: guardaCarretaBoolean,
+					}),
+				});
+
+				if (res.ok) {
+					actualizarFilaEnTabla(
+						id,
+						nombreValue,
+						montoValue,
+						guardaCarretaBoolean,
+						guardaCarretaValue,
+					);
+
+					alert("Datos actualizados correctamente.");
+					console.log("Propietario actualizado correctamente");
+				} else {
+					const error = await res.json();
+					alert("Error al actualizar: " + (error.error || "Error desconocido"));
+					mostrarNotificacion(
+						"Error al actualizar: " + (error.error || "Error desconocido"),
+						"error",
+					);
+				}
+			} catch (error) {
+				console.error("Error en la petición:", error);
+				alert("Error en la comunicación con el servidor. Inténtelo de nuevo.");
+				mostrarNotificacion(
+					"Error en la comunicación con el servidor. Inténtelo de nuevo.",
+					"error",
+				);
+			}
+		}
+
+		// Función para actualizar la fila en la tabla con los nuevos datos
+		function actualizarFilaEnTabla(
+			id: any,
+			nombre: any,
+			monto: any,
+			guardaBoolean: any,
+			guardaTexto: any,
+		) {
+			// Buscar todos los elementos que puedan corresponder a la fila que necesitamos actualizar
+			const filas = document.querySelectorAll("tr");
+
+			for (const fila of filas) {
+				// Buscar el checkbox que corresponde al ID que estamos actualizando
+				const checkbox = fila.querySelector(`input[id="checkbox-${id}"]`);
+
+				if (checkbox) {
+					// Encontramos la fila correcta, ahora actualizamos los elementos específicos
+
+					// 1. Actualizar el nombre - usando el ID específico
+					const nombreElement = fila.querySelector("#table-nombre-dueno-value");
+					if (nombreElement) {
+						nombreElement.textContent = nombre;
+					}
+
+					// 3. Actualizar el monto diario - usando el ID específico
+					const montoElement = fila.querySelector("#table-monto-diario");
+					if (montoElement) {
+						montoElement.textContent = `S/. ${Number(monto).toFixed(2)}`;
+					}
+
+					// 4. Actualizar el estado - usando el ID específico
+					const estadoContainer = fila.querySelector("#table-propietaro-value");
+					if (estadoContainer) {
+						// Limpiar el contenido actual
+						estadoContainer.innerHTML = "";
+
+						// Crear el indicador de color según el estado
+						const indicador = document.createElement("div");
+						indicador.className = guardaBoolean
+							? "h-2.5 w-2.5 rounded-full bg-green-500 mr-2"
+							: "h-2.5 w-2.5 rounded-full bg-red-500 mr-2";
+						// Añadir el indicador
+						estadoContainer.appendChild(indicador);
+
+						// Añadir el texto del estado
+						estadoContainer.appendChild(document.createTextNode(guardaTexto));
+					}
+
+					break; // Ya encontramos y actualizamos la fila, salimos del bucle
+				}
+			}
+		}
+
+		// Función para mostrar una notificación temporal
+		function mostrarNotificacion(mensaje: any, tipo = "success") {
+			// Crear un elemento de notificación
+			const notificacion = document.createElement("div");
+
+			// Establecer clases según el tipo
+			const baseClasses =
+				"fixed bottom-4 right-4 py-2 px-4 rounded-lg shadow-lg z-50 transition-all duration-300 transform translate-y-0 opacity-100";
+			const typeClasses =
+				tipo === "error" ? "bg-red-500 text-white" : "bg-green-500 text-white";
+
+			notificacion.className = `${baseClasses} ${typeClasses}`;
+			notificacion.textContent = mensaje;
+
+			// Añadir al DOM
+			document.body.appendChild(notificacion);
+
+			// Eliminar después de 3 segundos
+			setTimeout(() => {
+				notificacion.classList.add("translate-y-10", "opacity-0");
+				setTimeout(() => {
+					document.body.removeChild(notificacion);
+				}, 300);
+			}, 3000);
+		}
+
+		// Botón que confirma la edición
+		const updateOwnerForm = document.getElementById("update-owner-form");
+		if (updateOwnerForm) {
+			updateOwnerForm.addEventListener("submit", async (event) => {
+				event.preventDefault();
+				// Ejecutar la lógica de actualización aquí
+				await execUpdateOwner(event);
+				// Cerrar el modal y limpiar los datos
+				cerrarModal("edit-user-modal");
+				clearSessionData();
+			});
+		}
+	});
+</script>
