@@ -1,4 +1,6 @@
 ---
+import { inlineThemeScript } from "../themes/darkMode";
+
 interface Props {
 	title: string;
 }
@@ -9,6 +11,7 @@ const ogImageURL = new URL("hero.png", Astro.site).href;
 const canonicalURL = new URL(Astro.url).href;
 ---
 
+<!doctype html>
 <html lang="es-ES">
 	<head>
 		<title>{title}</title>
@@ -25,7 +28,7 @@ const canonicalURL = new URL(Astro.url).href;
 		<meta property="og:title" content={title} />
 		<meta property="og:description" content={description} />
 		<meta property="og:url" content={canonicalURL} />
-		<script src="../themes/darkMode.ts"></script>
+		<script set:html={inlineThemeScript} />
 	</head>
 	<body
 		class:list={[
