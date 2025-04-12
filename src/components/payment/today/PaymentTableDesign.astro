@@ -112,8 +112,8 @@ const { listaPagos } = Astro.props;
 											<button
 												type="button"
 												id="open-edit-payment-today-modal"
-												data-modal-toggle="edit-payment-day-ago-modal"
-												onclick={`sessionStorage.setItem('editPaymentDayAgoData', JSON.stringify({
+												data-modal-toggle="editPaymentTodayData"
+												onclick={`sessionStorage.setItem('editPaymentTodayData', JSON.stringify({
 													            idDueno: '${formatoPago.idDueno}',
 													            nombrePropietario: '${formatoPago.nombreDueno}',
 													            montoTotal: '${formatoPago.montoTotal.toFixed(2)}',
@@ -149,7 +149,7 @@ const { listaPagos } = Astro.props;
 			<!-- Edit User Modal -->
 			<div
 				class="fixed inset-0 z-50 items-center justify-center bg-black bg-opacity-50 transition-opacity duration-300 ease-in-out hidden"
-				id="edit-payment-day-ago-modal"
+				id="editPaymentTodayData"
 			>
 				<div
 					class="relative w-full max-w-2xl px-4 transform transition-all duration-300 ease-in-out scale-95 opacity-0"
@@ -165,9 +165,9 @@ const { listaPagos } = Astro.props;
 							</h3>
 							<button
 								type="button"
-								id="close-edit-payment-day-ago-modal"
+								id="close-editPaymentTodayData"
 								class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-700 dark:hover:text-white"
-								data-modal-toggle="edit-payment-day-ago-modal"
+								data-modal-toggle="editPaymentTodayData"
 							>
 								<svg
 									class="w-5 h-5"
@@ -262,10 +262,10 @@ const { listaPagos } = Astro.props;
 									class="flex items-center justify-end px-6 pt-4 border-t border-gray-200 rounded-b dark:border-gray-700"
 								>
 									<button
-										id="close-edit-payment-day-ago-modal-2"
+										id="close-editPaymentTodayData-2"
 										class="text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-blue-800"
 										type="submit"
-										data-modal-toggle="edit-payment-day-ago-modal"
+										data-modal-toggle="editPaymentTodayData"
 									>
 										Guardar
 									</button>
@@ -343,6 +343,7 @@ const { listaPagos } = Astro.props;
 						const modal = document.getElementById(modalId);
 						if (modal && modal.classList.contains("hidden")) {
 							abrirModal(modalId);
+							setParamsFromSession();
 						} else {
 							cerrarModal(modalId);
 						}
@@ -355,12 +356,12 @@ const { listaPagos } = Astro.props;
 
 		// Función para establecer los parámetros en los inputs del modal
 		function setParamsFromSession() {
-			const editPaymentDayAgoData = sessionStorage.getItem(
-				"editPaymentDayAgoData",
+			const editPaymentTodayData = sessionStorage.getItem(
+				"editPaymentTodayData",
 			);
-			if (editPaymentDayAgoData) {
+			if (editPaymentTodayData) {
 				const { nombrePropietario, montoTotal, retiroCoche, estadoPago } =
-					JSON.parse(editPaymentDayAgoData);
+					JSON.parse(editPaymentTodayData);
 
 				const inputNombre = document.getElementById(
 					"edit-full-name",
@@ -387,15 +388,15 @@ const { listaPagos } = Astro.props;
 
 		// Función para eliminar los parámetros del modal
 		function clearSessionData() {
-			sessionStorage.removeItem("editPaymentDayAgoData");
+			sessionStorage.removeItem("editPaymentTodayData");
 		}
 
 		async function execUpdateOwner(event: any) {
 			event.preventDefault();
-			const editPaymentDayAgoData = sessionStorage.getItem(
-				"editPaymentDayAgoData",
+			const editPaymentTodayData = sessionStorage.getItem(
+				"editPaymentTodayData",
 			);
-			if (!editPaymentDayAgoData)
+			if (!editPaymentTodayData)
 				return console.error("No hay datos en sessionStorage");
 
 			const {
@@ -404,7 +405,7 @@ const { listaPagos } = Astro.props;
 				montoTotal,
 				retiroCoche,
 				estadoPago,
-			} = JSON.parse(editPaymentDayAgoData);
+			} = JSON.parse(editPaymentTodayData);
 
 			const inputNombre = document.getElementById(
 				"edit-full-name",
@@ -572,7 +573,7 @@ const { listaPagos } = Astro.props;
 
 		// Botón que cierra el modal
 		const closeModalButton = document.getElementById(
-			"close-edit-payment-day-ago-modal",
+			"close-editPaymentTodayData",
 		);
 		if (closeModalButton) {
 			closeModalButton.addEventListener("click", (event) => {
@@ -589,7 +590,7 @@ const { listaPagos } = Astro.props;
 				// Ejecutar la lógica de actualización aquí
 				await execUpdateOwner(event);
 				// Cerrar el modal y limpiar los datos
-				cerrarModal("edit-payment-day-ago-modal");
+				cerrarModal("editPaymentTodayData");
 				clearSessionData();
 			});
 		}

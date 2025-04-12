@@ -567,6 +567,7 @@ const { listaPropietarios } = Astro.props;
 						const modal = document.getElementById(modalId);
 						if (modal && modal.classList.contains("hidden")) {
 							abrirModal(modalId);
+							setParamsFromSession();
 						} else {
 							cerrarModal(modalId);
 						}
