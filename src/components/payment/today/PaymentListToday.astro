@@ -21,23 +21,22 @@ const opciones: Intl.DateTimeFormatOptions = {
 	year: "numeric",
 };
 
-const convertirFechaPeru = (fechaStr: string) =>
-	new Date(
-		new Date(fechaStr + "T00:00:00Z").getTime() + 5 * 60 * 60 * 1000,
-	).toLocaleDateString("es-PE", opciones);
+function convertirFechaPeru(fechaStr: string) {
+	const fechaUTC = new Date(fechaStr + "T00:00:00Z"); // Se fuerza a UTC
+	const fechaLocal = new Date(fechaUTC.getTime() + 5 * 60 * 60 * 1000); // Ajuste a UTC-5
+	return fechaLocal.toLocaleDateString("es-PE", opciones);
+}
 
-const fechaUltimoDia = new Date(
-	new Date().setDate(new Date().getDate() - 1),
-).toLocaleDateString("es-PE", opciones);
+const diaHoy = new Date().setDate(new Date().getDate());
+const fechaHoy = new Date(diaHoy).toLocaleDateString("es-PE", opciones);
 
-const pagosUltimoDia = listaPagos.filter(
-	(pago: PaymentEntry) =>
-		convertirFechaPeru(pago.fecha_pago) === fechaUltimoDia,
+const pagosHoy = listaPagos.filter(
+	(pago: PaymentEntry) => convertirFechaPeru(pago.fecha_pago) === fechaHoy,
 );
 
 const pagosPorFecha = new Map<string, PaymentEntry[]>();
 
-pagosUltimoDia.forEach((pago: PaymentEntry) => {
+pagosHoy.forEach((pago: PaymentEntry) => {
 	const fechaPago = convertirFechaPeru(pago.fecha_pago);
 	if (!pagosPorFecha.has(fechaPago)) {
 		pagosPorFecha.set(fechaPago, []);
@@ -52,7 +51,7 @@ pagosPorFecha.forEach((pagos) =>
 
 <div>
 	{
-		pagosUltimoDia.length > 0 ? (
+		pagosHoy.length > 0 ? (
 			Array.from(pagosPorFecha.values()).map((dbDetallesPagos) => (
 				<div>
 					<PaymentTableDesign
