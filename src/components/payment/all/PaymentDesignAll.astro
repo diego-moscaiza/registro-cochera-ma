@@ -4,13 +4,20 @@ import PaymentListAll from "./PaymentListAll.astro";
 
 <section
 	class:list={[
-		"pt-10 pb-20 xl:px-10 md:px-8 px-4 w-full mx-auto",
-		"flex flex-col justify-center items-stretch gap-6",
+		"pb-10 px-1 lg:px-10",
+		"flex flex-col gap-1 w-full",
+		"bg-slate-50 dark:bg-slate-900",
+		"block sm:flex justify-between shadow-md",
 	]}
 >
-	<h2 class="text-3xl text-center
-	font-semibold text-black dark:text-white">
-		Todos los pagos
-	</h2>
+	<h1
+		class:list={[
+			"py-6 px-2 lg:py-8",
+			"text-black dark:text-white",
+			"font-semibold text-xl sm:text-2xl text-center",
+		]}
+	>
+		Pagos anteriores
+	</h1>
 	<PaymentListAll />
 </section>

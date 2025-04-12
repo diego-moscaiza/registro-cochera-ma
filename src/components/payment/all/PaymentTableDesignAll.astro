@@ -15,9 +15,9 @@ const { fechaPago, listaPagos } = Astro.props;
 ---
 
 <section class="flex flex-col gap-3">
-	<h3 class="text-xl font-medium text-black dark:text-white">
+	<h2 class="px-5 lg:px-0 text-lg font-medium text-black dark:text-white">
 		Pagos del "{fechaPago}"
-	</h3>
+	</h2>
 	<div class="overflow-x-auto rounded-2xl">
 		<table
 			class:list={[
@@ -72,7 +72,7 @@ const { fechaPago, listaPagos } = Astro.props;
 								<td class="p-4 text-base font-medium text-gray-900 dark:text-gray-200">
 									{formatoPago.nombreDueno}
 								</td>
-								<td class="p-4 text-base font-semibold text-gray-900 dark:text-gray-200">
+								<td class="p-4 text-nowrap text-base font-semibold text-gray-900 dark:text-gray-200">
 									S/.{" "}
 									{parseFloat((formatoPago.montoTotal ?? 0).toString()).toFixed(
 										2,
@@ -95,8 +95,8 @@ const { fechaPago, listaPagos } = Astro.props;
 										class:list={[
 											"px-3 py-1 rounded-full text-sm sm:text-base",
 											formatoPago.estadoPago === "Canceló"
-												? "text-green-800 bg-green-300 dark:text-green-300 dark:bg-green-800"
-												: "text-red-800 bg-red-200 dark:text-red-200 dark:bg-red-800",
+												? "text-green-800 bg-green-300 dark:text-[#58ff36] dark:bg-[#2fff403d]"
+												: "text-red-900 bg-red-200 dark:text-[#ff3636] dark:bg-[#ff2f2f3d]",
 										]}
 									>
 										{formatoPago.estadoPago}

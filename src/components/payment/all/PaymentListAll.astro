@@ -1,9 +1,10 @@
 ---
-import { getAllPayments } from "../../../pages/api/record/payment/apiPayments";
+import { getAllPayments } from "../../../pages/api/record/payment/getPayment";
 import PaymentTableDesignAll from "./../all/PaymentTableDesignAll.astro";
 
 export interface PaymentEntry {
 	id: string;
+	dueno_id: string;
 	nombre_dueno: string;
 	fecha_pago: string;
 	retiro_coche: boolean;
@@ -11,7 +12,8 @@ export interface PaymentEntry {
 	estado_pago: boolean;
 }
 
-const listaPagos = await getAllPayments();
+const response = await getAllPayments();
+const listaPagos = Array.isArray(response) ? response : await response.json();
 
 const opciones: Intl.DateTimeFormatOptions = {
 	weekday: "long",
@@ -43,7 +45,7 @@ listaPagos.forEach((pago: any) => {
 
 // Ordenar los pagos dentro de cada fecha
 pagosPorFecha.forEach((pagos) => {
-	pagos.sort((a, b) => Number(a.id) - Number(b.id));
+	pagos.sort((a, b) => Number(a.dueno_id) - Number(b.dueno_id));
 });
 
 // Obtener la fecha de hoy en el formato utilizado
