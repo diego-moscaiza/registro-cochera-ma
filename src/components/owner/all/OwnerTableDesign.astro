@@ -133,6 +133,7 @@ const { listaPropietarios } = Astro.props;
 										<td class="p-4 space-x-2 whitespace-nowrap">
 											<button
 												type="button"
+												id="open-edit-owner-modal"
 												data-modal-toggle="edit-owner-modal"
 												onclick={`sessionStorage.setItem('editData', JSON.stringify({
 													            id: '${formatoPropietario.idDueno}',
@@ -566,7 +567,6 @@ const { listaPropietarios } = Astro.props;
 						const modal = document.getElementById(modalId);
 						if (modal && modal.classList.contains("hidden")) {
 							abrirModal(modalId);
-							setParamsFromSession();
 						} else {
 							cerrarModal(modalId);
 						}
@@ -649,7 +649,8 @@ const { listaPropietarios } = Astro.props;
 				montoDiario === montoValue &&
 				guardaCarreta === guardaCarretaValue
 			) {
-				alert("No hay cambios en los datos, no se enviará el POST.");
+				//alert("No hay cambios en los datos, no se enviará el POST.");
+				mostrarNotificacion("No hay cambios en los datos.", "other");
 				return; // No hacer nada si los datos son los mismos
 			}
 
@@ -700,11 +701,13 @@ const { listaPropietarios } = Astro.props;
 			const baseClasses =
 				"fixed bottom-4 right-4 py-2 px-4 rounded-lg shadow-lg z-50 transition-all duration-300 transform opacity-0 scale-95";
 			const typeClasses =
-				tipo === "error"
-					? "bg-red-500 text-white"
-					: tipo === "success"
-						? "bg-green-600 text-white"
-						: "bg-purple-500 text-white";
+				tipo === "success"
+					? "bg-green-600 text-white"
+					: tipo === "error"
+						? "bg-red-500 text-white"
+						: "bg-orange-700 text-white";
+
+			const setTimeoutValue = tipo === "success" ? 800 : 5000;
 
 			notificacion.className = `${baseClasses} ${typeClasses}`;
 			notificacion.textContent = mensaje;
@@ -725,9 +728,19 @@ const { listaPropietarios } = Astro.props;
 				setTimeout(() => {
 					document.body.removeChild(notificacion);
 				}, 200);
-			}, 800);
+			}, setTimeoutValue);
 		}
 
+		// Botón que abre el modal
+		const openModalButton = document.getElementById("open-edit-owner-modal");
+		if (openModalButton) {
+			openModalButton.addEventListener("click", (event) => {
+				event.preventDefault();
+				setParamsFromSession();
+			});
+		}
+
+		// Botón que cierra el modal
 		const closeModalButton = document.getElementById("close-edit-owner-modal");
 		if (closeModalButton) {
 			closeModalButton.addEventListener("click", (event) => {
