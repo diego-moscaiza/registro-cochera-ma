@@ -522,6 +522,45 @@ const { listaPropietarios } = Astro.props;
 
 	// Espera a que cargue toda la pagina para ejecutarse
 	document.addEventListener("DOMContentLoaded", () => {
+		// Función para mostrar una notificación temporal
+		function mostrarNotificacion(mensaje: any, tipo: any) {
+			// Crear un elemento de notificación
+			const notificacion = document.createElement("div");
+
+			// Establecer clases según el tipo
+			const baseClasses =
+				"fixed bottom-4 right-4 py-2 px-4 rounded-lg shadow-lg z-50 transition-all duration-300 transform opacity-0 scale-95";
+			const typeClasses =
+				tipo === "success"
+					? "bg-green-600 text-white"
+					: tipo === "error"
+						? "bg-red-500 text-white"
+						: "bg-orange-700 text-white";
+
+			const setTimeoutValue = tipo === "success" ? 800 : 5000;
+
+			notificacion.className = `${baseClasses} ${typeClasses}`;
+			notificacion.textContent = mensaje;
+
+			// Añadir al DOM
+			document.body.appendChild(notificacion);
+
+			// Animación para aparecer
+			setTimeout(() => {
+				notificacion.classList.add("opacity-100", "scale-100");
+				notificacion.classList.remove("opacity-0", "scale-95");
+			}, 10);
+
+			// Eliminar después del tiempo configurado
+			setTimeout(() => {
+				notificacion.classList.add("translate-y-10", "opacity-0");
+				notificacion.classList.remove("opacity-100", "scale-100");
+				setTimeout(() => {
+					document.body.removeChild(notificacion);
+				}, 200);
+			}, setTimeoutValue);
+		}
+
 		// Función para alternar el estado del modal
 		function toggleModalVisibility(modalId: string, show: boolean) {
 			const modal = document.getElementById(modalId);
@@ -558,8 +597,8 @@ const { listaPropietarios } = Astro.props;
 		}
 
 		// Función para inicializar los eventos de los botones de toggle
-		function initializeModalToggles() {
-			const modalToggles = document.querySelectorAll("[data-modal-toggle]");
+		function initializeModalToggles(selectorValue: any) {
+			const modalToggles = document.querySelectorAll(selectorValue);
 			modalToggles.forEach((toggle) => {
 				toggle.addEventListener("click", () => {
 					const modalId = toggle.getAttribute("data-modal-toggle");
@@ -567,7 +606,6 @@ const { listaPropietarios } = Astro.props;
 						const modal = document.getElementById(modalId);
 						if (modal && modal.classList.contains("hidden")) {
 							abrirModal(modalId);
-							setParamsFromSession();
 						} else {
 							cerrarModal(modalId);
 						}
@@ -575,8 +613,6 @@ const { listaPropietarios } = Astro.props;
 				});
 			});
 		}
-		// Inicializar los eventos de los botones de toggle
-		initializeModalToggles();
 
 		// Función para establecer los parámetros en los inputs del modal
 		function setParamsFromSession() {
@@ -650,8 +686,11 @@ const { listaPropietarios } = Astro.props;
 				montoDiario === montoValue &&
 				guardaCarreta === guardaCarretaValue
 			) {
-				//alert("No hay cambios en los datos, no se enviará el POST.");
-				mostrarNotificacion("No hay cambios en los datos.", "other");
+				// console.log("⚠️ No se detectaron cambios en los datos para actualizar.");
+				mostrarNotificacion(
+					"⚠️ No se detectaron cambios en los datos para actualizar.",
+					"other",
+				);
 				return; // No hacer nada si los datos son los mismos
 			}
 
@@ -670,76 +709,48 @@ const { listaPropietarios } = Astro.props;
 				});
 
 				if (res.ok) {
-					//alert("Datos actualizados correctamente.");
-					mostrarNotificacion("Datos actualizados correctamente.", "success");
+					//alert("✅ Datos actualizados correctamente.");
+					mostrarNotificacion(
+						"✅ Datos actualizados correctamente.",
+						"success",
+					);
 					setTimeout(() => {
 						window.location.reload();
 					}, 1000);
 				} else {
 					const error = await res.json();
-					//alert("Error al actualizar: " + (error.error || "Error desconocido"));
+					//alert("❌ Error al actualizar: " + (error.error || "Error desconocido"));
 					mostrarNotificacion(
-						"Error al actualizar: " + (error.error || "Error desconocido"),
+						"❌ Error al actualizar: " + (error.error || "Error desconocido"),
 						"error",
 					);
 				}
 			} catch (error) {
 				console.error("Error en la petición:", error);
-				//alert("Error en la comunicación con el servidor. Inténtelo de nuevo.");
+				//alert("❌ Error en la comunicación con el servidor. Inténtelo de nuevo.");
 				mostrarNotificacion(
-					"Error en la comunicación con el servidor. Inténtelo de nuevo.",
+					"❌ Error en la comunicación con el servidor. Inténtelo de nuevo.",
 					"error",
 				);
 			}
 		}
 
-		// Función para mostrar una notificación temporal
-		function mostrarNotificacion(mensaje: any, tipo: any) {
-			// Crear un elemento de notificación
-			const notificacion = document.createElement("div");
+		const allModalToggle: any = "[data-modal-toggle]";
 
-			// Establecer clases según el tipo
-			const baseClasses =
-				"fixed bottom-4 right-4 py-2 px-4 rounded-lg shadow-lg z-50 transition-all duration-300 transform opacity-0 scale-95";
-			const typeClasses =
-				tipo === "success"
-					? "bg-green-600 text-white"
-					: tipo === "error"
-						? "bg-red-500 text-white"
-						: "bg-orange-700 text-white";
+		const editOwnerData: any = '[data-modal-toggle="edit-owner-modal"]';
 
-			const setTimeoutValue = tipo === "success" ? 800 : 5000;
+		// Inicializar los eventos de los botones de toggle
+		initializeModalToggles(allModalToggle);
 
-			notificacion.className = `${baseClasses} ${typeClasses}`;
-			notificacion.textContent = mensaje;
-
-			// Añadir al DOM
-			document.body.appendChild(notificacion);
-
-			// Animación para aparecer
-			setTimeout(() => {
-				notificacion.classList.add("opacity-100", "scale-100");
-				notificacion.classList.remove("opacity-0", "scale-95");
-			}, 10);
-
-			// Eliminar después de 3 segundos
-			setTimeout(() => {
-				notificacion.classList.add("translate-y-10", "opacity-0");
-				notificacion.classList.remove("opacity-100", "scale-100");
+		// Escuchar el evento de apertura del modal
+		document.querySelectorAll(editOwnerData).forEach((btn) => {
+			btn.addEventListener("click", () => {
+				// Pequeño retraso para asegurar que los datos ya estén en sessionStorage
 				setTimeout(() => {
-					document.body.removeChild(notificacion);
-				}, 200);
-			}, setTimeoutValue);
-		}
-
-		// Botón que abre el modal
-		const openModalButton = document.getElementById("open-edit-owner-modal");
-		if (openModalButton) {
-			openModalButton.addEventListener("click", (event) => {
-				event.preventDefault();
-				setParamsFromSession();
+					setParamsFromSession();
+				}, 100);
 			});
-		}
+		});
 
 		// Botón que cierra el modal
 		const closeModalButton = document.getElementById("close-edit-owner-modal");

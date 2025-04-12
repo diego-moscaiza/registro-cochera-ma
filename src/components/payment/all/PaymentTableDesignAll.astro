@@ -436,7 +436,8 @@ const { fechaPago, listaPagos } = Astro.props;
 				"editPaymentDayAgoData",
 			);
 			if (!editPaymentDayAgoData) {
-				mostrarNotificacion("No hay datos en sessionStorage.", "other");
+				// console.log("⚠️ No hay datos en sessionStorage.");
+				mostrarNotificacion("⚠️ No hay datos en el registro.", "other");
 				return;
 			}
 
@@ -468,7 +469,8 @@ const { fechaPago, listaPagos } = Astro.props;
 				!inputEstadoPago
 			) {
 				mostrarNotificacion(
-					"No se encontraron todos los elementos del formulario.",
+					//alert("⚠️ No se encontraron todos los elementos del formulario.");
+					"⚠️ No se encontraron todos los elementos del formulario.",
 					"other",
 				);
 				return;
@@ -486,7 +488,8 @@ const { fechaPago, listaPagos } = Astro.props;
 			} else if (retiroCocheValue === "No vino") {
 				retiroCocheBoolean = false;
 			} else {
-				mostrarNotificacion("Valor de estado no válido.", "other");
+				//alert("⚠️ Valor de estado no válido.");
+				mostrarNotificacion("⚠️ Valor de estado no válido.", "other");
 				return;
 			}
 
@@ -497,6 +500,7 @@ const { fechaPago, listaPagos } = Astro.props;
 			} else if (estadoPagoValue === "No pagó") {
 				estadoPagoBoolean = false;
 			} else {
+				//alert("⚠️ Valor de estado no válido.");
 				mostrarNotificacion("Valor de estado no válido.", "other");
 				return;
 			}
@@ -508,7 +512,8 @@ const { fechaPago, listaPagos } = Astro.props;
 				retiroCoche === retiroCocheValue &&
 				estadoPago === estadoPagoValue
 			) {
-				mostrarNotificacion("No hay cambios en los datos.", "other");
+				//alert("⚠️ No hay cambios en los datos, no se enviará el POST.");
+				mostrarNotificacion("⚠️ No hay cambios en los datos.", "other");
 				return;
 			}
 
@@ -526,20 +531,26 @@ const { fechaPago, listaPagos } = Astro.props;
 				});
 
 				if (res.ok) {
-					mostrarNotificacion("Datos actualizados correctamente.", "success");
+					//alert("✅ Datos actualizados correctamente.");
+					mostrarNotificacion(
+						"✅ Datos actualizados correctamente.",
+						"success",
+					);
 					setTimeout(() => {
 						window.location.reload();
 					}, 1000);
 				} else {
 					const error = await res.json();
+					//alert("❌ Error al actualizar: " + (error.error || "Error desconocido"));
 					mostrarNotificacion(
-						"Error al actualizar: " + (error.error || "Error desconocido"),
+						"❌ Error al actualizar: " + (error.error || "Error desconocido"),
 						"error",
 					);
 				}
 			} catch (error) {
+				//alert("❌ Error en la comunicación con el servidor. Inténtelo de nuevo."));
 				mostrarNotificacion(
-					"Error en la comunicación con el servidor. Inténtelo de nuevo.",
+					"❌ Error en la comunicación con el servidor. Inténtelo de nuevo.",
 					"error",
 				);
 			}
