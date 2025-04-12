@@ -32,6 +32,12 @@ const miCorreo = email ? email : "micorreo@mail.com";
 		aria-labelledby="user-menu-button"
 		id="dropdown-menu"
 	>
+		<div class="px-4 py-3">
+			<p class="text-sm text-black dark:text-neutral-100">{nombreUsuario}</p>
+			<p class="text-sm font-medium text-black truncate dark:text-neutral-300">
+				{miCorreo}
+			</p>
+		</div>
 		<a
 			href="#"
 			class="block px-4 py-2 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-slate-800"
@@ -47,12 +53,6 @@ const miCorreo = email ? email : "micorreo@mail.com";
 			class="block px-4 py-2 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-slate-800"
 			role="menuitem">Cerrar sesión</a
 		>
-		<div class="px-4 py-3">
-			<p class="text-sm text-black dark:text-neutral-100">{nombreUsuario}</p>
-			<p class="text-sm font-medium text-black truncate dark:text-neutral-300">
-				{miCorreo}
-			</p>
-		</div>
 	</div>
 </div>
 
