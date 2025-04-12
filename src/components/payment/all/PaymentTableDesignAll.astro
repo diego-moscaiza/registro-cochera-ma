@@ -106,7 +106,7 @@ const { fechaPago, listaPagos } = Astro.props;
 									<button
 										type="button"
 										id="open-edit-payment-day-ago-modal"
-										data-modal-toggle="edit-payment-day-ago-modal"
+										data-modal-toggle="edit-payment-day-ago-modal-data"
 										onclick={`sessionStorage.setItem('editPaymentDayAgoData', JSON.stringify({
 													            idDueno: '${formatoPago.idDueno}',
 													            nombrePropietario: '${formatoPago.nombreDueno}',
@@ -142,7 +142,7 @@ const { fechaPago, listaPagos } = Astro.props;
 	<!-- Edit User Modal -->
 	<div
 		class="fixed inset-0 z-50 items-center justify-center bg-black bg-opacity-50 transition-opacity duration-300 ease-in-out hidden"
-		id="edit-payment-day-ago-modal"
+		id="edit-payment-day-ago-modal-data"
 	>
 		<div
 			class="relative w-full max-w-2xl px-4 transform transition-all duration-300 ease-in-out scale-95 opacity-0"
@@ -158,9 +158,9 @@ const { fechaPago, listaPagos } = Astro.props;
 					</h3>
 					<button
 						type="button"
-						id="close-edit-payment-day-ago-modal"
+						id="close-edit-payment-day-ago-modal-1"
 						class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-700 dark:hover:text-white"
-						data-modal-toggle="edit-payment-day-ago-modal"
+						data-modal-toggle="edit-payment-day-ago-modal-data"
 					>
 						<svg
 							class="w-5 h-5"
@@ -178,7 +178,7 @@ const { fechaPago, listaPagos } = Astro.props;
 
 				<!-- Modal body -->
 				<div>
-					<form id="update-owner-form" class="p-6 space-y-6">
+					<form id="update-payment-day-ago-form" class="p-6 space-y-6">
 						<div class="grid grid-cols-6 gap-6">
 							<div class="col-span-6 sm:col-span-3">
 								<label
@@ -257,7 +257,7 @@ const { fechaPago, listaPagos } = Astro.props;
 								id="close-edit-payment-day-ago-modal-2"
 								class="text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-blue-800"
 								type="submit"
-								data-modal-toggle="edit-payment-day-ago-modal"
+								data-modal-toggle="edit-payment-day-ago-modal-data"
 							>
 								Guardar
 							</button>
@@ -285,9 +285,47 @@ const { fechaPago, listaPagos } = Astro.props;
 			}
 		});
 	}
-
 	// Espera a que cargue toda la pagina para ejecutarse
 	document.addEventListener("DOMContentLoaded", () => {
+		// Función para mostrar una notificación temporal
+		function mostrarNotificacion(mensaje: any, tipo: any) {
+			// Crear un elemento de notificación
+			const notificacion = document.createElement("div");
+
+			// Establecer clases según el tipo
+			const baseClasses =
+				"fixed bottom-4 right-4 py-2 px-4 rounded-lg shadow-lg z-50 transition-all duration-300 transform opacity-0 scale-95";
+			const typeClasses =
+				tipo === "success"
+					? "bg-green-600 text-white"
+					: tipo === "error"
+						? "bg-red-500 text-white"
+						: "bg-orange-700 text-white";
+
+			const setTimeoutValue = tipo === "success" ? 800 : 5000;
+
+			notificacion.className = `${baseClasses} ${typeClasses}`;
+			notificacion.textContent = mensaje;
+
+			// Añadir al DOM
+			document.body.appendChild(notificacion);
+
+			// Animación para aparecer
+			setTimeout(() => {
+				notificacion.classList.add("opacity-100", "scale-100");
+				notificacion.classList.remove("opacity-0", "scale-95");
+			}, 10);
+
+			// Eliminar después del tiempo configurado
+			setTimeout(() => {
+				notificacion.classList.add("translate-y-10", "opacity-0");
+				notificacion.classList.remove("opacity-100", "scale-100");
+				setTimeout(() => {
+					document.body.removeChild(notificacion);
+				}, 200);
+			}, setTimeoutValue);
+		}
+
 		// Función para alternar el estado del modal
 		function toggleModalVisibility(modalId: string, show: boolean) {
 			const modal = document.getElementById(modalId);
@@ -324,8 +362,8 @@ const { fechaPago, listaPagos } = Astro.props;
 		}
 
 		// Función para inicializar los eventos de los botones de toggle
-		function initializeModalToggles() {
-			const modalToggles = document.querySelectorAll("[data-modal-toggle]");
+		function initializeModalToggles(selectorValue: any) {
+			const modalToggles = document.querySelectorAll(selectorValue);
 			modalToggles.forEach((toggle) => {
 				toggle.addEventListener("click", () => {
 					const modalId = toggle.getAttribute("data-modal-toggle");
@@ -333,7 +371,6 @@ const { fechaPago, listaPagos } = Astro.props;
 						const modal = document.getElementById(modalId);
 						if (modal && modal.classList.contains("hidden")) {
 							abrirModal(modalId);
-							setParamsFromSession();
 						} else {
 							cerrarModal(modalId);
 						}
@@ -341,8 +378,6 @@ const { fechaPago, listaPagos } = Astro.props;
 				});
 			});
 		}
-		// Inicializar los eventos de los botones de toggle
-		initializeModalToggles();
 
 		// Función para establecer los parámetros en los inputs del modal
 		function setParamsFromSession() {
@@ -350,29 +385,42 @@ const { fechaPago, listaPagos } = Astro.props;
 				"editPaymentDayAgoData",
 			);
 			if (editPaymentDayAgoData) {
-				const { nombrePropietario, montoTotal, retiroCoche, estadoPago } =
-					JSON.parse(editPaymentDayAgoData);
+				try {
+					const { nombrePropietario, montoTotal, retiroCoche, estadoPago } =
+						JSON.parse(editPaymentDayAgoData);
 
-				const inputNombre = document.getElementById(
-					"edit-full-name",
-				) as HTMLInputElement;
+					const inputNombre = document.getElementById(
+						"edit-full-name",
+					) as HTMLInputElement;
+					const inputMonto = document.getElementById(
+						"edit-monto-total",
+					) as HTMLInputElement;
+					const inputRetiraCoche = document.getElementById(
+						"edit-retiro-coche",
+					) as HTMLSelectElement;
+					const inputEstadoPago = document.getElementById(
+						"edit-estado-pago",
+					) as HTMLSelectElement;
 
-				const inputMonto = document.getElementById(
-					"edit-monto-total",
-				) as HTMLInputElement;
+					if (inputNombre) inputNombre.value = nombrePropietario;
+					if (inputMonto) inputMonto.value = montoTotal;
+					if (inputRetiraCoche) inputRetiraCoche.value = retiroCoche;
+					if (inputEstadoPago) inputEstadoPago.value = estadoPago;
 
-				const inputRetiraCoche = document.getElementById(
-					"edit-retiro-coche",
-				) as HTMLSelectElement;
-
-				const inputEstadoPago = document.getElementById(
-					"edit-estado-pago",
-				) as HTMLSelectElement;
-
-				if (inputNombre) inputNombre.value = nombrePropietario;
-				if (inputMonto) inputMonto.value = montoTotal;
-				if (inputRetiraCoche) inputRetiraCoche.value = retiroCoche;
-				if (inputEstadoPago) inputEstadoPago.value = estadoPago;
+					console.log("Datos cargados en el modal:", {
+						nombrePropietario,
+						montoTotal,
+						retiroCoche,
+						estadoPago,
+					});
+				} catch (error) {
+					console.error(
+						"Error al procesar los datos de sessionStorage:",
+						error,
+					);
+				}
+			} else {
+				console.log("No hay datos en sessionStorage para cargar");
 			}
 		}
 
@@ -383,14 +431,15 @@ const { fechaPago, listaPagos } = Astro.props;
 
 		async function execUpdateOwner(event: any) {
 			event.preventDefault();
+
 			const editPaymentDayAgoData = sessionStorage.getItem(
 				"editPaymentDayAgoData",
 			);
 			if (!editPaymentDayAgoData) {
-				//console.error("No hay datos en sessionStorage.");
 				mostrarNotificacion("No hay datos en sessionStorage.", "other");
 				return;
 			}
+
 			const {
 				idDueno,
 				nombrePropietario,
@@ -402,15 +451,12 @@ const { fechaPago, listaPagos } = Astro.props;
 			const inputNombre = document.getElementById(
 				"edit-full-name",
 			) as HTMLInputElement;
-
 			const inputMonto = document.getElementById(
 				"edit-monto-total",
 			) as HTMLInputElement;
-
 			const inputRetiraCoche = document.getElementById(
 				"edit-retiro-coche",
 			) as HTMLSelectElement;
-
 			const inputEstadoPago = document.getElementById(
 				"edit-estado-pago",
 			) as HTMLSelectElement;
@@ -421,7 +467,6 @@ const { fechaPago, listaPagos } = Astro.props;
 				!inputRetiraCoche ||
 				!inputEstadoPago
 			) {
-				//console.error("No se encontraron todos los elementos del formulario");
 				mostrarNotificacion(
 					"No se encontraron todos los elementos del formulario.",
 					"other",
@@ -434,28 +479,24 @@ const { fechaPago, listaPagos } = Astro.props;
 			const retiroCocheValue = inputRetiraCoche.value;
 			const estadoPagoValue = inputEstadoPago.value;
 
-			// Validar que el monto sea un número válido
+			// Validar el estado de retiro de coche
 			let retiroCocheBoolean: boolean;
-
 			if (retiroCocheValue === "Sí vino") {
 				retiroCocheBoolean = true;
 			} else if (retiroCocheValue === "No vino") {
 				retiroCocheBoolean = false;
 			} else {
-				//console.error("Valor de estado no válido");
 				mostrarNotificacion("Valor de estado no válido.", "other");
 				return;
 			}
 
-			// Validar que el estado de pago sea un booleano
+			// Validar el estado de pago
 			let estadoPagoBoolean: boolean;
-
 			if (estadoPagoValue === "Canceló") {
 				estadoPagoBoolean = true;
 			} else if (estadoPagoValue === "No pagó") {
 				estadoPagoBoolean = false;
 			} else {
-				//console.error("Valor de estado no válido");
 				mostrarNotificacion("Valor de estado no válido.", "other");
 				return;
 			}
@@ -467,17 +508,14 @@ const { fechaPago, listaPagos } = Astro.props;
 				retiroCoche === retiroCocheValue &&
 				estadoPago === estadoPagoValue
 			) {
-				//alert("No hay cambios en los datos, no se enviará el POST.");
 				mostrarNotificacion("No hay cambios en los datos.", "other");
-				return; // No hacer nada si los datos son los mismos
+				return;
 			}
 
 			try {
 				const res = await fetch("/api/record/payment/updatePayment", {
 					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-					},
+					headers: { "Content-Type": "application/json" },
 					body: JSON.stringify({
 						id: Number(idDueno),
 						nombre_dueno: String(nombreValue),
@@ -488,26 +526,18 @@ const { fechaPago, listaPagos } = Astro.props;
 				});
 
 				if (res.ok) {
-					// alert("Datos actualizados correctamente.");
-					// console.log("Propietario actualizado correctamente");
 					mostrarNotificacion("Datos actualizados correctamente.", "success");
 					setTimeout(() => {
 						window.location.reload();
 					}, 1000);
 				} else {
 					const error = await res.json();
-					// alert("Error al actualizar: " + (error.error || "Error desconocido"));
-					// console.log(
-					// 	"Error al actualizar: " + (error.error || "Error desconocido"),
-					// );
 					mostrarNotificacion(
 						"Error al actualizar: " + (error.error || "Error desconocido"),
 						"error",
 					);
 				}
 			} catch (error) {
-				//console.error("Error en la petición:", error);
-				//alert("Error en la comunicación con el servidor. Inténtelo de nuevo.");
 				mostrarNotificacion(
 					"Error en la comunicación con el servidor. Inténtelo de nuevo.",
 					"error",
@@ -515,77 +545,47 @@ const { fechaPago, listaPagos } = Astro.props;
 			}
 		}
 
-		// Función para mostrar una notificación temporal
-		function mostrarNotificacion(mensaje: any, tipo: any) {
-			// Crear un elemento de notificación
-			const notificacion = document.createElement("div");
+		const allModalToggle: any = "[data-modal-toggle]";
 
-			// Establecer clases según el tipo
-			const baseClasses =
-				"fixed bottom-4 right-4 py-2 px-4 rounded-lg shadow-lg z-50 transition-all duration-300 transform opacity-0 scale-95";
-			const typeClasses =
-				tipo === "success"
-					? "bg-green-600 text-white"
-					: tipo === "error"
-						? "bg-red-500 text-white"
-						: "bg-orange-700 text-white";
+		const editPaymentDayAgoData: any =
+			'[data-modal-toggle="edit-payment-day-ago-modal-data"]';
 
-			const setTimeoutValue = tipo === "success" ? 800 : 5000;
+		// Inicializar eventos
+		initializeModalToggles(allModalToggle);
 
-			notificacion.className = `${baseClasses} ${typeClasses}`;
-			notificacion.textContent = mensaje;
-
-			// Añadir al DOM
-			document.body.appendChild(notificacion);
-
-			// Animación para aparecer
-			setTimeout(() => {
-				notificacion.classList.add("opacity-100", "scale-100");
-				notificacion.classList.remove("opacity-0", "scale-95");
-			}, 10);
-
-			// Eliminar después de 3 segundos
-			setTimeout(() => {
-				notificacion.classList.add("translate-y-10", "opacity-0");
-				notificacion.classList.remove("opacity-100", "scale-100");
+		// Escuchar el evento de apertura del modal
+		document.querySelectorAll(editPaymentDayAgoData).forEach((btn) => {
+			btn.addEventListener("click", () => {
+				// Pequeño retraso para asegurar que los datos ya estén en sessionStorage
 				setTimeout(() => {
-					document.body.removeChild(notificacion);
-				}, 200);
-			}, setTimeoutValue);
-		}
-
-		// Botón que abre el modal
-		const openModalButton = document.getElementById(
-			"open-edit-payment-day-ago-modal",
-		);
-		if (openModalButton) {
-			openModalButton.addEventListener("click", (event) => {
-				event.preventDefault();
-				setParamsFromSession();
+					setParamsFromSession();
+				}, 100);
 			});
-		}
+		});
 
 		// Botón que cierra el modal
-		const closeModalButton = document.getElementById(
-			"close-edit-payment-day-ago-modal",
+		const closeModalButton1 = document.getElementById(
+			"close-edit-payment-day-ago-modal-1",
 		);
-		if (closeModalButton) {
-			closeModalButton.addEventListener("click", (event) => {
-				event.preventDefault();
+		if (closeModalButton1) {
+			closeModalButton1.addEventListener("click", () => {
 				clearSessionData();
+				cerrarModal("edit-payment-day-ago-modal-data");
 			});
 		}
 
 		// Botón que confirma la edición
-		const updateOwnerForm = document.getElementById("update-owner-form");
-		if (updateOwnerForm) {
-			updateOwnerForm.addEventListener("submit", async (event) => {
+		const updatePaymentDayAgoForm = document.getElementById(
+			"update-payment-day-ago-form",
+		);
+		if (updatePaymentDayAgoForm) {
+			updatePaymentDayAgoForm.addEventListener("submit", async (event) => {
 				event.preventDefault();
 				// Ejecutar la lógica de actualización aquí
 				await execUpdateOwner(event);
 				// Cerrar el modal y limpiar los datos
-				cerrarModal("close-edit-payment-day-ago-modal");
 				clearSessionData();
+				cerrarModal("edit-payment-day-ago-modal-data");
 			});
 		}
 	});

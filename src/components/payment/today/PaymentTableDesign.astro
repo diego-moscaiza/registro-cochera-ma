@@ -112,7 +112,7 @@ const { listaPagos } = Astro.props;
 											<button
 												type="button"
 												id="open-edit-payment-today-modal"
-												data-modal-toggle="editPaymentTodayData"
+												data-modal-toggle="edit-payment-today-modal-data"
 												onclick={`sessionStorage.setItem('editPaymentTodayData', JSON.stringify({
 													            idDueno: '${formatoPago.idDueno}',
 													            nombrePropietario: '${formatoPago.nombreDueno}',
@@ -149,7 +149,7 @@ const { listaPagos } = Astro.props;
 			<!-- Edit User Modal -->
 			<div
 				class="fixed inset-0 z-50 items-center justify-center bg-black bg-opacity-50 transition-opacity duration-300 ease-in-out hidden"
-				id="editPaymentTodayData"
+				id="edit-payment-today-modal-data"
 			>
 				<div
 					class="relative w-full max-w-2xl px-4 transform transition-all duration-300 ease-in-out scale-95 opacity-0"
@@ -165,9 +165,9 @@ const { listaPagos } = Astro.props;
 							</h3>
 							<button
 								type="button"
-								id="close-editPaymentTodayData"
+								id="close-edit-payment-today-modal-1"
 								class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-700 dark:hover:text-white"
-								data-modal-toggle="editPaymentTodayData"
+								data-modal-toggle="edit-payment-today-modal-data"
 							>
 								<svg
 									class="w-5 h-5"
@@ -185,7 +185,7 @@ const { listaPagos } = Astro.props;
 
 						<!-- Modal body -->
 						<div>
-							<form id="update-owner-form" class="p-6 space-y-6">
+							<form id="update-payment-today-form" class="p-6 space-y-6">
 								<div class="grid grid-cols-6 gap-6">
 									<div class="col-span-6 sm:col-span-3">
 										<label
@@ -262,10 +262,10 @@ const { listaPagos } = Astro.props;
 									class="flex items-center justify-end px-6 pt-4 border-t border-gray-200 rounded-b dark:border-gray-700"
 								>
 									<button
-										id="close-editPaymentTodayData-2"
+										id="close-edit-payment-today-modal-2"
 										class="text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-blue-800"
 										type="submit"
-										data-modal-toggle="editPaymentTodayData"
+										data-modal-toggle="edit-payment-today-modal-data"
 									>
 										Guardar
 									</button>
@@ -298,6 +298,45 @@ const { listaPagos } = Astro.props;
 
 	// Espera a que cargue toda la pagina para ejecutarse
 	document.addEventListener("DOMContentLoaded", () => {
+		// Función para mostrar una notificación temporal
+		function mostrarNotificacion(mensaje: any, tipo: any) {
+			// Crear un elemento de notificación
+			const notificacion = document.createElement("div");
+
+			// Establecer clases según el tipo
+			const baseClasses =
+				"fixed bottom-4 right-4 py-2 px-4 rounded-lg shadow-lg z-50 transition-all duration-300 transform opacity-0 scale-95";
+			const typeClasses =
+				tipo === "success"
+					? "bg-green-600 text-white"
+					: tipo === "error"
+						? "bg-red-500 text-white"
+						: "bg-orange-700 text-white";
+
+			const setTimeoutValue = tipo === "success" ? 800 : 5000;
+
+			notificacion.className = `${baseClasses} ${typeClasses}`;
+			notificacion.textContent = mensaje;
+
+			// Añadir al DOM
+			document.body.appendChild(notificacion);
+
+			// Animación para aparecer
+			setTimeout(() => {
+				notificacion.classList.add("opacity-100", "scale-100");
+				notificacion.classList.remove("opacity-0", "scale-95");
+			}, 10);
+
+			// Eliminar después del tiempo configurado
+			setTimeout(() => {
+				notificacion.classList.add("translate-y-10", "opacity-0");
+				notificacion.classList.remove("opacity-100", "scale-100");
+				setTimeout(() => {
+					document.body.removeChild(notificacion);
+				}, 200);
+			}, setTimeoutValue);
+		}
+
 		// Función para alternar el estado del modal
 		function toggleModalVisibility(modalId: string, show: boolean) {
 			const modal = document.getElementById(modalId);
@@ -334,8 +373,8 @@ const { listaPagos } = Astro.props;
 		}
 
 		// Función para inicializar los eventos de los botones de toggle
-		function initializeModalToggles() {
-			const modalToggles = document.querySelectorAll("[data-modal-toggle]");
+		function initializeModalToggles(selectorValue: any) {
+			const modalToggles = document.querySelectorAll(selectorValue);
 			modalToggles.forEach((toggle) => {
 				toggle.addEventListener("click", () => {
 					const modalId = toggle.getAttribute("data-modal-toggle");
@@ -343,7 +382,6 @@ const { listaPagos } = Astro.props;
 						const modal = document.getElementById(modalId);
 						if (modal && modal.classList.contains("hidden")) {
 							abrirModal(modalId);
-							setParamsFromSession();
 						} else {
 							cerrarModal(modalId);
 						}
@@ -351,8 +389,6 @@ const { listaPagos } = Astro.props;
 				});
 			});
 		}
-		// Inicializar los eventos de los botones de toggle
-		initializeModalToggles();
 
 		// Función para establecer los parámetros en los inputs del modal
 		function setParamsFromSession() {
@@ -521,77 +557,47 @@ const { listaPagos } = Astro.props;
 			}
 		}
 
-		// Función para mostrar una notificación temporal
-		function mostrarNotificacion(mensaje: any, tipo: any) {
-			// Crear un elemento de notificación
-			const notificacion = document.createElement("div");
+		const allModalToggle1: any = "[data-modal-toggle]";
 
-			// Establecer clases según el tipo
-			const baseClasses =
-				"fixed bottom-4 right-4 py-2 px-4 rounded-lg shadow-lg z-50 transition-all duration-300 transform opacity-0 scale-95";
-			const typeClasses =
-				tipo === "success"
-					? "bg-green-600 text-white"
-					: tipo === "error"
-						? "bg-red-500 text-white"
-						: "bg-orange-700 text-white";
+		const editPaymentTodayData: any =
+			'[data-modal-toggle="edit-payment-today-modal-data"]';
 
-			const setTimeoutValue = tipo === "success" ? 800 : 5000;
+		// Inicializar eventos
+		initializeModalToggles(allModalToggle1);
 
-			notificacion.className = `${baseClasses} ${typeClasses}`;
-			notificacion.textContent = mensaje;
-
-			// Añadir al DOM
-			document.body.appendChild(notificacion);
-
-			// Animación para aparecer
-			setTimeout(() => {
-				notificacion.classList.add("opacity-100", "scale-100");
-				notificacion.classList.remove("opacity-0", "scale-95");
-			}, 10);
-
-			// Eliminar después de 3 segundos
-			setTimeout(() => {
-				notificacion.classList.add("translate-y-10", "opacity-0");
-				notificacion.classList.remove("opacity-100", "scale-100");
+		// Escuchar el evento de apertura del modal
+		document.querySelectorAll(editPaymentTodayData).forEach((btn) => {
+			btn.addEventListener("click", () => {
+				// Pequeño retraso para asegurar que los datos ya estén en sessionStorage
 				setTimeout(() => {
-					document.body.removeChild(notificacion);
-				}, 200);
-			}, setTimeoutValue);
-		}
-
-		// Botón que abre el modal
-		const openModalButton = document.getElementById(
-			"open-edit-payment-today-modal",
-		);
-		if (openModalButton) {
-			openModalButton.addEventListener("click", (event) => {
-				event.preventDefault();
-				setParamsFromSession();
+					setParamsFromSession();
+				}, 100);
 			});
-		}
+		});
 
 		// Botón que cierra el modal
-		const closeModalButton = document.getElementById(
-			"close-editPaymentTodayData",
+		const closeModalButton1 = document.getElementById(
+			"close-edit-payment-today-modal-1",
 		);
-		if (closeModalButton) {
-			closeModalButton.addEventListener("click", (event) => {
-				event.preventDefault();
+		if (closeModalButton1) {
+			closeModalButton1.addEventListener("click", () => {
 				clearSessionData();
+				cerrarModal("edit-payment-today-modal-data");
 			});
 		}
 
 		// Botón que confirma la edición
-		const updateOwnerForm = document.getElementById("update-owner-form");
-		if (updateOwnerForm) {
-			updateOwnerForm.addEventListener("submit", async (event) => {
+		const updatePaymentTodayForm = document.getElementById(
+			"update-payment-today-form",
+		);
+		if (updatePaymentTodayForm) {
+			updatePaymentTodayForm.addEventListener("submit", async (event) => {
 				event.preventDefault();
 				// Ejecutar la lógica de actualización aquí
 				await execUpdateOwner(event);
 				// Cerrar el modal y limpiar los datos
-				cerrarModal("editPaymentTodayData");
 				clearSessionData();
+				cerrarModal("edit-payment-today-modal-data");
 			});
 		}
 	});
