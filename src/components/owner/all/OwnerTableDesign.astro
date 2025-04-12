@@ -59,7 +59,7 @@ const { listaPropietarios } = Astro.props;
 							</th>
 							<th
 								scope="col"
-								class="p-4 text-sm font-semibold text-left text-gray-700 uppercase dark:text-gray-300"
+								class="p-4 text-sm text font-semibold text-left text-gray-700 uppercase dark:text-gray-300"
 							>
 								Acciones
 							</th>
@@ -117,7 +117,7 @@ const { listaPropietarios } = Astro.props;
 										>
 											S/. {formatoPropietario.montoDiario.toFixed(2)}
 										</td>
-										<td class="p-4 text-base font-semibold text-gray-900 dark:text-gray-200">
+										<td class="p-4 text-nowrap text-base font-semibold text-gray-900 dark:text-gray-200">
 											<div
 												id="table-propietaro-value"
 												class="flex items-center"
@@ -133,11 +133,11 @@ const { listaPropietarios } = Astro.props;
 										<td class="p-4 space-x-2 whitespace-nowrap">
 											<button
 												type="button"
-												data-modal-toggle="edit-user-modal"
+												data-modal-toggle="edit-owner-modal"
 												onclick={`sessionStorage.setItem('editData', JSON.stringify({
 													            id: '${formatoPropietario.idDueno}',
 													            nombrePropietario: '${formatoPropietario.nombreDueno}',
-													            montoDiario: '${formatoPropietario.montoDiario}',
+													            montoDiario: '${formatoPropietario.montoDiario.toFixed(2)}',
 													            guardaCarreta: '${formatoPropietario.guardaCarreta}'
 													        }));`}
 												class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-blue-600 hover:bg-blue-700 focus:ring-2 focus:ring-blue-400 dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-blue-700"
@@ -159,7 +159,7 @@ const { listaPropietarios } = Astro.props;
 											</button>
 											{/* <button
 												type="button"
-												data-modal-toggle="delete-user-modal"
+												data-modal-toggle="delete-owner-modal"
 												class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-red-600 rounded-lg hover:bg-red-700 focus:ring-2 focus:ring-red-400 dark:focus:ring-red-700"
 											>
 												<svg
@@ -188,7 +188,7 @@ const { listaPropietarios } = Astro.props;
 			<!-- Edit User Modal -->
 			<div
 				class="fixed inset-0 z-50 items-center justify-center bg-black bg-opacity-50 transition-opacity duration-300 ease-in-out hidden"
-				id="edit-user-modal"
+				id="edit-owner-modal"
 			>
 				<div
 					class="relative w-full max-w-2xl px-4 transform transition-all duration-300 ease-in-out scale-95 opacity-0"
@@ -206,7 +206,7 @@ const { listaPropietarios } = Astro.props;
 								type="button"
 								id="close-edit-owner-modal"
 								class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-700 dark:hover:text-white"
-								data-modal-toggle="edit-user-modal"
+								data-modal-toggle="edit-owner-modal"
 							>
 								<svg
 									class="w-5 h-5"
@@ -245,7 +245,8 @@ const { listaPropietarios } = Astro.props;
 										<label
 											for="edit-monto-diario"
 											class="block mb-2 text-sm font-medium text-blue-900 dark:text-white"
-											>Monto diario</label
+											>Monto diario <span class="text-gray-500">(S/.)</span
+											></label
 										>
 										<input
 											type="text"
@@ -282,9 +283,9 @@ const { listaPropietarios } = Astro.props;
 								>
 									<button
 										id="close-edit-owner-modal-2"
-										class="text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-blue-800"
+										class="text-white bg-blue-600 hover:bg--700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-blue-800"
 										type="submit"
-										data-modal-toggle="edit-user-modal"
+										data-modal-toggle="edit-owner-modal"
 									>
 										Guardar
 									</button>
@@ -298,7 +299,7 @@ const { listaPropietarios } = Astro.props;
 			<!-- Add User Modal -->
 			<div
 				class="fixed inset-0 z-50 items-center justify-center bg-black bg-opacity-50 transition-opacity duration-300 ease-in-out hidden"
-				id="add-user-modal"
+				id="add-owner-modal"
 			>
 				<div
 					class="relative w-full max-w-2xl px-4 transform transition-all duration-300 ease-in-out scale-95 opacity-0"
@@ -315,7 +316,7 @@ const { listaPropietarios } = Astro.props;
 							<button
 								type="button"
 								class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-700 dark:hover:text-white"
-								data-modal-toggle="add-user-modal"
+								data-modal-toggle="add-owner-modal"
 							>
 								<svg
 									class="w-5 h-5"
@@ -430,7 +431,7 @@ const { listaPropietarios } = Astro.props;
 			<!-- Delete User Modal -->
 			<div
 				class="fixed inset-0 z-50 items-center justify-center bg-black bg-opacity-50 transition-opacity duration-300 ease-in-out hidden"
-				id="delete-user-modal"
+				id="delete-owner-modal"
 			>
 				<div
 					class="relative w-full max-w-md px-4 transform transition-all duration-300 ease-in-out scale-95 opacity-0"
@@ -442,7 +443,7 @@ const { listaPropietarios } = Astro.props;
 							<button
 								type="button"
 								class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-700 dark:hover:text-white"
-								data-modal-toggle="delete-user-modal"
+								data-modal-toggle="delete-owner-modal"
 							>
 								<svg
 									class="w-5 h-5"
@@ -486,7 +487,7 @@ const { listaPropietarios } = Astro.props;
 							<button
 								type="button"
 								class="text-gray-900 bg-white border border-gray-200 hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:text-white dark:focus:ring-gray-700"
-								data-modal-toggle="delete-user-modal"
+								data-modal-toggle="delete-owner-modal"
 							>
 								No, cancel
 							</button>
@@ -604,6 +605,7 @@ const { listaPropietarios } = Astro.props;
 			sessionStorage.removeItem("editData");
 		}
 
+		// Evento para actualizar los datos y cerrar el modal al hacer clic en el botón de Guardar
 		async function execUpdateOwner(event: any) {
 			event.preventDefault();
 			const editData = sessionStorage.getItem("editData");
@@ -666,19 +668,14 @@ const { listaPropietarios } = Astro.props;
 				});
 
 				if (res.ok) {
-					actualizarFilaEnTabla(
-						id,
-						nombreValue,
-						montoValue,
-						guardaCarretaBoolean,
-						guardaCarretaValue,
-					);
-
-					alert("Datos actualizados correctamente.");
-					console.log("Propietario actualizado correctamente");
+					//alert("Datos actualizados correctamente.");
+					mostrarNotificacion("Datos actualizados correctamente.", "success");
+					setTimeout(() => {
+						window.location.reload();
+					}, 1000);
 				} else {
 					const error = await res.json();
-					alert("Error al actualizar: " + (error.error || "Error desconocido"));
+					//alert("Error al actualizar: " + (error.error || "Error desconocido"));
 					mostrarNotificacion(
 						"Error al actualizar: " + (error.error || "Error desconocido"),
 						"error",
@@ -686,7 +683,7 @@ const { listaPropietarios } = Astro.props;
 				}
 			} catch (error) {
 				console.error("Error en la petición:", error);
-				alert("Error en la comunicación con el servidor. Inténtelo de nuevo.");
+				//alert("Error en la comunicación con el servidor. Inténtelo de nuevo.");
 				mostrarNotificacion(
 					"Error en la comunicación con el servidor. Inténtelo de nuevo.",
 					"error",
@@ -694,69 +691,20 @@ const { listaPropietarios } = Astro.props;
 			}
 		}
 
-		// Función para actualizar la fila en la tabla con los nuevos datos
-		function actualizarFilaEnTabla(
-			id: any,
-			nombre: any,
-			monto: any,
-			guardaBoolean: any,
-			guardaTexto: any,
-		) {
-			// Buscar todos los elementos que puedan corresponder a la fila que necesitamos actualizar
-			const filas = document.querySelectorAll("tr");
-
-			for (const fila of filas) {
-				// Buscar el checkbox que corresponde al ID que estamos actualizando
-				const checkbox = fila.querySelector(`input[id="checkbox-${id}"]`);
-
-				if (checkbox) {
-					// Encontramos la fila correcta, ahora actualizamos los elementos específicos
-
-					// 1. Actualizar el nombre - usando el ID específico
-					const nombreElement = fila.querySelector("#table-nombre-dueno-value");
-					if (nombreElement) {
-						nombreElement.textContent = nombre;
-					}
-
-					// 3. Actualizar el monto diario - usando el ID específico
-					const montoElement = fila.querySelector("#table-monto-diario");
-					if (montoElement) {
-						montoElement.textContent = `S/. ${Number(monto).toFixed(2)}`;
-					}
-
-					// 4. Actualizar el estado - usando el ID específico
-					const estadoContainer = fila.querySelector("#table-propietaro-value");
-					if (estadoContainer) {
-						// Limpiar el contenido actual
-						estadoContainer.innerHTML = "";
-
-						// Crear el indicador de color según el estado
-						const indicador = document.createElement("div");
-						indicador.className = guardaBoolean
-							? "h-2.5 w-2.5 rounded-full bg-green-500 mr-2"
-							: "h-2.5 w-2.5 rounded-full bg-red-500 mr-2";
-						// Añadir el indicador
-						estadoContainer.appendChild(indicador);
-
-						// Añadir el texto del estado
-						estadoContainer.appendChild(document.createTextNode(guardaTexto));
-					}
-
-					break; // Ya encontramos y actualizamos la fila, salimos del bucle
-				}
-			}
-		}
-
 		// Función para mostrar una notificación temporal
-		function mostrarNotificacion(mensaje: any, tipo = "success") {
+		function mostrarNotificacion(mensaje: any, tipo: any) {
 			// Crear un elemento de notificación
 			const notificacion = document.createElement("div");
 
 			// Establecer clases según el tipo
 			const baseClasses =
-				"fixed bottom-4 right-4 py-2 px-4 rounded-lg shadow-lg z-50 transition-all duration-300 transform translate-y-0 opacity-100";
+				"fixed bottom-4 right-4 py-2 px-4 rounded-lg shadow-lg z-50 transition-all duration-300 transform opacity-0 scale-95";
 			const typeClasses =
-				tipo === "error" ? "bg-red-500 text-white" : "bg-green-500 text-white";
+				tipo === "error"
+					? "bg-red-500 text-white"
+					: tipo === "success"
+						? "bg-green-600 text-white"
+						: "bg-purple-500 text-white";
 
 			notificacion.className = `${baseClasses} ${typeClasses}`;
 			notificacion.textContent = mensaje;
@@ -764,13 +712,28 @@ const { listaPropietarios } = Astro.props;
 			// Añadir al DOM
 			document.body.appendChild(notificacion);
 
+			// Animación para aparecer
+			setTimeout(() => {
+				notificacion.classList.add("opacity-100", "scale-100");
+				notificacion.classList.remove("opacity-0", "scale-95");
+			}, 10);
+
 			// Eliminar después de 3 segundos
 			setTimeout(() => {
 				notificacion.classList.add("translate-y-10", "opacity-0");
+				notificacion.classList.remove("opacity-100", "scale-100");
 				setTimeout(() => {
 					document.body.removeChild(notificacion);
-				}, 300);
-			}, 3000);
+				}, 200);
+			}, 800);
+		}
+
+		const closeModalButton = document.getElementById("close-edit-owner-modal");
+		if (closeModalButton) {
+			closeModalButton.addEventListener("click", (event) => {
+				event.preventDefault();
+				clearSessionData();
+			});
 		}
 
 		// Botón que confirma la edición
@@ -781,7 +744,7 @@ const { listaPropietarios } = Astro.props;
 				// Ejecutar la lógica de actualización aquí
 				await execUpdateOwner(event);
 				// Cerrar el modal y limpiar los datos
-				cerrarModal("edit-user-modal");
+				cerrarModal("edit-owner-modal");
 				clearSessionData();
 			});
 		}

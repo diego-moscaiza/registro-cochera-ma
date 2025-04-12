@@ -1,6 +1,6 @@
 import { supabase } from "../../../../lib/supabase";
 
-// Insert new owner
+// Update new owner
 export async function POST({ request }: { request: Request }) {
     const body = await request.json();
     const { id, nombre_dueno, monto_diario, guarda_carreta } = body;

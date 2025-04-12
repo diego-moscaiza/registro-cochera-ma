@@ -10,7 +10,7 @@ export const apiInsertOwner = async (id: string, nombre_dueno: string, monto_dia
 
     if (error == null) {
         // Si no hay errores, se recarga la pagina
-        window.location.href = `/panel/propietarios-carretas`;
+        window.location.href = `/panel/lista-propietarios`;
         return data;
     }
 
