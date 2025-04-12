@@ -1,39 +1,6 @@
-<script>
-	function getFullHourToday() {
-		return new Date().toLocaleTimeString([], {
-			hour: "2-digit",
-			minute: "2-digit",
-			second: "2-digit",
-			hour12: true,
-		});
-	}
+---
 
-	function getFullDayToday() {
-		return new Date().toLocaleDateString([], {
-			weekday: "long",
-			day: "2-digit",
-			month: "long",
-			year: "numeric",
-		});
-	}
-
-	document.addEventListener("DOMContentLoaded", () => {
-		const updateDateTime = () => {
-			const fullHourElement = document.getElementById("fullHourToday");
-			if (fullHourElement) {
-				fullHourElement.textContent = getFullHourToday();
-			}
-
-			const fullDayElement = document.getElementById("fullDayToday");
-			if (fullDayElement) {
-				fullDayElement.textContent = getFullDayToday();
-			}
-		};
-
-		updateDateTime();
-		setInterval(updateDateTime, 1000);
-	});
-</script>
+---
 
 <aside
 	id="sidebar"
@@ -77,65 +44,6 @@
 					></span>
 				</div>
 				<ul class="flex flex-col gap-2 py-2">
-					<!-- Search label -->
-					<li>
-						<form action="#" method="GET" class="lg:hidden">
-							<label for="mobile-search" class="sr-only">Search</label>
-							<div class="relative p-2">
-								<div
-									class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none"
-								>
-									<svg
-										class="w-5 h-5 text-gray-500"
-										fill="currentColor"
-										viewBox="0 0 20 20"
-										xmlns="http://www.w3.org/2000/svg"
-										><path
-											fill-rule="evenodd"
-											d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-											clip-rule="evenodd"></path></svg
-									>
-								</div>
-								<input
-									type="text"
-									name="email"
-									id="mobile-search"
-									class:list={[
-										"w-full block pl-10 p-2.5",
-										"text-black text-sm rounded-lg",
-										"bg-stone-50 border border-gray-300",
-										"focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600",
-										"dark:text-gray-200 dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500",
-									]}
-									placeholder="Search"
-								/>
-							</div>
-						</form>
-					</li>
-					<!-- Welcome -->
-					<!-- <li>
-						<a
-							href=""
-							class="flex items-center p-2 text-base text-black rounded-lg hover:bg-gray-100 group dark:text-neutral-100 dark:hover:bg-gray-700"
-						>
-							<svg
-								fill="currentColor"
-								class="w-6 h-6 text-gray-500 transition duration-75 group-hover:text-black dark:text-gray-400 dark:group-hover:text-neutral-100"
-								viewBox="0 0 24 24"
-								xmlns="http://www.w3.org/2000/svg"
-								aria-hidden="true"
-							>
-								<path
-									d="M11.47 3.84a.75.75 0 011.06 0l8.69 8.69a.75.75 0 101.06-1.06l-8.689-8.69a2.25 2.25 0 00-3.182 0l-8.69 8.69a.75.75 0 001.061 1.06l8.69-8.69z"
-								></path>
-								<path
-									d="M12 5.432l8.159 8.159c.03.03.06.058.091.086v6.198c0 1.035-.84 1.875-1.875 1.875H15a.75.75 0 01-.75-.75v-4.5a.75.75 0 00-.75-.75h-3a.75.75 0 00-.75.75V21a.75.75 0 01-.75.75H5.625a1.875 1.875 0 01-1.875-1.875v-6.198a2.29 2.29 0 00.091-.086L12 5.43z"
-								></path>
-							</svg>
-							<span class="ml-3" sidebar-toggle-item>Welcome</span>
-						</a>
-					</li> -->
-
 					<!-- Pagos del dia -->
 					<li>
 						<a
@@ -163,7 +71,7 @@
 					<!-- Lista de todos los pagos -->
 					<li>
 						<a
-							href="/panel/lista-general-pagos"
+							href="/panel/pagos-anteriores"
 							class="flex items-center p-2 text-base text-black rounded-lg hover:bg-gray-100 group dark:text-neutral-100 dark:hover:bg-gray-700"
 						>
 							<svg
@@ -179,13 +87,13 @@
 									d="M.99 5.24A2.25 2.25 0 013.25 3h13.5A2.25 2.25 0 0119 5.25l.01 9.5A2.25 2.25 0 0116.76 17H3.26A2.267 2.267 0 011 14.74l-.01-9.5zm8.26 9.52v-.625a.75.75 0 00-.75-.75H3.25a.75.75 0 00-.75.75v.615c0 .414.336.75.75.75h5.373a.75.75 0 00.627-.74zm1.5 0a.75.75 0 00.627.74h5.373a.75.75 0 00.75-.75v-.615a.75.75 0 00-.75-.75H11.5a.75.75 0 00-.75.75v.625zm6.75-3.63v-.625a.75.75 0 00-.75-.75H11.5a.75.75 0 00-.75.75v.625c0 .414.336.75.75.75h5.25a.75.75 0 00.75-.75zm-8.25 0v-.625a.75.75 0 00-.75-.75H3.25a.75.75 0 00-.75.75v.625c0 .414.336.75.75.75H8.5a.75.75 0 00.75-.75zM17.5 7.5v-.625a.75.75 0 00-.75-.75H11.5a.75.75 0 00-.75.75V7.5c0 .414.336.75.75.75h5.25a.75.75 0 00.75-.75zm-8.25 0v-.625a.75.75 0 00-.75-.75H3.25a.75.75 0 00-.75.75V7.5c0 .414.336.75.75.75H8.5a.75.75 0 00.75-.75z"
 								></path>
 							</svg>
-							<span class="ml-3" sidebar-toggle-item>Todos los pagos</span>
+							<span class="ml-3" sidebar-toggle-item>Pagos anteriores</span>
 						</a>
 					</li>
 
 					<li>
 						<a
-							href="/panel/propietarios-carretas"
+							href="/panel/lista-propietarios"
 							class="flex items-center p-2 text-base text-black rounded-lg hover:bg-gray-100 group dark:text-neutral-100 dark:hover:bg-gray-700"
 						>
 							<svg
@@ -197,7 +105,8 @@
 									d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"
 								></path></svg
 							>
-							<span class="ml-3" sidebar-toggle-item>Propietarios</span>
+							<span class="ml-3" sidebar-toggle-item>Lista de propietarios</span
+							>
 						</a>
 					</li>
 				</ul>
@@ -229,6 +138,41 @@
 </aside>
 
 <script>
+	function getFullHourToday() {
+		return new Date().toLocaleTimeString([], {
+			hour: "2-digit",
+			minute: "2-digit",
+			second: "2-digit",
+			hour12: true,
+		});
+	}
+
+	function getFullDayToday() {
+		return new Date().toLocaleDateString([], {
+			weekday: "long",
+			day: "2-digit",
+			month: "long",
+			year: "numeric",
+		});
+	}
+
+	document.addEventListener("DOMContentLoaded", () => {
+		const updateDateTime = () => {
+			const fullHourElement = document.getElementById("fullHourToday");
+			if (fullHourElement) {
+				fullHourElement.textContent = getFullHourToday();
+			}
+
+			const fullDayElement = document.getElementById("fullDayToday");
+			if (fullDayElement) {
+				fullDayElement.textContent = getFullDayToday();
+			}
+		};
+
+		updateDateTime();
+		setInterval(updateDateTime, 1000);
+	});
+
 	document.addEventListener("DOMContentLoaded", function () {
 		const sidebar: any = document.getElementById("sidebar");
 		const toggleSidebarMobileEl: any = document.getElementById(
