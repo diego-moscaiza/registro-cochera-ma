@@ -37,12 +37,12 @@ const { fechaPago, listaPagos } = Astro.props;
 					<th
 						scope="col"
 						class="p-4 text-sm font-semibold text-left text-gray-700 uppercase dark:text-gray-300"
-						>Monto</th
+						>Pago total</th
 					>
 					<th
 						scope="col"
 						class="p-4 text-sm font-semibold text-left text-gray-700 uppercase dark:text-gray-300"
-						>Saco carreta?</th
+						>¿Retiro su carreta?</th
 					>
 					<th
 						scope="col"
@@ -64,7 +64,7 @@ const { fechaPago, listaPagos } = Astro.props;
 							nombreDueno: pago.nombreDueno ?? "-",
 							montoTotal: pago.montoTotal ?? "-",
 							retiroCoche: pago.retiroCoche ? "Sí vino" : "No vino",
-							estadoPago: pago.estadoPago ? "Canceló" : "No pagó",
+							estadoPago: pago.estadoPago ? "Sí Canceló" : "No pagó",
 						};
 
 						return (
@@ -94,7 +94,7 @@ const { fechaPago, listaPagos } = Astro.props;
 									<span
 										class:list={[
 											"px-3 py-1 rounded-full text-sm sm:text-base",
-											formatoPago.estadoPago === "Canceló"
+											formatoPago.estadoPago === "Sí Canceló"
 												? "text-green-800 bg-green-300 dark:text-[#58ff36] dark:bg-[#2fff403d]"
 												: "text-red-900 bg-red-200 dark:text-[#ff3636] dark:bg-[#ff2f2f3d]",
 										]}
@@ -245,7 +245,7 @@ const { fechaPago, listaPagos } = Astro.props;
 										Seleccione el estado</option
 									>
 									<option value="No pagó">No pagó</option>
-									<option value="Canceló">Canceló</option>
+									<option value="Sí Canceló">Sí Canceló</option>
 								</select>
 							</div>
 						</div>
@@ -495,7 +495,7 @@ const { fechaPago, listaPagos } = Astro.props;
 
 			// Validar el estado de pago
 			let estadoPagoBoolean: boolean;
-			if (estadoPagoValue === "Canceló") {
+			if (estadoPagoValue === "Sí Canceló") {
 				estadoPagoBoolean = true;
 			} else if (estadoPagoValue === "No pagó") {
 				estadoPagoBoolean = false;
