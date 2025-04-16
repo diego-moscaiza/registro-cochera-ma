@@ -17,10 +17,9 @@ export const apiGetAllOwners = async () => {
 };
 
 // Get owners by Id
-export const apiGetOwnerById = async (id: string) => {
+export const apiGetOwnerById = async ({ id }: { id: string }) => {
 	const { data, error } = await supabase
-		.from("dueno_carreta")
-		.select("id, nombre_dueno")
+		.rpc("obtener_duenos_carretas")
 		.eq("id", id)
 		.single();
 	if (error || !data) {
