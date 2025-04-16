@@ -28,22 +28,23 @@ const { listaPropietarios } = Astro.props;
 						class="bg-slate-200 dark:bg-slate-700 rounded-t-lg text-nowrap"
 					>
 						<tr>
-							<th scope="col" class="p-4">
-								<div class="flex items-center">
-									<input
-										id="checkbox-all"
-										aria-describedby="checkbox-1"
-										type="checkbox"
-										class="w-4 h-4 border-gray-300 rounded bg-gray-50 focus:ring-2 focus:ring-primary-400 dark:focus:ring-primary-600 dark:ring-offset-gray-900 dark:bg-gray-800 dark:border-gray-600"
-									/>
-									<label for="checkbox-all" class="sr-only">checkbox</label>
-								</div>
-							</th>
 							<th
 								scope="col"
 								class="p-4 text-sm font-semibold text-left text-gray-700 uppercase dark:text-gray-300"
 							>
 								Nombre
+							</th>
+							<th
+								scope="col"
+								class="p-4 text-sm font-semibold text-left text-gray-700 uppercase dark:text-gray-300"
+							>
+								Tarifa diaria (si viene)
+							</th>
+							<th
+								scope="col"
+								class="p-4 text-sm font-semibold text-left text-gray-700 uppercase dark:text-gray-300"
+							>
+								Tarifa diaria (si no viene)
 							</th>
 							<th
 								scope="col"
@@ -73,6 +74,7 @@ const { listaPropietarios } = Astro.props;
 									idDueno: propietario.idDueno ?? "-",
 									nombreDueno: propietario.nombreDueno ?? "-",
 									montoDiario: propietario.montoDiario ?? "-",
+									tarifaAgua: propietario.montoTarifaAgua ?? "-",
 									guardaCarreta: propietario.guardaCarreta
 										? "Sí guarda"
 										: "Ya no guarda",
@@ -80,22 +82,6 @@ const { listaPropietarios } = Astro.props;
 
 								return (
 									<tr class="hover:bg-gray-100 dark:hover:bg-gray-700 transition duration-200">
-										<td class="w-4 p-4">
-											<div class="flex items-center">
-												<input
-													id={`checkbox-${formatoPropietario.idDueno}`}
-													aria-describedby="checkbox-1"
-													type="checkbox"
-													class="w-4 h-4 border-gray-300 rounded bg-gray-50 focus:ring-2 focus:ring-primary-400 dark:focus:ring-primary-600 dark:ring-offset-gray-900 dark:bg-gray-800 dark:border-gray-600"
-												/>
-												<label
-													for={`checkbox-${formatoPropietario.idDueno}`}
-													class="sr-only"
-												>
-													checkbox
-												</label>
-											</div>
-										</td>
 										<td class="flex items-center p-4 mr-12 space-x-6 whitespace-nowrap">
 											<div class="flex items-center justify-center w-10 h-10 rounded-full bg-gray-500">
 												<span class="text-sm font-medium text-white">
@@ -115,7 +101,23 @@ const { listaPropietarios } = Astro.props;
 											id="table-monto-diario"
 											class="p-4 text-base font-semibold text-gray-900 whitespace-nowrap dark:text-gray-200"
 										>
+											S/.{" "}
+											{(
+												formatoPropietario.montoDiario +
+												formatoPropietario.tarifaAgua
+											).toFixed(2)}
+										</td>
+										<td
+											id="table-monto-diario"
+											class="p-4 text-base font-base text-gray-900 whitespace-nowrap dark:text-gray-200"
+										>
 											S/. {formatoPropietario.montoDiario.toFixed(2)}
+										</td>
+										<td
+											id="table-monto-diario"
+											class="p-4 text-base font-semibold text-gray-900 whitespace-nowrap dark:text-gray-200"
+										>
+											S/. {formatoPropietario.tarifaAgua.toFixed(2)}
 										</td>
 										<td class="p-4 text-nowrap text-base font-semibold text-gray-900 dark:text-gray-200">
 											<div
@@ -158,6 +160,30 @@ const { listaPropietarios } = Astro.props;
 												</svg>
 												Editar
 											</button>
+											<button
+												type="button"
+												id="more-owner-info"
+												onclick={`window.location.href='/panel/lista-propietarios/${formatoPropietario.idDueno}'`}
+												class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-blue-600 hover:bg-blue-700 focus:ring-2 focus:ring-blue-400 dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-blue-700"
+											>
+												<svg
+													class="w-5 h-4 mr-1 text-white"
+													aria-hidden="true"
+													xmlns="http://www.w3.org/2000/svg"
+													width="24"
+													height="24"
+													viewBox="0 -3 20 20"
+													fill="currentColor"
+												>
+													<path
+														fill-rule="evenodd"
+														clip-rule="evenodd"
+														d="M16 8C16 12.4183 12.4183 16 8 16C3.58172 16 0 12.4183 0 8C0 3.58172 3.58172 0 8 0C12.4183 0 16 3.58172 16 8ZM7 8H6V6H9V11H10V13H7V8ZM9 5V3H7V5H9Z"
+													/>
+												</svg>
+												Ver más
+											</button>
+
 											{/* <button
 												type="button"
 												data-modal-toggle="delete-owner-modal"

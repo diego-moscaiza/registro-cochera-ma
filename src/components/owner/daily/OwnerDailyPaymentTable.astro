@@ -1,0 +1,173 @@
+---
+import { getAllPaymentsById } from "../../../pages/api/record/payment/getPayment";
+
+interface Props {
+	id: string;
+}
+
+interface PaymentEntry {
+	dueno_id: string;
+	nombre_dueno: string;
+	fecha_pago: string;
+	retiro_coche: boolean;
+	monto_total: number;
+	estado_pago: boolean;
+}
+
+const opciones: Intl.DateTimeFormatOptions = {
+	weekday: "long",
+	day: "2-digit",
+	month: "long",
+	year: "numeric",
+};
+
+function convertirFechaPeru(fechaStr: string) {
+	const fechaUTC = new Date(fechaStr + "T00:00:00Z"); // Se fuerza a UTC
+	const fechaLocal = new Date(fechaUTC.getTime() + 5 * 60 * 60 * 1000); // Ajuste a UTC-5
+	return fechaLocal.toLocaleDateString("es-PE", opciones);
+}
+
+const { id } = Astro.props;
+const pagoPorPropietario: any = id ? await getAllPaymentsById({ id }) : "null";
+---
+
+<div>
+	{
+		pagoPorPropietario.length === 0 ? (
+			<div class="px-6 py-4 text-2xl text-center bg-white dark:bg-slate-700 rounded-lg border border-slate-400 dark:border-slate-600">
+				No hay registros de los pagos.
+			</div>
+		) : (
+			<div class="overflow-hidden shadow-md rounded-2xl">
+				<table
+					class:list={[
+						"min-w-full overflow-x-auto",
+						"divide-y rounded-lg",
+						"bg-white dark:bg-slate-800",
+						"divide-gray-300 dark:divide-slate-700",
+					]}
+				>
+					<thead class="bg-slate-200 dark:bg-slate-700 rounded-t-lg text-nowrap">
+						<tr>
+							<th
+								scope="col"
+								class="p-4 text-sm font-semibold text-left text-gray-700 uppercase dark:text-gray-300"
+							>
+								Fecha de pago
+							</th>
+							<th
+								scope="col"
+								class="p-4 text-sm font-semibold text-left text-gray-700 uppercase dark:text-gray-300"
+							>
+								Monto total
+							</th>
+							<th
+								scope="col"
+								class="p-4 text-sm font-semibold text-left text-gray-700 uppercase dark:text-gray-300"
+							>
+								¿retiro su carreta?
+							</th>
+							<th
+								scope="col"
+								class="p-4 text-sm font-semibold text-left text-gray-700 uppercase dark:text-gray-300"
+							>
+								Estado del Pago
+							</th>
+							<th
+								scope="col"
+								class="p-4 text-sm text font-semibold text-left text-gray-700 uppercase dark:text-gray-300"
+							>
+								Acciones
+							</th>
+						</tr>
+					</thead>
+
+					<tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+						{pagoPorPropietario.map((pago: PaymentEntry) => {
+							const formatoPago = {
+								idDueno: pago.dueno_id ?? "-",
+								nombreDueno: pago.nombre_dueno ?? "-",
+								fechaPago: pago.fecha_pago ?? "-",
+								montoTotal: pago.monto_total,
+								retiroCoche: pago.retiro_coche ? "Sí vino" : "No vino",
+								estadoPago: pago.estado_pago ? "Sí Canceló" : "No Pagó",
+							};
+
+							return (
+								<tr class="hover:bg-gray-100 dark:hover:bg-gray-700 transition duration-200">
+									<td
+										id="table-monto-diario"
+										class="p-4 text-base font-semibold text-gray-900 whitespace-nowrap dark:text-gray-200"
+									>
+										{convertirFechaPeru(formatoPago.fechaPago)}
+									</td>
+									<td
+										id="table-monto-diario"
+										class="p-4 text-base font-semibold text-gray-900 whitespace-nowrap dark:text-gray-200"
+									>
+										S/. {formatoPago.montoTotal.toFixed(2)}
+									</td>
+									<td class="p-4 text-sm text-nowrap font-medium">
+										<span
+											id="table-retiro-coche-value"
+											class:list={[
+												"px-3 py-1 rounded-full text-sm sm:text-base",
+												formatoPago.retiroCoche === "No vino"
+													? "text-neutral-800 bg-neutral-300 dark:text-[#cacaca] dark:bg-[#32373f]"
+													: "text-blue-800 bg-blue-300 dark:text-[#5294ff] dark:bg-[#162542]",
+											]}
+										>
+											{formatoPago.retiroCoche}
+										</span>
+									</td>
+									<td class="p-4 text-sm text-nowrap font-medium">
+										<span
+											id="table-estado-pago-value"
+											class:list={[
+												"px-3 py-1 rounded-full text-sm sm:text-base",
+												formatoPago.estadoPago === "Sí Canceló"
+													? "text-green-800 bg-green-300 dark:text-[#58ff36] dark:bg-[#2fff403d]"
+													: "text-red-900 bg-red-200 dark:text-[#ff3636] dark:bg-[#ff2f2f3d]",
+											]}
+										>
+											{formatoPago.estadoPago}
+										</span>
+									</td>
+									<td class="p-4 space-x-2 whitespace-nowrap">
+										<button
+											type="button"
+											id="open-edit-owner-modal"
+											data-modal-toggle="edit-owner-modal"
+											onclick={`sessionStorage.setItem('ownerDailyPaymentData', JSON.stringify({
+													id: '${formatoPago.idDueno}',
+													nombrePropietario: '${formatoPago.nombreDueno}',
+													montoDiario: '${formatoPago.montoTotal.toFixed(2)}',
+													guardaCarreta: '${formatoPago.estadoPago}'
+											}));`}
+											class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-blue-600 hover:bg-blue-700 focus:ring-2 focus:ring-blue-400 dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-blue-700"
+										>
+											<svg
+												class="w-4 h-4 mr-2"
+												fill="currentColor"
+												viewBox="0 0 20 20"
+												xmlns="http://www.w3.org/2000/svg"
+											>
+												<path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" />
+												<path
+													fill-rule="evenodd"
+													d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"
+													clip-rule="evenodd"
+												/>
+											</svg>
+											Editar
+										</button>
+									</td>
+								</tr>
+							);
+						})}
+					</tbody>
+				</table>
+			</div>
+		)
+	}
+</div>
