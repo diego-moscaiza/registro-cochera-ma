@@ -15,7 +15,7 @@ interface Props {
 }
 
 const { id } = Astro?.params;
-const propietario: any = id ? await apiGetOwnerById({ id }) : "null";
+const propietario: any = id ? await apiGetOwnerById({ id }) : [];
 
 export const prerender = false;
 
@@ -39,8 +39,8 @@ export async function getStaticPaths() {
 			Información de {propietario.nombre_dueno}
 		</h1>
 
-		<section class="flex flex-col gap-2">
-			<div>
+		<article class="flex flex-col gap-2">
+			<section id="owner-data">
 				<h2
 					class:list={[
 						"py-4",
@@ -50,81 +50,15 @@ export async function getStaticPaths() {
 				>
 					Datos
 				</h2>
-				<!-- <div class="overflow-hidden shadow-md rounded-2xl">
-					<div
-						id="card-owner"
-						class:list={["p-4 rounded-lg", "bg-white dark:bg-slate-800"]}
-					>
-						<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-							<div class="grid grid-cols-1 gap-2">
-								<div class="flex flex-col gap-2">
-									<span class="font-semibold">Nombre:</span>
-									<p class="text-nowrap">
-										{propietario.nombre_dueno}
-									</p>
-								</div>
-								<div class="flex flex-col gap-2">
-									<span class="font-semibold">Monto diario:</span>
-									<p class="text-nowrap">
-										S./ {propietario.monto_diario.toFixed(2)} soles
-									</p>
-								</div>
-								<div class="flex flex-col gap-2">
-									<span class="font-semibold">¿Tiene tarifa de agua?:</span>
-									<p class="text-nowrap">
-										{propietario.tiene_tarifa_agua ? "Sí" : "No"}
-									</p>
-								</div>
-							</div>
-							<div class="grid grid-cols-1 gap-2">
-								<div class="flex flex-col gap-2">
-									<span class="font-semibold">Tarifa por agua:</span>
-									<p class="text-nowrap">
-										S./ {propietario.monto_tarifa_agua.toFixed(2)} céntimos
-									</p>
-								</div>
-								<div class="flex flex-col gap-2">
-									<span class="font-semibold">Estado:</span>
-									<p class="text-nowrap">
-										{propietario.guarda_carreta ? "Sí guarda" : "Ya no guarda"}
-									</p>
-								</div>
-							</div>
-						</div>
-						<div class="pt-4 mt-2">
-							<a
-								href={`/panel/lista-propietarios/editar/${id}`}
-								class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-blue-600 hover:bg-blue-700 focus:ring-2 focus:ring-blue-400 dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-blue-700"
-							>
-								<svg
-									class="w-4 h-4 mr-2"
-									fill="currentColor"
-									viewBox="0 0 20 20"
-									xmlns="http://www.w3.org/2000/svg"
-								>
-									<path
-										d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"
-									></path>
-									<path
-										fill-rule="evenodd"
-										d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"
-										clip-rule="evenodd"></path>
-								</svg>
-								Editar
-							</a>
-						</div>
-					</div>
-				</div> -->
-
-				<div
+				<aside
 					class:list={[
 						"overflow-hidden shadow-md rounded-2xl",
 						"rounded-lg",
 						"bg-white dark:bg-slate-800",
 					]}
 				>
-					<div class="p-6">
-						<div class="grid grid-cols-9 gap-6">
+					<section class="p-6">
+						<aside class="grid grid-cols-9 gap-6">
 							<div-1 class="col-span-9 sm:col-span-3">
 								<label
 									class="block mb-2 text-sm font-medium text-blue-900 dark:text-white"
@@ -164,7 +98,7 @@ export async function getStaticPaths() {
 									}
 								</p>
 							</div-2>
-							<div-2 class="col-span-9 sm:col-span-3">
+							<div-3 class="col-span-9 sm:col-span-3">
 								<label
 									class="block mb-2 text-sm font-medium text-blue-900 dark:text-white"
 									>Tarifa diaria (si no viene) <span class="text-gray-500"
@@ -181,8 +115,8 @@ export async function getStaticPaths() {
 								>
 									{propietario.monto_diario.toFixed(2)}
 								</p>
-							</div-2>
-							<div-3 class="col-span-9 sm:col-span-3">
+							</div-3>
+							<div-4 class="col-span-9 sm:col-span-3">
 								<label
 									class="block mb-2 text-sm font-medium text-blue-900 dark:text-white"
 									>¿Paga por agua?</label
@@ -201,8 +135,8 @@ export async function getStaticPaths() {
 											: "No paga por agua"
 									}
 								</p>
-							</div-3>
-							<div-4 class="col-span-9 sm:col-span-3">
+							</div-4>
+							<div-5 class="col-span-9 sm:col-span-3">
 								<label
 									class="block mb-2 text-sm font-medium text-blue-900 dark:text-white"
 									>Tarifa de agua <span class="text-gray-500">(S/.)</span
@@ -218,8 +152,8 @@ export async function getStaticPaths() {
 								>
 									{propietario.monto_tarifa_agua.toFixed(2)}
 								</p>
-							</div-4>
-							<div-5 class="col-span-9 sm:col-span-3">
+							</div-5>
+							<div-6 class="col-span-9 sm:col-span-3">
 								<label
 									class="block mb-2 text-sm font-medium text-blue-900 dark:text-white"
 									>¿Sigue guardando carreta?</label
@@ -234,8 +168,8 @@ export async function getStaticPaths() {
 								>
 									{propietario.guarda_carreta ? "Sí guarda" : "Ya no guarda"}
 								</p>
-							</div-5>
-							<div-6 class="col-span-9 sm:col-span-3">
+							</div-6>
+							<div-7 class="col-span-9 sm:col-span-3">
 								<label
 									class="block mb-2 text-sm font-medium text-blue-900 dark:text-white"
 									>Tipo de carreta</label
@@ -250,8 +184,8 @@ export async function getStaticPaths() {
 								>
 									{propietario.tipo_carreta}
 								</p>
-							</div-6>
-							<div-7 class="col-span-9 sm:col-span-6">
+							</div-7>
+							<div-8 class="col-span-9 sm:col-span-6">
 								<label
 									class="block mb-2 text-sm font-medium text-blue-900 dark:text-white"
 									>Descripción</label
@@ -266,9 +200,9 @@ export async function getStaticPaths() {
 								>
 									{propietario.descripcion_carreta}
 								</p>
-							</div-7>
-						</div>
-						<div class="flex items-center justify-end px-6 pt-4">
+							</div-8>
+						</aside>
+						<aside class="flex items-center justify-end px-6 pt-4">
 							<button
 								type="button"
 								id=""
@@ -290,12 +224,12 @@ export async function getStaticPaths() {
 								</svg>
 								Editar
 							</button>
-						</div>
-					</div>
-				</div>
-			</div>
+						</aside>
+					</section>
+				</aside>
+			</section>
 
-			<div id="table-owner-payments">
+			<section id="table-owner-payments">
 				<h2
 					class:list={[
 						"py-4",
@@ -306,7 +240,7 @@ export async function getStaticPaths() {
 					Listado de pagos
 				</h2>
 				<OwnerDailyPaymentTable id={id} />
-			</div>
-		</section>
+			</section>
+		</article>
 	</main>
 </LayoutSidebar>
