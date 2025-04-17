@@ -145,6 +145,7 @@ const { listaPagos } = Astro.props;
 												type="button"
 												id="open-edit-payment-today-modal"
 												data-modal-toggle="edit-payment-today-modal-data"
+												class="text-nowrap inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-blue-600 hover:bg-blue-700 focus:ring-2 focus:ring-blue-400 dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-blue-700"
 												onclick={`sessionStorage.setItem('editPaymentTodayData', JSON.stringify({
 													            idDueno: '${formatoPago.idDueno}',
 													            nombrePropietario: '${formatoPago.nombreDueno}',
@@ -154,7 +155,6 @@ const { listaPagos } = Astro.props;
 																			estadoPago: '${formatoPago.estadoPago}',
 																			notaAdicional: '${formatoPago.notaAdicional}'
 													        }));`}
-												class="text-nowrap inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-blue-600 hover:bg-blue-700 focus:ring-2 focus:ring-blue-400 dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-blue-700"
 											>
 												<svg
 													class="w-4 h-4 mr-2"
@@ -284,7 +284,7 @@ const { listaPagos } = Astro.props;
 									<div class="col-span-2">
 										<label
 											for="edit-nota-adicional"
-											class="block text-base font-medium text-blue-900 dark:text-white"
+											class="block mb-2 text-base font-medium text-blue-900 dark:text-white"
 											>Nota adicional</label
 										>
 										<textarea
@@ -422,43 +422,60 @@ const { listaPagos } = Astro.props;
 				"editPaymentTodayData",
 			);
 			if (editPaymentTodayData) {
-				const {
-					nombrePropietario,
-					montoTotal,
-					retiroCoche,
-					estadoPago,
-					notaAdicional,
-				} = JSON.parse(editPaymentTodayData);
+				try {
+					const {
+						nombrePropietario,
+						montoTotal,
+						retiroCoche,
+						estadoPago,
+						notaAdicional,
+					} = JSON.parse(editPaymentTodayData);
 
-				const inputNombre = document.getElementById(
-					"edit-full-name",
-				) as HTMLInputElement;
+					const inputNombre = document.getElementById(
+						"edit-full-name",
+					) as HTMLInputElement;
 
-				const inputMonto = document.getElementById(
-					"edit-monto-total",
-				) as HTMLInputElement;
+					const inputMonto = document.getElementById(
+						"edit-monto-total",
+					) as HTMLInputElement;
 
-				const inputRetiraCoche = document.getElementById(
-					"edit-retiro-coche",
-				) as HTMLSelectElement;
+					const inputRetiraCoche = document.getElementById(
+						"edit-retiro-coche",
+					) as HTMLSelectElement;
 
-				const inputEstadoPago = document.getElementById(
-					"edit-estado-pago",
-				) as HTMLSelectElement;
+					const inputEstadoPago = document.getElementById(
+						"edit-estado-pago",
+					) as HTMLSelectElement;
 
-				const inputNotaAdicional: any = document.getElementById(
-					"edit-nota-adicional",
-				);
+					const inputNotaAdicional: any = document.getElementById(
+						"edit-nota-adicional",
+					) as HTMLSelectElement;
 
-				if (inputNombre) inputNombre.textContent = nombrePropietario;
-				if (inputMonto) inputMonto.textContent = montoTotal;
-				if (inputRetiraCoche) inputRetiraCoche.value = retiroCoche;
-				if (inputEstadoPago) inputEstadoPago.value = estadoPago;
-				if (notaAdicional === "No se registró nota") {
-					inputNotaAdicional.value = null;
-				} else {
-					inputNotaAdicional.value = notaAdicional;
+					if (inputNombre) inputNombre.textContent = nombrePropietario;
+					if (inputMonto) inputMonto.textContent = montoTotal;
+					if (inputRetiraCoche) inputRetiraCoche.value = retiroCoche;
+					if (inputEstadoPago) inputEstadoPago.value = estadoPago;
+					if (notaAdicional === "No se registró nota") {
+						inputNotaAdicional.value = null;
+					} else {
+						inputNotaAdicional.value = notaAdicional;
+					}
+
+					// console.log("Datos cargados en el modal:", {
+					// 	nombrePropietario,
+					// 	montoTotal,
+					// 	retiroCoche,
+					// 	estadoPago,
+					// 	notaAdicional
+					// });
+				} catch (error) {
+					console.error(
+						"Error al procesar los datos de sessionStorage:",
+						error,
+					);
 				}
+			} else {
+				console.log("No hay datos en sessionStorage para cargar");
 			}
 		}
 
@@ -725,22 +742,7 @@ const { listaPagos } = Astro.props;
 
 		activeOnlyPaymentModal();
 
-		const execCloseModal = () => {
-			// Botón que cierra el modal
-			const closeModalButton1 = document.getElementById(
-				"close-edit-payment-today-modal-1",
-			);
-			if (closeModalButton1) {
-				closeModalButton1.addEventListener("click", () => {
-					clearSessionData();
-					cerrarModal("edit-payment-today-modal-data");
-				});
-			}
-		};
-
-		execCloseModal();
-
-		const exectUpdatePaymentToday = () => {
+		const confirmUpdatePaymentToday = () => {
 			// Botón que confirma la edición
 			const updatePaymentTodayForm = document.getElementById(
 				"update-payment-today-form",
@@ -757,6 +759,21 @@ const { listaPagos } = Astro.props;
 			}
 		};
 
-		exectUpdatePaymentToday();
+		confirmUpdatePaymentToday();
+
+		const execCloseModal = () => {
+			// Botón que cierra el modal
+			const closeModalButton1 = document.getElementById(
+				"close-edit-payment-today-modal-1",
+			);
+			if (closeModalButton1) {
+				closeModalButton1.addEventListener("click", () => {
+					clearSessionData();
+					cerrarModal("edit-payment-today-modal-data");
+				});
+			}
+		};
+
+		execCloseModal();
 	});
 </script>
