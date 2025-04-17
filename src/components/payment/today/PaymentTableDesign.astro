@@ -74,8 +74,8 @@ const { listaPagos } = Astro.props;
 								const formatoPago = {
 									idDueno: pago.id ?? "-",
 									nombreDueno: pago.nombreDueno ?? "-",
-									montoTotal: pago.montoTotal ?? "-",
-									montoTarifaAgua: pago.montoTarifaAgua ?? "-",
+									montoTotal: pago.montoTotal ?? "0",
+									montoTarifaAgua: pago.montoTarifaAgua ?? "0",
 									retiroCoche: pago.retiroCoche ? "Sí vino" : "No vino",
 									estadoPago: pago.estadoPago ? "Sí Canceló" : "No pagó",
 									notaAdicional: pago.notaAdicional ?? "No se registró nota",
