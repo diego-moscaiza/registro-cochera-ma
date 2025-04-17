@@ -6,7 +6,9 @@ interface Props {
 		fechaPago: string;
 		retiroCoche: boolean;
 		montoTotal: number;
+		montoTarifaAgua: number;
 		estadoPago: boolean;
+		notaAdicional: string;
 	}[];
 }
 
@@ -37,7 +39,12 @@ const { listaPagos } = Astro.props;
 							<th
 								scope="col"
 								class="p-4 text-sm font-semibold text-left text-gray-700 uppercase dark:text-gray-300"
-								>Tarifa diaria</th
+								>Pago diario</th
+							>
+							<th
+								scope="col"
+								class="p-4 text-sm font-semibold text-left text-gray-700 uppercase dark:text-gray-300"
+								>Tarifa por agua</th
 							>
 							<th
 								scope="col"
@@ -48,6 +55,11 @@ const { listaPagos } = Astro.props;
 								scope="col"
 								class="p-4 text-sm font-semibold text-left text-gray-700 uppercase dark:text-gray-300"
 								>Estado del Pago</th
+							>
+							<th
+								scope="col"
+								class="p-4 text-sm font-semibold text-left text-gray-700 uppercase dark:text-gray-300"
+								>Nota adicional</th
 							>
 							<th
 								scope="col"
@@ -63,8 +75,10 @@ const { listaPagos } = Astro.props;
 									idDueno: pago.id ?? "-",
 									nombreDueno: pago.nombreDueno ?? "-",
 									montoTotal: pago.montoTotal ?? "-",
+									montoTarifaAgua: pago.montoTarifaAgua ?? "-",
 									retiroCoche: pago.retiroCoche ? "Sí vino" : "No vino",
 									estadoPago: pago.estadoPago ? "Sí Canceló" : "No pagó",
+									notaAdicional: pago.notaAdicional ?? "No se registró nota",
 								};
 
 								return (
@@ -81,6 +95,15 @@ const { listaPagos } = Astro.props;
 										>
 											S/.{" "}
 											{parseFloat(formatoPago.montoTotal.toString()).toFixed(2)}
+										</td>
+										<td
+											id="table-tarifa-agua-value"
+											class="p-4 text-nowrap text-base font-semibold text-gray-900 dark:text-gray-200"
+										>
+											S/.{" "}
+											{parseFloat(
+												formatoPago.montoTarifaAgua.toString(),
+											).toFixed(2)}
 										</td>
 										<td class="p-4 text-sm text-nowrap font-medium">
 											<span
@@ -108,6 +131,12 @@ const { listaPagos } = Astro.props;
 												{formatoPago.estadoPago}
 											</span>
 										</td>
+										<td
+											id="table-nota-adicional-value"
+											class="p-4 text-base font-medium text-gray-900 dark:text-gray-200"
+										>
+											{formatoPago.notaAdicional}
+										</td>
 										<td class="p-4 space-x-2">
 											<button
 												type="button"
@@ -117,8 +146,10 @@ const { listaPagos } = Astro.props;
 													            idDueno: '${formatoPago.idDueno}',
 													            nombrePropietario: '${formatoPago.nombreDueno}',
 													            montoTotal: '${formatoPago.montoTotal.toFixed(2)}',
+																			montoTarifaAgua: '${formatoPago.montoTarifaAgua.toFixed(2)}',
 													            retiroCoche: '${formatoPago.retiroCoche}',
-																estadoPago: '${formatoPago.estadoPago}'
+																			estadoPago: '${formatoPago.estadoPago}',
+																			notaAdicional: '${formatoPago.notaAdicional}'
 													        }));`}
 												class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-blue-600 hover:bg-blue-700 focus:ring-2 focus:ring-blue-400 dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-blue-700"
 											>
@@ -135,7 +166,7 @@ const { listaPagos } = Astro.props;
 														clip-rule="evenodd"
 													/>
 												</svg>
-												Editar
+												Confirmar Pago
 											</button>
 										</td>
 									</tr>
@@ -160,8 +191,8 @@ const { listaPagos } = Astro.props;
 						<div
 							class="flex items-start justify-between p-5 border-b border-gray-200 rounded-t dark:border-gray-700"
 						>
-							<h3 class="text-xl font-semibold text-gray-900 dark:text-white">
-								Editar información del propietario
+							<h3 class="text-xl font-semibold text-blue-900 dark:text-white">
+								Confirmación de pago
 							</h3>
 							<button
 								type="button"
@@ -185,44 +216,35 @@ const { listaPagos } = Astro.props;
 
 						<!-- Modal body -->
 						<div>
-							<form id="update-payment-today-form" class="p-6 space-y-6">
-								<div class="grid grid-cols-6 gap-6">
-									<div class="col-span-6 sm:col-span-3">
-										<label
-											for="edit-full-name"
-											class="block mb-2 text-sm font-medium text-blue-900 dark:text-white"
-											>Nombre</label
+							<form id="update-payment-today-form" class="p-6">
+								<div class="mb-4 grid grid-cols-1 sm:grid-cols-2 gap-6">
+									<div class="items-center col-span-1 sm:col-span-2">
+										<div
+											class="p-4 flex flex-col gap-2 items-center bg-blue-50 dark:bg-gray-700 rounded-lg"
 										>
-										<input
-											type="text"
-											name="nombre-Dueno"
-											id="edit-full-name"
-											class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
-											placeholder="Nombre del propietario"
-											required
-										/>
+											<p
+												class="text-lg font-medium text-blue-900 dark:text-white mb-1"
+											>
+												Pago de
+												<span id="edit-full-name" class="font-semibold"></span>
+											</p>
+											<div class="overflow-hidden">
+												<p
+													class="text-nowrap text-8xl text-gray-500 dark:text-gray-400"
+												>
+													S/. <span
+														id="edit-monto-total"
+														class="overflow-x-hidden"></span>
+												</p>
+											</div>
+										</div>
 									</div>
-									<div class="col-span-6 sm:col-span-3">
-										<label
-											for="edit-monto-total"
-											class="block mb-2 text-sm font-medium text-blue-900 dark:text-white"
-											>Monto diario <span class="text-gray-500">(S/.)</span
-											></label
-										>
-										<input
-											type="text"
-											name="monto-total"
-											id="edit-monto-total"
-											class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
-											placeholder="Monto total del pago diario"
-											required
-										/>
-									</div>
-									<div class="col-span-6 sm:col-span-3">
+
+									<div class="col-span-2 sm:col-span-1">
 										<label
 											for="edit-retiro-coche"
-											class="block mb-2 text-sm font-medium text-blue-900 dark:text-white"
-											>Estado</label
+											class="block mb-2 text-base font-medium text-blue-900 dark:text-white"
+											>¿Retiro su carreta?</label
 										>
 										<select
 											name="retiro-coche"
@@ -237,11 +259,11 @@ const { listaPagos } = Astro.props;
 											<option value="No vino">No vino</option>
 										</select>
 									</div>
-									<div class="col-span-6 sm:col-span-3">
+									<div class="col-span-2 sm:col-span-1">
 										<label
 											for="edit-estado-pago"
-											class="block mb-2 text-sm font-medium text-blue-900 dark:text-white"
-											>Estado</label
+											class="block mb-2 text-base font-medium text-blue-900 dark:text-white"
+											>Estado del pago</label
 										>
 										<select
 											name="estado-pago"
@@ -252,14 +274,31 @@ const { listaPagos } = Astro.props;
 											<option value="" disabled selected>
 												Seleccione el estado</option
 											>
-											<option value="No pagó">No pagó</option>
 											<option value="Sí Canceló">Sí Canceló</option>
+											<option value="No pagó">No pagó</option>
 										</select>
 									</div>
+									<div class="col-span-2">
+										<label
+											for="edit-nota-adicional"
+											class="block text-base font-medium text-blue-900 dark:text-white"
+											>Nota adicional</label
+										>
+										<textarea
+											name="nota-adicional"
+											id="edit-nota-adicional"
+											rows="3"
+											cols="6"
+											maxlength="100"
+											placeholder="Ejemplo: Pagó 8 soles de 2 dias ó Pagó 7 soles por la otra carreta"
+											class="shadow-sm bg-gray-50 rounded-lg border border-gray-300 text-gray-900 text-base sm:text-lg focus:ring-gray-500 focus:border-gray-500 block w-full h-24 resize-none p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500 appearance-none"
+										></textarea>
+									</div>
 								</div>
+
 								<!-- Modal footer -->
 								<div
-									class="flex items-center justify-end px-6 pt-4 border-t border-gray-200 rounded-b dark:border-gray-700"
+									class="flex items-center justify-end py-4 px-6 border-t border-gray-200 rounded-b dark:border-gray-700"
 								>
 									<button
 										id="close-edit-payment-today-modal-2"
@@ -267,7 +306,7 @@ const { listaPagos } = Astro.props;
 										type="submit"
 										data-modal-toggle="edit-payment-today-modal-data"
 									>
-										Guardar
+										Confirmar
 									</button>
 								</div>
 							</form>
@@ -280,22 +319,6 @@ const { listaPagos } = Astro.props;
 </div>
 
 <script>
-	// Input nonto_diario
-	const editMontoDiarioElement = document.getElementById("edit-monto-total");
-	if (editMontoDiarioElement) {
-		editMontoDiarioElement.addEventListener("input", (event) => {
-			const input: any = event.target;
-			const regex = /^\d{0,2}(\.\d{0,2})?$/; // Permite hasta 2 cifras enteras y 2 decimales
-			const previousValue = input.getAttribute("data-previous-value") || ""; // Obtiene el valor anterior
-
-			if (!regex.test(input.value)) {
-				input.value = previousValue; // Restaura el valor anterior si no es válido
-			} else {
-				input.setAttribute("data-previous-value", input.value); // Guarda el valor actual como válido
-			}
-		});
-	}
-
 	// Espera a que cargue toda la pagina para ejecutarse
 	document.addEventListener("DOMContentLoaded", () => {
 		// Función para mostrar una notificación temporal
@@ -396,8 +419,13 @@ const { listaPagos } = Astro.props;
 				"editPaymentTodayData",
 			);
 			if (editPaymentTodayData) {
-				const { nombrePropietario, montoTotal, retiroCoche, estadoPago } =
-					JSON.parse(editPaymentTodayData);
+				const {
+					nombrePropietario,
+					montoTotal,
+					retiroCoche,
+					estadoPago,
+					notaAdicional,
+				} = JSON.parse(editPaymentTodayData);
 
 				const inputNombre = document.getElementById(
 					"edit-full-name",
@@ -415,10 +443,19 @@ const { listaPagos } = Astro.props;
 					"edit-estado-pago",
 				) as HTMLSelectElement;
 
-				if (inputNombre) inputNombre.value = nombrePropietario;
-				if (inputMonto) inputMonto.value = montoTotal;
+				const inputNotaAdicional: any = document.getElementById(
+					"edit-nota-adicional",
+				);
+
+				if (inputNombre) inputNombre.textContent = nombrePropietario;
+				if (inputMonto) inputMonto.textContent = montoTotal;
 				if (inputRetiraCoche) inputRetiraCoche.value = retiroCoche;
 				if (inputEstadoPago) inputEstadoPago.value = estadoPago;
+				if (notaAdicional === "No se registró nota") {
+					inputNotaAdicional.value = null;
+				} else {
+					inputNotaAdicional.value = notaAdicional;
+				}
 			}
 		}
 
@@ -427,93 +464,87 @@ const { listaPagos } = Astro.props;
 			sessionStorage.removeItem("editPaymentTodayData");
 		}
 
-		async function execUpdateOwner(event: any) {
-			event.preventDefault();
-			const editPaymentTodayData = sessionStorage.getItem(
-				"editPaymentTodayData",
-			);
-			if (!editPaymentTodayData)
-				return console.error("No hay datos en sessionStorage");
-
-			const {
-				idDueno,
-				nombrePropietario,
-				montoTotal,
-				retiroCoche,
-				estadoPago,
-			} = JSON.parse(editPaymentTodayData);
-
+		// Valida si todos los elementos del formulario existen
+		function validateFormElements() {
 			const inputNombre = document.getElementById(
 				"edit-full-name",
 			) as HTMLInputElement;
-
 			const inputMonto = document.getElementById(
 				"edit-monto-total",
 			) as HTMLInputElement;
-
 			const inputRetiraCoche = document.getElementById(
 				"edit-retiro-coche",
 			) as HTMLSelectElement;
-
 			const inputEstadoPago = document.getElementById(
 				"edit-estado-pago",
 			) as HTMLSelectElement;
+			const inputNotaAdicional = document.getElementById(
+				"edit-nota-adicional",
+			) as HTMLTextAreaElement;
 
 			if (
 				!inputNombre ||
 				!inputMonto ||
 				!inputRetiraCoche ||
-				!inputEstadoPago
+				!inputEstadoPago ||
+				!inputNotaAdicional
 			) {
-				//console.error("⚠️ No se encontraron todos los elementos del formulario");
 				mostrarNotificacion(
 					"⚠️ No se encontraron todos los elementos del formulario",
 					"other",
 				);
-				return;
+				return null;
 			}
 
-			const nombreValue = inputNombre.value;
-			const montoValue = inputMonto.value;
-			const retiroCocheValue = inputRetiraCoche.value;
-			const estadoPagoValue = inputEstadoPago.value;
+			return {
+				inputNombre,
+				inputMonto,
+				inputRetiraCoche,
+				inputEstadoPago,
+				inputNotaAdicional,
+			};
+		}
 
-			// Validar que el monto sea un número válido
-			let retiroCocheBoolean: boolean;
-
+		// Convierte el valor de retiro de coche a booleano
+		function parseRetiroCocheValue(retiroCocheValue: string): boolean | null {
 			if (retiroCocheValue === "Sí vino") {
-				retiroCocheBoolean = true;
+				return true;
 			} else if (retiroCocheValue === "No vino") {
-				retiroCocheBoolean = false;
+				return false;
 			} else {
-				console.error("Valor de estado no válido");
-				return;
+				console.error("Valor de retiro de coche no válido");
+				return null;
 			}
+		}
 
-			// Validar que el estado de pago sea un booleano
-			let estadoPagoBoolean: boolean;
-
+		// Convierte el valor de estado de pago a booleano
+		function parseEstadoPagoValue(estadoPagoValue: string): boolean | null {
 			if (estadoPagoValue === "Sí Canceló") {
-				estadoPagoBoolean = true;
+				return true;
 			} else if (estadoPagoValue === "No pagó") {
-				estadoPagoBoolean = false;
+				return false;
 			} else {
-				console.error("Valor de estado no válido");
-				return;
+				mostrarNotificacion("⚠️ Valor de estado no válido.", "other");
+				return null;
 			}
+		}
 
-			// Comprobar si los datos no han cambiado
+		// Verifica si los datos han cambiado
+		function checkIfDataChanged(originalData: any, newData: any): boolean {
 			if (
-				nombrePropietario === nombreValue &&
-				montoTotal === montoValue &&
-				retiroCoche === retiroCocheValue &&
-				estadoPago === estadoPagoValue
+				originalData.montoTotal === newData.montoValue &&
+				originalData.retiroCoche === newData.retiroCocheValue &&
+				originalData.estadoPago === newData.estadoPagoValue &&
+				originalData.notaAdicional === newData.notaAdicionalText
 			) {
-				//alert("⚠️ No hay cambios en los datos, no se enviará el POST.");
 				mostrarNotificacion("⚠️ No hay cambios en los datos.", "other");
-				return; // No hacer nada si los datos son los mismos
+				return false;
 			}
+			return true;
+		}
 
+		// Envía la solicitud para actualizar el pago
+		async function sendUpdateRequest(paymentData: any): Promise<boolean> {
 			try {
 				const res = await fetch("/api/record/payment/updatePayment", {
 					method: "POST",
@@ -521,17 +552,15 @@ const { listaPagos } = Astro.props;
 						"Content-Type": "application/json",
 					},
 					body: JSON.stringify({
-						id: Number(idDueno),
-						nombre_dueno: String(nombreValue),
-						monto_total: Number(montoValue),
-						retiro_coche: retiroCocheBoolean,
-						estado_pago: estadoPagoBoolean,
+						id: Number(paymentData.id),
+						monto_total: Number(paymentData.montoValue),
+						retiro_coche: paymentData.retiroCocheBoolean,
+						estado_pago: paymentData.estadoPagoBoolean,
+						nota_adicional: paymentData.notaAdicionalText,
 					}),
 				});
 
 				if (res.ok) {
-					// alert("✅ Datos actualizados correctamente.");
-					// console.log("Propietario actualizado correctamente");
 					mostrarNotificacion(
 						"✅ Datos actualizados correctamente.",
 						"success",
@@ -539,66 +568,192 @@ const { listaPagos } = Astro.props;
 					setTimeout(() => {
 						window.location.reload();
 					}, 1000);
+					return true;
 				} else {
 					const error = await res.json();
-					// alert("❌ Error al actualizar: " + (error.error || "Error desconocido"));
 					mostrarNotificacion(
 						"❌ Error al actualizar: " + (error.error || "Error desconocido"),
 						"error",
 					);
+					return false;
 				}
 			} catch (error) {
-				//console.error("Error en la petición:", error);
-				//alert("❌ Error en la comunicación con el servidor. Inténtelo de nuevo.");
 				mostrarNotificacion(
 					"❌ Error en la comunicación con el servidor. Inténtelo de nuevo.",
 					"error",
 				);
+				return false;
 			}
 		}
 
-		const allModalToggle1: any = "[data-modal-toggle]";
+		// Función principal que gestiona la actualización del pago
+		async function execUpdatePaymentToday(event: any) {
+			event.preventDefault();
 
-		const editPaymentTodayData: any =
-			'[data-modal-toggle="edit-payment-today-modal-data"]';
+			// Obtener los datos de sessionStorage
+			const editPaymentTodayData = sessionStorage.getItem(
+				"editPaymentTodayData",
+			);
+			if (!editPaymentTodayData) {
+				console.error("No hay datos en sessionStorage");
+				return;
+			}
 
-		// Inicializar eventos
-		initializeModalToggles(allModalToggle1);
+			const { idDueno, montoTotal, retiroCoche, estadoPago, notaAdicional } =
+				JSON.parse(editPaymentTodayData);
 
-		// Escuchar el evento de apertura del modal
-		document.querySelectorAll(editPaymentTodayData).forEach((btn) => {
-			btn.addEventListener("click", () => {
-				// Pequeño retraso para asegurar que los datos ya estén en sessionStorage
-				setTimeout(() => {
-					setParamsFromSession();
-				}, 100);
-			});
-		});
+			// Validar elementos del formulario
+			const formElements = validateFormElements();
+			if (!formElements) return;
 
-		// Botón que cierra el modal
-		const closeModalButton1 = document.getElementById(
-			"close-edit-payment-today-modal-1",
-		);
-		if (closeModalButton1) {
-			closeModalButton1.addEventListener("click", () => {
-				clearSessionData();
-				cerrarModal("edit-payment-today-modal-data");
+			const {
+				inputMonto,
+				inputRetiraCoche,
+				inputEstadoPago,
+				inputNotaAdicional,
+			} = formElements;
+
+			// Obtener valores del formulario
+			const montoValue = inputMonto.textContent;
+			const retiroCocheValue = inputRetiraCoche.value;
+			const estadoPagoValue = inputEstadoPago.value;
+			const notaAdicionalText =
+				inputNotaAdicional.value === "" ? null : inputNotaAdicional.value;
+
+			// Validar y convertir los valores
+			const retiroCocheBoolean = parseRetiroCocheValue(retiroCocheValue);
+			if (retiroCocheBoolean === null) return;
+
+			const estadoPagoBoolean = parseEstadoPagoValue(estadoPagoValue);
+			if (estadoPagoBoolean === null) return;
+
+			// Verificar si los datos han cambiado
+			const originalData = {
+				montoTotal,
+				retiroCoche,
+				estadoPago,
+				notaAdicional,
+			};
+			const newData = {
+				montoValue,
+				retiroCocheValue,
+				estadoPagoValue,
+				notaAdicionalText,
+			};
+
+			if (!checkIfDataChanged(originalData, newData)) return;
+
+			// Enviar solicitud de actualización
+			await sendUpdateRequest({
+				id: idDueno,
+				montoValue,
+				retiroCocheBoolean,
+				estadoPagoBoolean,
+				notaAdicionalText,
 			});
 		}
 
-		// Botón que confirma la edición
-		const updatePaymentTodayForm = document.getElementById(
-			"update-payment-today-form",
-		);
-		if (updatePaymentTodayForm) {
-			updatePaymentTodayForm.addEventListener("submit", async (event) => {
-				event.preventDefault();
-				// Ejecutar la lógica de actualización aquí
-				await execUpdateOwner(event);
-				// Cerrar el modal y limpiar los datos
-				clearSessionData();
-				cerrarModal("edit-payment-today-modal-data");
+		const sumarTarifaAgua = () => {
+			const inputRetiroCoche = document.getElementById(
+				"edit-retiro-coche",
+			) as HTMLSelectElement;
+
+			const editMontoDiarioElement = document.getElementById(
+				"edit-monto-total",
+			) as HTMLInputElement;
+
+			// Agregue el oyente de eventos de cambio para detectar cuando el usuario cambia la selección
+			if (inputRetiroCoche) {
+				inputRetiroCoche.addEventListener("change", () => {
+					// Obtenga los datos de SessionStorage para acceder a los valores originales
+					const editPaymentTodayData = sessionStorage.getItem(
+						"editPaymentTodayData",
+					);
+					if (editPaymentTodayData) {
+						const { montoTarifaAgua } = JSON.parse(editPaymentTodayData);
+
+						// Analizar valores originales con respaldo
+						const tarifaAgua = parseFloat(montoTarifaAgua) || 0;
+
+						// Actualizar el valor de MONTO basado en la selección
+						if (editMontoDiarioElement) {
+							if (inputRetiroCoche.value === "Sí vino") {
+								// Si vinieron, agregue la tarifa de agua al total
+								editMontoDiarioElement.textContent = (
+									Number(editMontoDiarioElement.textContent) + tarifaAgua
+								).toFixed(2);
+							} else if (inputRetiroCoche.value === "No vino") {
+								// Si no vinieron, reste la tarifa de agua del total
+								editMontoDiarioElement.textContent = (
+									Number(editMontoDiarioElement.textContent) - tarifaAgua
+								).toFixed(2);
+							}
+						}
+					}
+				});
+			}
+		};
+
+		sumarTarifaAgua();
+
+		const activeAllModals = () => {
+			const allModalToggle1: any = "[data-modal-toggle]";
+
+			// Inicializar eventos
+			initializeModalToggles(allModalToggle1);
+		};
+
+		activeAllModals();
+
+		const activeOnlyPaymentModal = () => {
+			// Inicializar el modal de edición
+			const editPaymentTodayData: any =
+				'[data-modal-toggle="edit-payment-today-modal-data"]';
+			// Escuchar el evento de apertura del modal
+			document.querySelectorAll(editPaymentTodayData).forEach((btn) => {
+				btn.addEventListener("click", () => {
+					// Pequeño retraso para asegurar que los datos ya estén en sessionStorage
+					setTimeout(() => {
+						setParamsFromSession();
+					}, 100);
+				});
 			});
-		}
+		};
+
+		activeOnlyPaymentModal();
+
+		const execCloseModal = () => {
+			// Botón que cierra el modal
+			const closeModalButton1 = document.getElementById(
+				"close-edit-payment-today-modal-1",
+			);
+			if (closeModalButton1) {
+				closeModalButton1.addEventListener("click", () => {
+					clearSessionData();
+					cerrarModal("edit-payment-today-modal-data");
+				});
+			}
+		};
+
+		execCloseModal();
+
+		const exectUpdatePaymentToday = () => {
+			// Botón que confirma la edición
+			const updatePaymentTodayForm = document.getElementById(
+				"update-payment-today-form",
+			);
+			if (updatePaymentTodayForm) {
+				updatePaymentTodayForm.addEventListener("submit", async (event) => {
+					event.preventDefault();
+					// Ejecutar la lógica de actualización aquí
+					await execUpdatePaymentToday(event);
+					// Cerrar el modal y limpiar los datos
+					clearSessionData();
+					cerrarModal("edit-payment-today-modal-data");
+				});
+			}
+		};
+
+		exectUpdatePaymentToday();
 	});
 </script>
