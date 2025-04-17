@@ -28,7 +28,7 @@ function convertirFechaPeru(fechaStr: string) {
 }
 
 const { id } = Astro.props;
-const pagoPorPropietario: any = id ? await getAllPaymentsById({ id }) : "null";
+const pagoPorPropietario: any = id ? await getAllPaymentsById({ id }) : [];
 ---
 
 <div>
@@ -59,7 +59,7 @@ const pagoPorPropietario: any = id ? await getAllPaymentsById({ id }) : "null";
 								scope="col"
 								class="p-4 text-sm font-semibold text-left text-gray-700 uppercase dark:text-gray-300"
 							>
-								Monto total
+								Pago realizado
 							</th>
 							<th
 								scope="col"
