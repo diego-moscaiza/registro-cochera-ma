@@ -7,9 +7,11 @@ export interface PaymentEntry {
 	dueno_id: string;
 	nombre_dueno: string;
 	fecha_pago: string;
+	monto_tarifa_agua: number;
 	retiro_coche: boolean;
 	monto_total: number;
 	estado_pago: boolean;
+	nota_adicional: string;
 }
 
 const response = await getAllPayments();
@@ -59,9 +61,11 @@ pagosPorFecha.forEach((pagos) =>
 							id: detallePago.id,
 							nombreDueno: detallePago.nombre_dueno,
 							fechaPago: detallePago.fecha_pago,
+							montoTarifaAgua: detallePago.monto_tarifa_agua,
 							retiroCoche: detallePago.retiro_coche,
 							montoTotal: detallePago.monto_total,
 							estadoPago: detallePago.estado_pago,
+							notaAdicional: detallePago.nota_adicional,
 						}))}
 					/>
 				</div>
