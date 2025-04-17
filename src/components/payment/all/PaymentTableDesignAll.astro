@@ -7,7 +7,9 @@ interface Props {
 		fechaPago: string;
 		retiroCoche: boolean;
 		montoTotal: number;
+		montoTarifaAgua: number;
 		estadoPago: boolean;
+		notaAdicional: string;
 	}[];
 }
 
@@ -42,12 +44,22 @@ const { fechaPago, listaPagos } = Astro.props;
 					<th
 						scope="col"
 						class="p-4 text-sm font-semibold text-left text-gray-700 uppercase dark:text-gray-300"
+						>Tarifa por agua</th
+					>
+					<th
+						scope="col"
+						class="p-4 text-sm font-semibold text-left text-gray-700 uppercase dark:text-gray-300"
 						>¿Retiro su carreta?</th
 					>
 					<th
 						scope="col"
 						class="p-4 text-sm font-semibold text-left text-gray-700 uppercase dark:text-gray-300"
 						>Estado del Pago</th
+					>
+					<th
+						scope="col"
+						class="p-4 text-sm font-semibold text-left text-gray-700 uppercase dark:text-gray-300"
+						>Nota adicional</th
 					>
 					<th
 						scope="col"
@@ -63,8 +75,10 @@ const { fechaPago, listaPagos } = Astro.props;
 							idDueno: pago.id ?? "-",
 							nombreDueno: pago.nombreDueno ?? "-",
 							montoTotal: pago.montoTotal ?? "-",
+							montoTarifaAgua: pago.montoTarifaAgua ?? "-",
 							retiroCoche: pago.retiroCoche ? "Sí vino" : "No vino",
 							estadoPago: pago.estadoPago ? "Sí Canceló" : "No pagó",
+							notaAdicional: pago.notaAdicional ?? "No se registró nota",
 						};
 
 						return (
@@ -73,8 +87,14 @@ const { fechaPago, listaPagos } = Astro.props;
 									{formatoPago.nombreDueno}
 								</td>
 								<td class="p-4 text-nowrap text-base font-semibold text-gray-900 dark:text-gray-200">
+									S/. {parseFloat(formatoPago.montoTotal.toString()).toFixed(2)}
+								</td>
+								<td
+									id="table-tarifa-agua-value"
+									class="p-4 text-nowrap text-base font-semibold text-gray-900 dark:text-gray-200"
+								>
 									S/.{" "}
-									{parseFloat((formatoPago.montoTotal ?? 0).toString()).toFixed(
+									{parseFloat(formatoPago.montoTarifaAgua.toString()).toFixed(
 										2,
 									)}
 								</td>
@@ -102,19 +122,30 @@ const { fechaPago, listaPagos } = Astro.props;
 										{formatoPago.estadoPago}
 									</span>
 								</td>
+								<td
+									id="table-nota-adicional-value"
+									class="p-4 text-base text-nowrap font-medium text-gray-900 dark:text-gray-200"
+									title={formatoPago.notaAdicional}
+								>
+									{formatoPago.notaAdicional.length > 19
+										? formatoPago.notaAdicional.substring(0, 19) + "..."
+										: formatoPago.notaAdicional}
+								</td>
 								<td class="p-4 space-x-2">
 									<button
 										type="button"
 										id="open-edit-payment-day-ago-modal"
 										data-modal-toggle="edit-payment-day-ago-modal-data"
+										class="inline-flex text-nowrap items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-blue-600 hover:bg-blue-700 focus:ring-2 focus:ring-blue-400 dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-blue-700"
 										onclick={`sessionStorage.setItem('editPaymentDayAgoData', JSON.stringify({
 													            idDueno: '${formatoPago.idDueno}',
 													            nombrePropietario: '${formatoPago.nombreDueno}',
 													            montoTotal: '${formatoPago.montoTotal.toFixed(2)}',
+																			montoTarifaAgua: '${formatoPago.montoTarifaAgua.toFixed(2)}',
 													            retiroCoche: '${formatoPago.retiroCoche}',
-																estadoPago: '${formatoPago.estadoPago}'
-													        }));`}
-										class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-blue-600 hover:bg-blue-700 focus:ring-2 focus:ring-blue-400 dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-blue-700"
+																			estadoPago: '${formatoPago.estadoPago}',
+																			notaAdicional: '${formatoPago.notaAdicional}'
+													    }));`}
 									>
 										<svg
 											class="w-4 h-4 mr-2"
@@ -129,7 +160,7 @@ const { fechaPago, listaPagos } = Astro.props;
 												clip-rule="evenodd"
 											/>
 										</svg>
-										Editar
+										Confirmar Pago
 									</button>
 								</td>
 							</tr>
@@ -154,7 +185,7 @@ const { fechaPago, listaPagos } = Astro.props;
 					class="flex items-start justify-between p-5 border-b border-gray-200 rounded-t dark:border-gray-700"
 				>
 					<h3 class="text-xl font-semibold text-gray-900 dark:text-white">
-						Editar información del propietario
+						Confirmación de pago
 					</h3>
 					<button
 						type="button"
@@ -178,43 +209,34 @@ const { fechaPago, listaPagos } = Astro.props;
 
 				<!-- Modal body -->
 				<div>
-					<form id="update-payment-day-ago-form" class="p-6 space-y-6">
-						<div class="grid grid-cols-6 gap-6">
-							<div class="col-span-6 sm:col-span-3">
-								<label
-									for="edit-full-name"
-									class="block mb-2 text-sm font-medium text-blue-900 dark:text-white"
-									>Nombre</label
+					<form id="update-payment-day-ago-form" class="p-6">
+						<div class="mb-4 grid grid-cols-1 sm:grid-cols-2 gap-6">
+							<div
+								class="inline-block min-w-full align-middle col-span-1 sm:col-span-2"
+							>
+								<div
+									class="overflow-hidden p-4 flex flex-col gap-2 items-center bg-blue-50 dark:bg-gray-700 rounded-lg"
 								>
-								<input
-									type="text"
-									name="nombre-Dueno"
-									id="edit-full-name"
-									class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
-									placeholder="Nombre del propietario"
-									required
-								/>
+									<p
+										class="text-nowrap text-lg font-medium text-blue-900 dark:text-white mb-1"
+									>
+										Pago de
+										<span id="edit-full-name" class="font-semibold"></span>
+									</p>
+									<p
+										class="text-nowrap text-4xl lg:text-5xl 2xl:text-6xl text-gray-600 dark:text-gray-300"
+									>
+										S/. <span id="edit-monto-total" class="overflow-x-hidden"
+										></span>
+									</p>
+								</div>
 							</div>
-							<div class="col-span-6 sm:col-span-3">
-								<label
-									for="edit-monto-total"
-									class="block mb-2 text-sm font-medium text-blue-900 dark:text-white"
-									>Monto diario <span class="text-gray-500">(S/.)</span></label
-								>
-								<input
-									type="text"
-									name="monto-total"
-									id="edit-monto-total"
-									class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
-									placeholder="Monto total del pago diario"
-									required
-								/>
-							</div>
-							<div class="col-span-6 sm:col-span-3">
+
+							<div class="col-span-2 sm:col-span-1">
 								<label
 									for="edit-retiro-coche"
-									class="block mb-2 text-sm font-medium text-blue-900 dark:text-white"
-									>Estado</label
+									class="block mb-2 text-base font-medium text-blue-900 dark:text-white"
+									>¿Retiro su carreta?</label
 								>
 								<select
 									name="retiro-coche"
@@ -229,11 +251,11 @@ const { fechaPago, listaPagos } = Astro.props;
 									<option value="No vino">No vino</option>
 								</select>
 							</div>
-							<div class="col-span-6 sm:col-span-3">
+							<div class="col-span-2 sm:col-span-1">
 								<label
 									for="edit-estado-pago"
-									class="block mb-2 text-sm font-medium text-blue-900 dark:text-white"
-									>Estado</label
+									class="block mb-2 text-base font-medium text-blue-900 dark:text-white"
+									>Estado del pago</label
 								>
 								<select
 									name="estado-pago"
@@ -247,6 +269,22 @@ const { fechaPago, listaPagos } = Astro.props;
 									<option value="No pagó">No pagó</option>
 									<option value="Sí Canceló">Sí Canceló</option>
 								</select>
+							</div>
+							<div class="col-span-2">
+								<label
+									for="edit-nota-adicional"
+									class="block mb-2 text-base font-medium text-blue-900 dark:text-white"
+									>Nota adicional</label
+								>
+								<textarea
+									name="nota-adicional"
+									id="edit-nota-adicional"
+									rows="3"
+									cols="6"
+									maxlength="100"
+									placeholder="Ejemplo: Pagó 8 soles de 2 días ó Pagó 7 soles por la otra carreta"
+									class="shadow-sm bg-gray-50 rounded-lg border border-gray-300 text-gray-900 text-base sm:text-lg focus:ring-gray-500 focus:border-gray-500 block w-full h-24 resize-none p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500 appearance-none"
+								></textarea>
 							</div>
 						</div>
 						<!-- Modal footer -->
@@ -270,21 +308,6 @@ const { fechaPago, listaPagos } = Astro.props;
 </section>
 
 <script>
-	// Input nonto_diario
-	const editMontoDiarioElement = document.getElementById("edit-monto-total");
-	if (editMontoDiarioElement) {
-		editMontoDiarioElement.addEventListener("input", (event) => {
-			const input: any = event.target;
-			const regex = /^\d{0,2}(\.\d{0,2})?$/; // Permite hasta 2 cifras enteras y 2 decimales
-			const previousValue = input.getAttribute("data-previous-value") || ""; // Obtiene el valor anterior
-
-			if (!regex.test(input.value)) {
-				input.value = previousValue; // Restaura el valor anterior si no es válido
-			} else {
-				input.setAttribute("data-previous-value", input.value); // Guarda el valor actual como válido
-			}
-		});
-	}
 	// Espera a que cargue toda la pagina para ejecutarse
 	document.addEventListener("DOMContentLoaded", () => {
 		// Función para mostrar una notificación temporal
@@ -386,8 +409,13 @@ const { fechaPago, listaPagos } = Astro.props;
 			);
 			if (editPaymentDayAgoData) {
 				try {
-					const { nombrePropietario, montoTotal, retiroCoche, estadoPago } =
-						JSON.parse(editPaymentDayAgoData);
+					const {
+						nombrePropietario,
+						montoTotal,
+						retiroCoche,
+						estadoPago,
+						notaAdicional,
+					} = JSON.parse(editPaymentDayAgoData);
 
 					const inputNombre = document.getElementById(
 						"edit-full-name",
@@ -402,17 +430,27 @@ const { fechaPago, listaPagos } = Astro.props;
 						"edit-estado-pago",
 					) as HTMLSelectElement;
 
-					if (inputNombre) inputNombre.value = nombrePropietario;
-					if (inputMonto) inputMonto.value = montoTotal;
+					const inputNotaAdicional: any = document.getElementById(
+						"edit-nota-adicional",
+					) as HTMLSelectElement;
+
+					if (inputNombre) inputNombre.textContent = nombrePropietario;
+					if (inputMonto) inputMonto.textContent = montoTotal;
 					if (inputRetiraCoche) inputRetiraCoche.value = retiroCoche;
 					if (inputEstadoPago) inputEstadoPago.value = estadoPago;
+					if (notaAdicional === "No se registró nota") {
+						inputNotaAdicional.value = null;
+					} else {
+						inputNotaAdicional.value = notaAdicional;
+					}
 
-					console.log("Datos cargados en el modal:", {
-						nombrePropietario,
-						montoTotal,
-						retiroCoche,
-						estadoPago,
-					});
+					// console.log("Datos cargados en el modal:", {
+					// 	nombrePropietario,
+					// 	montoTotal,
+					// 	retiroCoche,
+					// 	estadoPago,
+					// 	notaAdicional
+					// });
 				} catch (error) {
 					console.error(
 						"Error al procesar los datos de sessionStorage:",
@@ -428,15 +466,143 @@ const { fechaPago, listaPagos } = Astro.props;
 		function clearSessionData() {
 			sessionStorage.removeItem("editPaymentDayAgoData");
 		}
+		// Valida si todos los elementos del formulario existen
+		function validateFormElements() {
+			const inputNombre = document.getElementById(
+				"edit-full-name",
+			) as HTMLInputElement;
 
-		async function execUpdateOwner(event: any) {
+			const inputMonto = document.getElementById(
+				"edit-monto-total",
+			) as HTMLInputElement;
+
+			const inputRetiraCoche = document.getElementById(
+				"edit-retiro-coche",
+			) as HTMLSelectElement;
+
+			const inputEstadoPago = document.getElementById(
+				"edit-estado-pago",
+			) as HTMLSelectElement;
+
+			const inputNotaAdicional = document.getElementById(
+				"edit-nota-adicional",
+			) as HTMLTextAreaElement;
+
+			if (
+				!inputNombre ||
+				!inputMonto ||
+				!inputRetiraCoche ||
+				!inputEstadoPago ||
+				!inputNotaAdicional
+			) {
+				mostrarNotificacion(
+					"⚠️ No se encontraron todos los elementos del formulario.",
+					"other",
+				);
+				return null;
+			}
+
+			return {
+				inputNombre,
+				inputMonto,
+				inputRetiraCoche,
+				inputEstadoPago,
+				inputNotaAdicional,
+			};
+		}
+
+		// Convierte el valor de retiro de coche a booleano
+		function parseRetiroCocheValue(retiroCocheValue: string): boolean | null {
+			if (retiroCocheValue === "Sí vino") {
+				return true;
+			} else if (retiroCocheValue === "No vino") {
+				return false;
+			} else {
+				mostrarNotificacion("⚠️ Valor de estado no válido.", "other");
+				return null;
+			}
+		}
+
+		// Convierte el valor de estado de pago a booleano
+		function parseEstadoPagoValue(estadoPagoValue: string): boolean | null {
+			if (estadoPagoValue === "Sí Canceló") {
+				return true;
+			} else if (estadoPagoValue === "No pagó") {
+				return false;
+			} else {
+				mostrarNotificacion("⚠️ Valor de estado no válido.", "other");
+				return null;
+			}
+		}
+
+		// Verifica si los datos han cambiado
+		function checkIfDataChanged(originalData: any, newData: any): boolean {
+			if (
+				originalData.nombrePropietario === newData.nombreValue &&
+				originalData.montoTotal === newData.montoValue &&
+				originalData.retiroCoche === newData.retiroCocheValue &&
+				originalData.estadoPago === newData.estadoPagoValue &&
+				originalData.notaAdicional === newData.notaAdicionalText
+			) {
+				mostrarNotificacion("⚠️ No hay cambios en los datos.", "other");
+				return false;
+			}
+			return true;
+		}
+
+		// Envía la solicitud para actualizar el pago
+		async function sendUpdateRequest(paymentData: any): Promise<boolean> {
+			try {
+				const res = await fetch("/api/record/payment/updatePayment", {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({
+						id: Number(paymentData.id),
+						nombre_dueno: String(paymentData.nombreValue),
+						monto_total: Number(paymentData.montoValue),
+						retiro_coche: paymentData.retiroCocheBoolean,
+						estado_pago: paymentData.estadoPagoBoolean,
+						nota_adicional: paymentData.notaAdicionalText,
+					}),
+				});
+
+				if (res.ok) {
+					mostrarNotificacion(
+						"✅ Datos actualizados correctamente.",
+						"success",
+					);
+					setTimeout(() => {
+						window.location.reload();
+					}, 1000);
+					return true;
+				} else {
+					const error = await res.json();
+					mostrarNotificacion(
+						"❌ Error al actualizar: " + (error.error || "Error desconocido"),
+						"error",
+					);
+					return false;
+				}
+			} catch (error) {
+				mostrarNotificacion(
+					"❌ Error en la comunicación con el servidor. Inténtelo de nuevo.",
+					"error",
+				);
+				return false;
+			}
+		}
+
+		// Función principal que gestiona la actualización del pago
+		async function execUpdatePaymentAgoDay(event: any) {
 			event.preventDefault();
 
+			// Obtener los datos de sessionStorage
 			const editPaymentDayAgoData = sessionStorage.getItem(
 				"editPaymentDayAgoData",
 			);
 			if (!editPaymentDayAgoData) {
-				// console.log("⚠️ No hay datos en sessionStorage.");
 				mostrarNotificacion("⚠️ No hay datos en el registro.", "other");
 				return;
 			}
@@ -447,157 +613,192 @@ const { fechaPago, listaPagos } = Astro.props;
 				montoTotal,
 				retiroCoche,
 				estadoPago,
+				notaAdicional,
 			} = JSON.parse(editPaymentDayAgoData);
 
-			const inputNombre = document.getElementById(
-				"edit-full-name",
-			) as HTMLInputElement;
-			const inputMonto = document.getElementById(
-				"edit-monto-total",
-			) as HTMLInputElement;
-			const inputRetiraCoche = document.getElementById(
+			// Validar elementos del formulario
+			const formElements = validateFormElements();
+			if (!formElements) return;
+
+			const {
+				inputNombre,
+				inputMonto,
+				inputRetiraCoche,
+				inputEstadoPago,
+				inputNotaAdicional,
+			} = formElements;
+
+			// Obtener valores del formulario
+			const nombreValue = inputNombre.textContent;
+			const montoValue = inputMonto.textContent;
+			const retiroCocheValue = inputRetiraCoche.value;
+			const estadoPagoValue = inputEstadoPago.value;
+			const notaAdicionalText =
+				inputNotaAdicional.value === "" ? null : inputNotaAdicional.value;
+
+			// Validar y convertir los valores
+			const retiroCocheBoolean = parseRetiroCocheValue(retiroCocheValue);
+			if (retiroCocheBoolean === null) return;
+
+			const estadoPagoBoolean = parseEstadoPagoValue(estadoPagoValue);
+			if (estadoPagoBoolean === null) return;
+
+			// Verificar si los datos han cambiado
+			const originalData = {
+				nombrePropietario,
+				montoTotal,
+				retiroCoche,
+				estadoPago,
+				notaAdicional,
+			};
+			const newData = {
+				nombreValue,
+				montoValue,
+				retiroCocheValue,
+				estadoPagoValue,
+				notaAdicionalText,
+			};
+
+			if (!checkIfDataChanged(originalData, newData)) return;
+
+			// Enviar solicitud de actualización
+			await sendUpdateRequest({
+				id: idDueno,
+				nombreValue,
+				montoValue,
+				retiroCocheBoolean,
+				estadoPagoBoolean,
+				notaAdicionalText,
+			});
+		}
+
+		const sumarTarifaAgua = () => {
+			const inputRetiroCoche = document.getElementById(
 				"edit-retiro-coche",
 			) as HTMLSelectElement;
+
+			const editMontoDiarioElement = document.getElementById(
+				"edit-monto-total",
+			) as HTMLInputElement;
+
+			// Agregue el oyente de eventos de cambio para detectar cuando el usuario cambia la selección
+			if (inputRetiroCoche) {
+				inputRetiroCoche.addEventListener("change", () => {
+					// Obtenga los datos de SessionStorage para acceder a los valores originales
+					const editPaymentDayAgoData = sessionStorage.getItem(
+						"editPaymentDayAgoData",
+					);
+					if (editPaymentDayAgoData) {
+						const { montoTarifaAgua } = JSON.parse(editPaymentDayAgoData);
+
+						// Analizar valores originales con respaldo
+						const tarifaAgua = parseFloat(montoTarifaAgua) || 0;
+
+						// Actualizar el valor de MONTO basado en la selección
+						if (editMontoDiarioElement) {
+							if (inputRetiroCoche.value === "Sí vino") {
+								// Si vinieron, agregue la tarifa de agua al total
+								editMontoDiarioElement.textContent = (
+									Number(editMontoDiarioElement.textContent) + tarifaAgua
+								).toFixed(2);
+							} else if (inputRetiroCoche.value === "No vino") {
+								// Si no vinieron, reste la tarifa de agua del total
+								editMontoDiarioElement.textContent = (
+									Number(editMontoDiarioElement.textContent) - tarifaAgua
+								).toFixed(2);
+							}
+						}
+					}
+				});
+			}
+		};
+
+		sumarTarifaAgua();
+
+		const activeAllModals = () => {
+			const allModalToggle: any = "[data-modal-toggle]";
+
+			// Inicializar eventos
+			initializeModalToggles(allModalToggle);
+		};
+
+		activeAllModals();
+
+		const activeOnlyPaymentModal = () => {
+			const editPaymentDayAgoData: any =
+				'[data-modal-toggle="edit-payment-day-ago-modal-data"]';
+
+			// Escuchar el evento de apertura del modal
+			document.querySelectorAll(editPaymentDayAgoData).forEach((btn) => {
+				btn.addEventListener("click", () => {
+					// Pequeño retraso para asegurar que los datos ya estén en sessionStorage
+					setTimeout(() => {
+						setParamsFromSession();
+						applyEstadoPagoStyles();
+					}, 100);
+				});
+			});
+		};
+
+		activeOnlyPaymentModal();
+
+		// Function to apply estado pago styles based on current selection
+		const applyEstadoPagoStyles = () => {
 			const inputEstadoPago = document.getElementById(
 				"edit-estado-pago",
 			) as HTMLSelectElement;
 
-			if (
-				!inputNombre ||
-				!inputMonto ||
-				!inputRetiraCoche ||
-				!inputEstadoPago
-			) {
-				mostrarNotificacion(
-					//alert("⚠️ No se encontraron todos los elementos del formulario.");
-					"⚠️ No se encontraron todos los elementos del formulario.",
-					"other",
-				);
-				return;
+			const inputRetiroCoche = document.getElementById(
+				"edit-retiro-coche",
+			) as HTMLSelectElement;
+
+			if (!inputEstadoPago || !inputRetiroCoche) return;
+
+			// Apply styles based on payment status
+			if (inputEstadoPago.value === "Sí Canceló") {
+				inputRetiroCoche.disabled = true;
+				inputRetiroCoche.classList.add("cursor-not-allowed", "opacity-60");
+			} else if (inputEstadoPago.value === "No pagó") {
+				inputRetiroCoche.disabled = false;
+				inputRetiroCoche.classList.remove("cursor-not-allowed", "opacity-60");
 			}
 
-			const nombreValue = inputNombre.value;
-			const montoValue = inputMonto.value;
-			const retiroCocheValue = inputRetiraCoche.value;
-			const estadoPagoValue = inputEstadoPago.value;
+			// Add change event listener to reapply styles when payment status changes
+			inputEstadoPago.addEventListener("change", applyEstadoPagoStyles);
+		};
 
-			// Validar el estado de retiro de coche
-			let retiroCocheBoolean: boolean;
-			if (retiroCocheValue === "Sí vino") {
-				retiroCocheBoolean = true;
-			} else if (retiroCocheValue === "No vino") {
-				retiroCocheBoolean = false;
-			} else {
-				//alert("⚠️ Valor de estado no válido.");
-				mostrarNotificacion("⚠️ Valor de estado no válido.", "other");
-				return;
-			}
-
-			// Validar el estado de pago
-			let estadoPagoBoolean: boolean;
-			if (estadoPagoValue === "Sí Canceló") {
-				estadoPagoBoolean = true;
-			} else if (estadoPagoValue === "No pagó") {
-				estadoPagoBoolean = false;
-			} else {
-				//alert("⚠️ Valor de estado no válido.");
-				mostrarNotificacion("Valor de estado no válido.", "other");
-				return;
-			}
-
-			// Comprobar si los datos no han cambiado
-			if (
-				nombrePropietario === nombreValue &&
-				montoTotal === montoValue &&
-				retiroCoche === retiroCocheValue &&
-				estadoPago === estadoPagoValue
-			) {
-				//alert("⚠️ No hay cambios en los datos, no se enviará el POST.");
-				mostrarNotificacion("⚠️ No hay cambios en los datos.", "other");
-				return;
-			}
-
-			try {
-				const res = await fetch("/api/record/payment/updatePayment", {
-					method: "POST",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify({
-						id: Number(idDueno),
-						nombre_dueno: String(nombreValue),
-						monto_total: Number(montoValue),
-						retiro_coche: retiroCocheBoolean,
-						estado_pago: estadoPagoBoolean,
-					}),
+		const confirmUpdatePaymentAgoDay = () => {
+			// Botón que confirma la edición
+			const updatePaymentDayAgoForm = document.getElementById(
+				"update-payment-day-ago-form",
+			);
+			if (updatePaymentDayAgoForm) {
+				updatePaymentDayAgoForm.addEventListener("submit", async (event) => {
+					event.preventDefault();
+					// Ejecutar la lógica de actualización aquí
+					await execUpdatePaymentAgoDay(event);
+					// Cerrar el modal y limpiar los datos
+					clearSessionData();
+					cerrarModal("edit-payment-day-ago-modal-data");
 				});
-
-				if (res.ok) {
-					//alert("✅ Datos actualizados correctamente.");
-					mostrarNotificacion(
-						"✅ Datos actualizados correctamente.",
-						"success",
-					);
-					setTimeout(() => {
-						window.location.reload();
-					}, 1000);
-				} else {
-					const error = await res.json();
-					//alert("❌ Error al actualizar: " + (error.error || "Error desconocido"));
-					mostrarNotificacion(
-						"❌ Error al actualizar: " + (error.error || "Error desconocido"),
-						"error",
-					);
-				}
-			} catch (error) {
-				//alert("❌ Error en la comunicación con el servidor. Inténtelo de nuevo."));
-				mostrarNotificacion(
-					"❌ Error en la comunicación con el servidor. Inténtelo de nuevo.",
-					"error",
-				);
 			}
-		}
+		};
 
-		const allModalToggle: any = "[data-modal-toggle]";
+		confirmUpdatePaymentAgoDay();
 
-		const editPaymentDayAgoData: any =
-			'[data-modal-toggle="edit-payment-day-ago-modal-data"]';
+		const execCloseModal = () => {
+			// Botón que cierra el modal
+			const closeModalButton1 = document.getElementById(
+				"close-edit-payment-day-ago-modal-1",
+			);
+			if (closeModalButton1) {
+				closeModalButton1.addEventListener("click", () => {
+					clearSessionData();
+					cerrarModal("edit-payment-day-ago-modal-data");
+				});
+			}
+		};
 
-		// Inicializar eventos
-		initializeModalToggles(allModalToggle);
-
-		// Escuchar el evento de apertura del modal
-		document.querySelectorAll(editPaymentDayAgoData).forEach((btn) => {
-			btn.addEventListener("click", () => {
-				// Pequeño retraso para asegurar que los datos ya estén en sessionStorage
-				setTimeout(() => {
-					setParamsFromSession();
-				}, 100);
-			});
-		});
-
-		// Botón que cierra el modal
-		const closeModalButton1 = document.getElementById(
-			"close-edit-payment-day-ago-modal-1",
-		);
-		if (closeModalButton1) {
-			closeModalButton1.addEventListener("click", () => {
-				clearSessionData();
-				cerrarModal("edit-payment-day-ago-modal-data");
-			});
-		}
-
-		// Botón que confirma la edición
-		const updatePaymentDayAgoForm = document.getElementById(
-			"update-payment-day-ago-form",
-		);
-		if (updatePaymentDayAgoForm) {
-			updatePaymentDayAgoForm.addEventListener("submit", async (event) => {
-				event.preventDefault();
-				// Ejecutar la lógica de actualización aquí
-				await execUpdateOwner(event);
-				// Cerrar el modal y limpiar los datos
-				clearSessionData();
-				cerrarModal("edit-payment-day-ago-modal-data");
-			});
-		}
+		execCloseModal();
 	});
 </script>

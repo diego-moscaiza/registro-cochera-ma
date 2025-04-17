@@ -2,14 +2,16 @@
 import { getAllPayments } from "../../../pages/api/record/payment/getPayment";
 import PaymentTableDesignAll from "./../all/PaymentTableDesignAll.astro";
 
-export interface PaymentEntry {
+interface PaymentEntry {
 	id: string;
 	dueno_id: string;
 	nombre_dueno: string;
 	fecha_pago: string;
 	retiro_coche: boolean;
 	monto_total: number;
+	monto_tarifa_agua: number;
 	estado_pago: boolean;
+	nota_adicional: string;
 }
 const response = await getAllPayments();
 const listaPagos = Array.isArray(response) ? response : await response.json();
@@ -86,7 +88,9 @@ pagosPorFecha.forEach((pagos) => {
 							fechaPago: detallePago.fecha_pago,
 							retiroCoche: detallePago.retiro_coche,
 							montoTotal: detallePago.monto_total,
+							montoTarifaAgua: detallePago.monto_tarifa_agua,
 							estadoPago: detallePago.estado_pago,
+							notaAdicional: detallePago.nota_adicional,
 						}))}
 					/>
 				),
