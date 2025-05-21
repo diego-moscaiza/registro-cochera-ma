@@ -57,26 +57,42 @@ const loginTitle = "Iniciar sesión";
 						class="text-base lg:text-xl font-semibold text-black dark:text-white"
 						>Tu contraseña</label
 					>
-					<input
-						id="password"
-						type="password"
-						name="password"
-						placeholder="••••••••"
-						autocomplete="on"
+					<div
 						class:list={[
 							"py-2 px-4 rounded-md border",
+							"flex items-center justify-between",
+							"gap-2",
 							"text-base lg:text-lg text-black dark:text-neutral-100",
 							"bg-white dark:bg-slate-700 border-neutral-300 dark:border-slate-500",
-							"focus:bg-neutral-50 dark:focus:bg-slate-800 focus:border-blue-500 focus:ring-blue-600",
-							"focus:outline-none focus:ring-2 focus:ring-opacity-60",
+							"focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-600 focus-within:ring-opacity-60",
+							"focus-within:bg-neutral-50 dark:focus-within:bg-slate-800",
 						]}
-					/>
+					>
+						<input
+							id="password"
+							type="password"
+							name="password"
+							placeholder="••••••••"
+							autocomplete="current-password"
+							class:list={[
+								"w-full outline-none",
+								"text-base lg:text-lg text-black dark:text-neutral-100",
+								"bg-transparent border-none",
+							]}
+						/>
+						<button
+							type="button"
+							id="showPasswordButton"
+							aria-label="Mostrar u ocultar contraseña"
+							class:list={[
+								"flex items-center justify-center",
+								"w-8 h-8 rounded-md",
+								"hover:bg-neutral-100 dark:hover:bg-slate-600",
+								"focus:outline-none focus:ring-2 focus:ring-blue-500",
+							]}>👁️</button
+						>
+					</div>
 				</div>
-
-				<label class="flex items-center gap-2 text-md lg:text-xl">
-					<input type="checkbox" id="showPassword" class="cursor-pointer" />
-					<span id="checkText">Mostrar contraseña 👁️</span>
-				</label>
 
 				<button
 					type="submit"
@@ -94,13 +110,11 @@ const loginTitle = "Iniciar sesión";
 
 <script>
 	const passwordInput: any = document.getElementById("password");
-	const showPassword: any = document.getElementById("showPassword");
-	const checkText: any = document.getElementById("checkText");
+	const showPasswordButton: any = document.getElementById("showPasswordButton");
 
-	showPassword.addEventListener("change", () => {
-		passwordInput.type = showPassword.checked ? "text" : "password";
-		checkText.textContent = showPassword.checked
-			? "Ocultar contraseña 🙈"
-			: "Mostrar contraseña 👁️";
+	showPasswordButton.addEventListener("click", () => {
+		const isVisible = passwordInput.type === "text";
+		passwordInput.type = isVisible ? "password" : "text";
+		showPasswordButton.textContent = isVisible ? "👁️" : "🙈";
 	});
 </script>
