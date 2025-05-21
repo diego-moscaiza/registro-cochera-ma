@@ -735,12 +735,38 @@ const { listaPagos } = Astro.props;
 					// Pequeño retraso para asegurar que los datos ya estén en sessionStorage
 					setTimeout(() => {
 						setParamsFromSession();
+						applyEstadoPagoStyles();
 					}, 100);
 				});
 			});
 		};
 
 		activeOnlyPaymentModal();
+
+		// Function to apply estado pago styles based on current selection
+		const applyEstadoPagoStyles = () => {
+			const inputEstadoPago = document.getElementById(
+				"edit-estado-pago",
+			) as HTMLSelectElement;
+
+			const inputRetiroCoche = document.getElementById(
+				"edit-retiro-coche",
+			) as HTMLSelectElement;
+
+			if (!inputEstadoPago || !inputRetiroCoche) return;
+
+			// Apply styles based on payment status
+			if (inputEstadoPago.value === "Sí Canceló") {
+				inputRetiroCoche.disabled = true;
+				inputRetiroCoche.classList.add("cursor-not-allowed", "opacity-60");
+			} else if (inputEstadoPago.value === "No pagó") {
+				inputRetiroCoche.disabled = false;
+				inputRetiroCoche.classList.remove("cursor-not-allowed", "opacity-60");
+			}
+
+			// Add change event listener to reapply styles when payment status changes
+			inputEstadoPago.addEventListener("change", applyEstadoPagoStyles);
+		};
 
 		const confirmUpdatePaymentToday = () => {
 			// Botón que confirma la edición
