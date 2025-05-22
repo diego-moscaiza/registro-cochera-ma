@@ -25,6 +25,7 @@ const loginTitle = "Iniciar sesión";
 			</h1>
 
 			<form
+				id="loginForm"
 				action="/api/auth/signin"
 				method="post"
 				class="grid grid-cols-1 gap-6 w-full"
@@ -41,6 +42,7 @@ const loginTitle = "Iniciar sesión";
 						name="email"
 						placeholder="nombre@mail.com"
 						autocomplete="on"
+						required
 						class:list={[
 							"py-2 px-4 rounded-md border",
 							"text-base lg:text-lg text-black dark:text-neutral-100",
@@ -49,6 +51,9 @@ const loginTitle = "Iniciar sesión";
 							"focus:outline-none focus:ring-2 focus:ring-opacity-60",
 						]}
 					/>
+					<div id="emailError" class="text-red-500 text-sm hidden">
+						Por favor, introduce una dirección de correo válida.
+					</div>
 				</div>
 
 				<div id="passwordContainer" class="grid grid-cols-1 gap-2">
@@ -73,6 +78,7 @@ const loginTitle = "Iniciar sesión";
 							type="password"
 							name="password"
 							placeholder="••••••••"
+							required
 							autocomplete="current-password"
 							class:list={[
 								"w-full outline-none",
@@ -89,32 +95,143 @@ const loginTitle = "Iniciar sesión";
 								"w-8 h-8 rounded-md",
 								"hover:bg-neutral-100 dark:hover:bg-slate-600",
 								"focus:outline-none focus:ring-2 focus:ring-blue-500",
-							]}>👁️</button
+							]}
 						>
+							<span aria-hidden="true">👁️</span>
+						</button>
+					</div>
+					<div id="passwordError" class="text-red-500 text-sm hidden">
+						La contraseña es obligatoria.
+					</div>
+				</div>
+
+				<div class="flex flex-col gap-4">
+					<div class="flex items-center">
+						<input
+							type="checkbox"
+							id="remember"
+							name="remember"
+							class="w-4 h-4 text-blue-600 bg-gray-100 rounded border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:bg-gray-700 dark:border-gray-600"
+						/>
+						<label
+							for="remember"
+							class="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+						>
+							Mantener sesión iniciada
+						</label>
 					</div>
 				</div>
 
 				<button
+					id="loginButton"
 					type="submit"
 					class:list={[
-						"py-1.5 text-md lg:text-xl text-sm font-medium text-neutral-100",
+						"py-2 text-md lg:text-xl font-medium text-neutral-100",
 						"rounded-md bg-blue-700 border-blue-800 border",
 						"focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-neutral-900",
 						"disabled:opacity-50 disabled:cursor-not-allowed",
-					]}>Ingresar</button
+						"relative",
+					]}
 				>
+					<span>Ingresar</span>
+					<span
+						id="loadingSpinner"
+						class="absolute inset-0 flex items-center justify-center hidden"
+					>
+						<svg
+							class="animate-spin h-5 w-5 text-white"
+							xmlns="http://www.w3.org/2000/svg"
+							fill="none"
+							viewBox="0 0 24 24"
+						>
+							<circle
+								class="opacity-25"
+								cx="12"
+								cy="12"
+								r="10"
+								stroke="currentColor"
+								stroke-width="4"></circle>
+							<path
+								class="opacity-75"
+								fill="currentColor"
+								d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+							></path>
+						</svg>
+					</span>
+				</button>
 			</form>
 		</section>
 	</main>
 </Base>
 
 <script>
-	const passwordInput: any = document.getElementById("password");
-	const showPasswordButton: any = document.getElementById("showPasswordButton");
+	const passwordInput = document.getElementById("password") as HTMLInputElement;
+	const showPasswordButton = document.getElementById(
+		"showPasswordButton",
+	) as HTMLButtonElement;
+	const loginForm = document.getElementById("loginForm") as HTMLFormElement;
+	const loginButton = document.getElementById(
+		"loginButton",
+	) as HTMLButtonElement;
+	const loadingSpinner = document.getElementById(
+		"loadingSpinner",
+	) as HTMLSpanElement;
+	const emailInput = document.getElementById("email") as HTMLInputElement;
+	const emailError = document.getElementById("emailError") as HTMLDivElement;
+	const passwordError = document.getElementById(
+		"passwordError",
+	) as HTMLDivElement;
 
+	// Mostrar/ocultar contraseña
 	showPasswordButton.addEventListener("click", () => {
 		const isVisible = passwordInput.type === "text";
 		passwordInput.type = isVisible ? "password" : "text";
-		showPasswordButton.textContent = isVisible ? "👁️" : "🙈";
+		showPasswordButton.innerHTML = isVisible
+			? '<span aria-hidden="true">👁️</span>'
+			: '<span aria-hidden="true">🙈</span>';
+	});
+
+	// Validación y manejo de formulario
+	loginForm.addEventListener("submit", (e) => {
+		let isValid = true;
+
+		// Validar email
+		if (!emailInput.validity.valid) {
+			emailError.classList.remove("hidden");
+			isValid = false;
+		} else {
+			emailError.classList.add("hidden");
+		}
+
+		// Validar contraseña
+		if (!passwordInput.validity.valid) {
+			passwordError.classList.remove("hidden");
+			isValid = false;
+		} else {
+			passwordError.classList.add("hidden");
+		}
+
+		if (!isValid) {
+			e.preventDefault();
+			return;
+		}
+
+		// Mostrar animación de carga
+		loginButton.disabled = true;
+		loginButton.querySelector("span:first-child")!.classList.add("invisible");
+		loadingSpinner.classList.remove("hidden");
+	});
+
+	// Validar en tiempo real
+	emailInput.addEventListener("input", () => {
+		if (emailInput.validity.valid) {
+			emailError.classList.add("hidden");
+		}
+	});
+
+	passwordInput.addEventListener("input", () => {
+		if (passwordInput.validity.valid) {
+			passwordError.classList.add("hidden");
+		}
 	});
 </script>
