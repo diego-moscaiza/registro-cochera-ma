@@ -6,19 +6,25 @@ const handleErrorResponse = (message: string, status: number): Response => {
 	return new Response(message, { status });
 };
 
-const setAuthCookies = (cookies: any, accessToken: string, refreshToken: string): boolean => {
+// Función actualizada para incluir duración de sesión basada en "remember"
+const setAuthCookies = (cookies: any, accessToken: string, refreshToken: string, remember: boolean): boolean => {
 	try {
+		// Configurar la duración de la sesión: 30 días si "remember" está activo, o 1 día si no
+		const maxAge = remember ? 60 * 60 * 24 * 30 : 60 * 60 * 24; // segundos: 30 días o 1 día
+
 		cookies.set("sb-access-token", accessToken, {
 			sameSite: "strict",
 			path: "/",
 			secure: process.env.NODE_ENV === "production",
 			httpOnly: true,
+			maxAge: maxAge, // Añadir maxAge para controlar cuándo expira
 		});
 		cookies.set("sb-refresh-token", refreshToken, {
 			sameSite: "strict",
 			path: "/",
 			secure: process.env.NODE_ENV === "production",
 			httpOnly: true,
+			maxAge: maxAge, // Añadir maxAge para controlar cuándo expira
 		});
 		return true;
 	} catch (error) {
@@ -55,6 +61,8 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
 		const email = formData.get("email")?.toString() || "";
 		const password = formData.get("password")?.toString() || "";
 		const provider = formData.get("provider")?.toString();
+		// Capturar el valor del checkbox "remember" del formulario
+		const remember = formData.get("remember") === "on";
 
 		const redirectToDashboard = "/panel/pagos-del-dia";
 
@@ -63,7 +71,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
 			if (response.status === 302) {
 				return response;
 			}
-			const errorText = await response.text(); // Leer el texto una vez
+			const errorText = await response.text();
 			console.error("OAuth sign-in error:", errorText);
 			return handleErrorResponse(errorText, response.status);
 		}
@@ -74,7 +82,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
 
 		const response = await signInWithPassword(email, password);
 		if (response.status !== 200) {
-			const errorText = await response.text(); // Leer el texto una vez
+			const errorText = await response.text();
 			console.error("Password sign-in error:", errorText);
 			return handleErrorResponse(errorText, response.status);
 		}
@@ -85,11 +93,15 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
 		}
 
 		const { access_token, refresh_token } = data.session;
-		const cookiesSet = setAuthCookies(cookies, access_token, refresh_token);
+		// Pasar el valor de remember a la función setAuthCookies
+		const cookiesSet = setAuthCookies(cookies, access_token, refresh_token, remember);
 
 		if (!cookiesSet) {
 			return handleErrorResponse("Failed to set authentication cookies", 500);
 		}
+
+		// Imprimir en consola para debugging (puedes quitar esto en producción)
+		console.log(`Usuario autenticado, sesión extendida: ${remember ? 'Sí (30 días)' : 'No (1 día)'}`);
 
 		return redirect(redirectToDashboard);
 	} catch (error) {
