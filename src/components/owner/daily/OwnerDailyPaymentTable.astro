@@ -1,17 +1,15 @@
 ---
-import { getAllPaymentsById } from "../../../pages/api/record/payment/getPayment";
-
 interface Props {
-	id: string;
-}
-
-interface PaymentEntry {
-	dueno_id: string;
-	nombre_dueno: string;
-	fecha_pago: string;
-	retiro_coche: boolean;
-	monto_total: number;
-	estado_pago: boolean;
+	pagoPorPropietario: {
+		idDueno: string;
+		nombreDueno: string;
+		montoTotal: number;
+		montoTarifaAgua: number;
+		fechaPago: string;
+		retiroCoche: boolean;
+		estadoPago: boolean;
+		guardaCarreta: boolean;
+	}[];
 }
 
 const opciones: Intl.DateTimeFormatOptions = {
@@ -27,87 +25,85 @@ function convertirFechaPeru(fechaStr: string) {
 	return fechaLocal.toLocaleDateString("es-PE", opciones);
 }
 
-const { id } = Astro.props;
-const pagoPorPropietario: any = id ? await getAllPaymentsById({ id }) : [];
+const { pagoPorPropietario } = Astro.props;
 ---
 
-<div>
-	{
-		pagoPorPropietario.length === 0 ? (
-			<div class="px-6 py-4 text-2xl text-center bg-white dark:bg-slate-700 rounded-lg border border-slate-400 dark:border-slate-600">
-				No hay registros de los pagos.
-			</div>
-		) : (
-			<div class="overflow-hidden shadow-md rounded-2xl">
-				<table
-					class:list={[
-						"min-w-full overflow-x-auto",
-						"divide-y rounded-lg",
-						"bg-white dark:bg-slate-800",
-						"divide-gray-300 dark:divide-slate-700",
-					]}
-				>
-					<thead class="bg-slate-200 dark:bg-slate-700 rounded-t-lg text-nowrap">
-						<tr>
-							<th
-								scope="col"
-								class="p-4 text-sm font-semibold text-left text-gray-700 uppercase dark:text-gray-300"
-							>
-								Fecha de pago
-							</th>
-							<th
-								scope="col"
-								class="p-4 text-sm font-semibold text-left text-gray-700 uppercase dark:text-gray-300"
-							>
-								Pago realizado
-							</th>
-							<th
-								scope="col"
-								class="p-4 text-sm font-semibold text-left text-gray-700 uppercase dark:text-gray-300"
-							>
-								¿retiro su carreta?
-							</th>
-							<th
-								scope="col"
-								class="p-4 text-sm font-semibold text-left text-gray-700 uppercase dark:text-gray-300"
-							>
-								Estado del Pago
-							</th>
-							<th
-								scope="col"
-								class="p-4 text-sm text font-semibold text-left text-gray-700 uppercase dark:text-gray-300"
-							>
-								Acciones
-							</th>
-						</tr>
-					</thead>
+<section class="overflow-x-auto">
+	<div class="inline-block min-w-full align-middle">
+		<div class="overflow-hidden shadow-md rounded-2xl">
+			<table
+				class:list={[
+					"min-w-full overflow-x-auto",
+					"divide-y rounded-lg",
+					"bg-white dark:bg-slate-800",
+					"divide-gray-300 dark:divide-slate-700",
+				]}
+			>
+				<thead class="bg-slate-200 dark:bg-slate-700 rounded-t-lg text-nowrap">
+					<tr>
+						<th
+							scope="col"
+							class="p-4 text-xs sm:text-sm xl:text-base font-semibold text-left text-gray-700 uppercase dark:text-gray-300"
+						>
+							Fecha de pago
+						</th>
+						<th
+							scope="col"
+							class="p-4 text-xs sm:text-sm xl:text-base font-semibold text-left text-gray-700 uppercase dark:text-gray-300"
+						>
+							Pago realizado
+						</th>
+						<th
+							scope="col"
+							class="p-4 text-xs sm:text-sm xl:text-base font-semibold text-left text-gray-700 uppercase dark:text-gray-300"
+						>
+							¿retiro su carreta?
+						</th>
+						<th
+							scope="col"
+							class="p-4 text-xs sm:text-sm xl:text-base font-semibold text-left text-gray-700 uppercase dark:text-gray-300"
+						>
+							Estado del Pago
+						</th>
+						<th
+							scope="col"
+							class="p-4 text-xs sm:text-sm xl:text-base font-semibold text-left text-gray-700 uppercase dark:text-gray-300"
+						>
+							Acciones
+						</th>
+					</tr>
+				</thead>
 
-					<tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-						{pagoPorPropietario.map((pago: PaymentEntry) => {
+				<tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+					{
+						pagoPorPropietario.map((pago) => {
 							const formatoPago = {
-								idDueno: pago.dueno_id ?? "-",
-								nombreDueno: pago.nombre_dueno ?? "-",
-								fechaPago: pago.fecha_pago ?? "-",
-								montoTotal: pago.monto_total,
-								retiroCoche: pago.retiro_coche ? "Sí vino" : "No vino",
-								estadoPago: pago.estado_pago ? "Sí Canceló" : "No Pagó",
+								idDueno: pago.idDueno ?? "-",
+								nombreDueno: pago.nombreDueno ?? "-",
+								fechaPago: pago.fechaPago ?? "-",
+								montoTotal: pago.montoTotal ?? 0,
+								retiroCoche: pago.retiroCoche ? "Sí vino" : "No vino",
+								estadoPago: pago.estadoPago ? "Sí Canceló" : "No Pagó",
+								guardaCarreta: pago.guardaCarreta
+									? "Sí guarda"
+									: "Ya no guarda",
 							};
 
 							return (
 								<tr class="hover:bg-gray-100 dark:hover:bg-gray-700 transition duration-200">
 									<td
 										id="table-monto-diario"
-										class="p-4 text-base font-semibold text-gray-900 whitespace-nowrap dark:text-gray-200"
+										class="p-4 text-xs sm:text-sm xl:text-base font-semibold text-gray-900 whitespace-nowrap dark:text-gray-200"
 									>
 										{convertirFechaPeru(formatoPago.fechaPago)}
 									</td>
 									<td
 										id="table-monto-diario"
-										class="p-4 text-base font-semibold text-gray-900 whitespace-nowrap dark:text-gray-200"
+										class="p-4 text-xs sm:text-sm xl:text-base font-semibold text-gray-900 whitespace-nowrap dark:text-gray-200"
 									>
 										S/. {formatoPago.montoTotal.toFixed(2)}
 									</td>
-									<td class="p-4 text-sm text-nowrap font-medium">
+									<td class="p-4 text-xs sm:text-sm xl:text-base text-nowrap font-medium">
 										<span
 											id="table-retiro-coche-value"
 											class:list={[
@@ -120,7 +116,7 @@ const pagoPorPropietario: any = id ? await getAllPaymentsById({ id }) : [];
 											{formatoPago.retiroCoche}
 										</span>
 									</td>
-									<td class="p-4 text-sm text-nowrap font-medium">
+									<td class="p-4 text-xs sm:text-sm xl:text-base text-nowrap font-medium">
 										<span
 											id="table-estado-pago-value"
 											class:list={[
@@ -136,15 +132,15 @@ const pagoPorPropietario: any = id ? await getAllPaymentsById({ id }) : [];
 									<td class="p-4 space-x-2 whitespace-nowrap">
 										<button
 											type="button"
-											id="open-edit-owner-modal"
-											data-modal-toggle="edit-owner-modal"
+											id="open-edit-owner-daily-pay-modal"
+											data-modal-toggle="edit-owner-daily-pay-modal"
 											onclick={`sessionStorage.setItem('ownerDailyPaymentData', JSON.stringify({
 													id: '${formatoPago.idDueno}',
 													nombrePropietario: '${formatoPago.nombreDueno}',
 													montoDiario: '${formatoPago.montoTotal.toFixed(2)}',
-													guardaCarreta: '${formatoPago.estadoPago}'
+													guardaCarreta: '${formatoPago.guardaCarreta}',
 											}));`}
-											class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-blue-600 hover:bg-blue-700 focus:ring-2 focus:ring-blue-400 dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-blue-700"
+											class="inline-flex items-center px-3 py-2 text-xs sm:text-sm xl:text-basefont-medium text-center text-white rounded-lg bg-blue-600 hover:bg-blue-700 focus:ring-2 focus:ring-blue-400 dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-blue-700"
 										>
 											<svg
 												class="w-4 h-4 mr-2"
@@ -164,10 +160,386 @@ const pagoPorPropietario: any = id ? await getAllPaymentsById({ id }) : [];
 									</td>
 								</tr>
 							);
-						})}
-					</tbody>
-				</table>
+						})
+					}
+				</tbody>
+			</table>
+		</div>
+	</div>
+	<!-- Edit User Modal -->
+	<div
+		class="fixed inset-0 z-50 items-center justify-center bg-black bg-opacity-50 transition-opacity duration-300 ease-in-out hidden"
+		id="edit-owner-daily-pay-modal"
+	>
+		<div
+			class="relative w-full max-w-2xl px-4 transform transition-all duration-300 ease-in-out scale-95 opacity-0"
+		>
+			<!-- Modal content -->
+			<div class="relative bg-white rounded-lg shadow-lg dark:bg-gray-800">
+				<!-- Modal header -->
+				<div
+					class="flex items-start justify-between p-5 border-b border-gray-200 rounded-t dark:border-gray-700"
+				>
+					<h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+						Editar información del propietario
+					</h3>
+					<button
+						type="button"
+						id="close-edit-owner-daily-pay-modal"
+						class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-700 dark:hover:text-white"
+						data-modal-toggle="edit-owner-daily-pay-modal"
+					>
+						<svg
+							class="w-5 h-5"
+							fill="currentColor"
+							viewBox="0 0 20 20"
+							xmlns="http://www.w3.org/2000/svg"
+						>
+							<path
+								fill-rule="evenodd"
+								d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+								clip-rule="evenodd"></path>
+						</svg>
+					</button>
+				</div>
+
+				<!-- Modal body -->
+				<div>
+					<form id="update-owner-daily-payment-form" class="p-6 space-y-6">
+						<div class="grid grid-cols-6 gap-6">
+							<div class="col-span-6 sm:col-span-6">
+								<label
+									for="edit-full-name"
+									class="block mb-2 text-sm font-medium text-blue-900 dark:text-white"
+									>Nombre</label
+								>
+								<input
+									type="text"
+									name="nombre-Dueno"
+									id="edit-full-name"
+									class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
+									placeholder="Nombre del propietario"
+									required
+								/>
+							</div>
+							<div class="col-span-6 sm:col-span-3">
+								<label
+									for="edit-monto-diario"
+									class="block mb-2 text-sm font-medium text-blue-900 dark:text-white"
+									>Monto diario <span class="text-gray-500">(S/.)</span></label
+								>
+								<input
+									type="text"
+									name="monto-diario"
+									id="edit-monto-diario"
+									class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
+									placeholder="Monto diario de pago"
+									required
+								/>
+							</div>
+							<div class="col-span-6 sm:col-span-3">
+								<label
+									for="edit-estado"
+									class="block mb-2 text-sm font-medium text-blue-900 dark:text-white"
+									>Estado</label
+								>
+								<select
+									name="estado"
+									id="edit-estado"
+									class="shadow-sm bg-gray-50 rounded-lg border border-gray-300 text-gray-900 sm:text-sm focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500 appearance-none"
+									required
+								>
+									<option value="" disabled selected>
+										Seleccione el estado</option
+									>
+									<option value="Sí guarda">Sí guarda</option>
+									<option value="Ya no guarda">Ya no guarda</option>
+								</select>
+							</div>
+						</div>
+						<!-- Modal footer -->
+						<div
+							class="flex items-center justify-end px-6 pt-4 border-t border-gray-200 rounded-b dark:border-gray-700"
+						>
+							<button
+								id="close-edit-owner-daily-pay-modal-2"
+								class="text-white bg-blue-600 hover:bg--700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-blue-800"
+								type="submit"
+								data-modal-toggle="edit-owner-daily-pay-modal"
+							>
+								Guardar
+							</button>
+						</div>
+					</form>
+				</div>
 			</div>
-		)
+		</div>
+	</div>
+</section>
+
+<script>
+	// Input nonto_diario
+	const editMontoDiarioElement = document.getElementById("edit-monto-diario");
+	if (editMontoDiarioElement) {
+		editMontoDiarioElement.addEventListener("input", (event) => {
+			const input: any = event.target;
+			const regex = /^\d{0,2}(\.\d{0,2})?$/; // Permite hasta 2 cifras enteras y 2 decimales
+			const previousValue = input.getAttribute("data-previous-value") || ""; // Obtiene el valor anterior
+
+			if (!regex.test(input.value)) {
+				input.value = previousValue; // Restaura el valor anterior si no es válido
+			} else {
+				input.setAttribute("data-previous-value", input.value); // Guarda el valor actual como válido
+			}
+		});
 	}
-</div>
+
+	// Espera a que cargue toda la pagina para ejecutarse
+	document.addEventListener("DOMContentLoaded", () => {
+		// Función para mostrar una notificación temporal
+		function mostrarNotificacion(mensaje: any, tipo: any) {
+			// Crear un elemento de notificación
+			const notificacion = document.createElement("div");
+
+			// Establecer clases según el tipo
+			const baseClasses =
+				"fixed bottom-4 right-4 py-2 px-4 rounded-lg shadow-lg z-50 transition-all duration-300 transform opacity-0 scale-95";
+			const typeClasses =
+				tipo === "success"
+					? "bg-green-600 text-white"
+					: tipo === "error"
+						? "bg-red-500 text-white"
+						: "bg-orange-700 text-white";
+
+			const setTimeoutValue = tipo === "success" ? 800 : 5000;
+
+			notificacion.className = `${baseClasses} ${typeClasses}`;
+			notificacion.textContent = mensaje;
+
+			// Añadir al DOM
+			document.body.appendChild(notificacion);
+
+			// Animación para aparecer
+			setTimeout(() => {
+				notificacion.classList.add("opacity-100", "scale-100");
+				notificacion.classList.remove("opacity-0", "scale-95");
+			}, 10);
+
+			// Eliminar después del tiempo configurado
+			setTimeout(() => {
+				notificacion.classList.add("translate-y-10", "opacity-0");
+				notificacion.classList.remove("opacity-100", "scale-100");
+				setTimeout(() => {
+					document.body.removeChild(notificacion);
+				}, 200);
+			}, setTimeoutValue);
+		}
+
+		// Función para alternar el estado del modal
+		function toggleModalVisibility(modalId: string, show: boolean) {
+			const modal = document.getElementById(modalId);
+			if (modal) {
+				const modalContent = modal.querySelector(".transform");
+				if (show) {
+					modal.classList.remove("hidden");
+					modal.classList.add("flex");
+					setTimeout(() => {
+						modal.classList.add("opacity-100");
+						modalContent?.classList.add("scale-100", "opacity-100");
+						modalContent?.classList.remove("scale-95", "opacity-0");
+					}, 10);
+				} else {
+					modal.classList.remove("opacity-100");
+					modalContent?.classList.remove("scale-100", "opacity-100");
+					modalContent?.classList.add("scale-95", "opacity-0");
+					setTimeout(() => {
+						modal.classList.remove("flex");
+						modal.classList.add("hidden");
+					}, 300);
+				}
+			}
+		}
+		// Función para cerrar un modal
+		function cerrarModal(modalId: string) {
+			toggleModalVisibility(modalId, false);
+		}
+
+		// Función para establecer los parámetros en los inputs del modal
+		function setParamsFromSession() {
+			const ownerDailyPaymentData = sessionStorage.getItem(
+				"ownerDailyPaymentData",
+			);
+			if (ownerDailyPaymentData) {
+				const { nombrePropietario, montoDiario, guardaCarreta } = JSON.parse(
+					ownerDailyPaymentData,
+				);
+
+				const inputNombre = document.getElementById(
+					"edit-full-name",
+				) as HTMLInputElement;
+				const inputMonto = document.getElementById(
+					"edit-monto-diario",
+				) as HTMLInputElement;
+				const inputEstado = document.getElementById(
+					"edit-estado",
+				) as HTMLSelectElement;
+
+				if (inputNombre) inputNombre.value = nombrePropietario;
+				if (inputMonto) inputMonto.value = montoDiario;
+				if (inputEstado) inputEstado.value = guardaCarreta;
+			}
+		}
+
+		// Función para eliminar los parámetros del modal
+		function clearSessionData() {
+			sessionStorage.removeItem("ownerDailyPaymentData");
+		}
+
+		// Evento para actualizar los datos y cerrar el modal al hacer clic en el botón de Guardar
+		async function execUpdateOwner(event: any) {
+			event.preventDefault();
+			const ownerDailyPaymentData = sessionStorage.getItem(
+				"ownerDailyPaymentData",
+			);
+			if (!ownerDailyPaymentData)
+				return console.error("No hay datos en sessionStorage");
+
+			const { id, nombrePropietario, montoDiario, guardaCarreta } = JSON.parse(
+				ownerDailyPaymentData,
+			);
+
+			const inputNombre = document.getElementById(
+				"edit-full-name",
+			) as HTMLInputElement;
+			const inputMonto = document.getElementById(
+				"edit-monto-diario",
+			) as HTMLInputElement;
+			const inputEstado = document.getElementById(
+				"edit-estado",
+			) as HTMLSelectElement;
+
+			if (!inputNombre || !inputMonto || !inputEstado) {
+				console.error("No se encontraron todos los elementos del formulario");
+				return;
+			}
+
+			const nombreValue = inputNombre.value;
+			const montoValue = inputMonto.value;
+			const guardaCarretaValue = inputEstado.value;
+			let guardaCarretaBoolean: boolean;
+
+			if (guardaCarretaValue === "Sí guarda") {
+				guardaCarretaBoolean = true;
+			} else if (guardaCarretaValue === "Ya no guarda") {
+				guardaCarretaBoolean = false;
+			} else {
+				console.error("Valor de estado no válido");
+				return;
+			}
+
+			// Comprobar si los datos no han cambiado
+			if (
+				nombrePropietario === nombreValue &&
+				montoDiario === montoValue &&
+				guardaCarreta === guardaCarretaValue
+			) {
+				// console.log("⚠️ No se detectaron cambios en los datos para actualizar.");
+				mostrarNotificacion(
+					"⚠️ No se detectaron cambios en los datos para actualizar.",
+					"other",
+				);
+				return; // No hacer nada si los datos son los mismos
+			}
+
+			try {
+				const res = await fetch("/api/record/owner/updateOwner", {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({
+						id: Number(id),
+						nombre_dueno: String(nombreValue),
+						monto_diario: Number(montoValue),
+						guarda_carreta: guardaCarretaBoolean,
+					}),
+				});
+
+				if (res.ok) {
+					//alert("✅ Datos actualizados correctamente.");
+					mostrarNotificacion(
+						"✅ Datos actualizados correctamente.",
+						"success",
+					);
+					setTimeout(() => {
+						window.location.reload();
+					}, 1000);
+				} else {
+					const error = await res.json();
+					//alert("❌ Error al actualizar: " + (error.error || "Error desconocido"));
+					mostrarNotificacion(
+						"❌ Error al actualizar: " + (error.error || "Error desconocido"),
+						"error",
+					);
+				}
+			} catch (error) {
+				console.error("Error en la petición:", error);
+				//alert("❌ Error en la comunicación con el servidor. Inténtelo de nuevo.");
+				mostrarNotificacion(
+					"❌ Error en la comunicación con el servidor. Inténtelo de nuevo.",
+					"error",
+				);
+			}
+		}
+
+		const applyEstadoPagoStyles = () => {
+			const editOwnerData: any =
+				'[data-modal-toggle="edit-owner-daily-pay-modal"]';
+
+			// Escuchar el evento de apertura del modal
+			document.querySelectorAll(editOwnerData).forEach((btn) => {
+				btn.addEventListener("click", () => {
+					// Pequeño retraso para asegurar que los datos ya estén en sessionStorage
+					setTimeout(() => {
+						setParamsFromSession();
+					}, 100);
+				});
+			});
+		};
+
+		applyEstadoPagoStyles();
+
+		const confirmUpdateOwnerPayment = () => {
+			// Botón que confirma la edición
+			const updateOwnerForm = document.getElementById(
+				"update-owner-daily-payment-form",
+			);
+			if (updateOwnerForm) {
+				updateOwnerForm.addEventListener("submit", async (event) => {
+					event.preventDefault();
+					// Ejecutar la lógica de actualización aquí
+					await execUpdateOwner(event);
+					// Cerrar el modal y limpiar los datos
+					cerrarModal("edit-owner-daily-pay-modal");
+					clearSessionData();
+				});
+			}
+		};
+
+		confirmUpdateOwnerPayment();
+
+		const execCloseModal = () => {
+			// Botón que cierra el modal
+			const closeModalButton = document.getElementById(
+				"close-edit-owner-daily-pay-modal",
+			);
+			if (closeModalButton) {
+				closeModalButton.addEventListener("click", () => {
+					clearSessionData();
+				});
+			}
+		};
+
+		execCloseModal();
+	});
+</script>

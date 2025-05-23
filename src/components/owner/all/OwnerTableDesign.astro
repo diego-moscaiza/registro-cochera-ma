@@ -761,43 +761,61 @@ const { listaPropietarios } = Astro.props;
 			}
 		}
 
-		const allModalToggle: any = "[data-modal-toggle]";
+		const activeAllModals = () => {
+			const allModalToggle: any = "[data-modal-toggle]";
 
-		const editOwnerData: any = '[data-modal-toggle="edit-owner-modal"]';
+			// Inicializar los eventos de los botones de toggle
+			initializeModalToggles(allModalToggle);
+		};
 
-		// Inicializar los eventos de los botones de toggle
-		initializeModalToggles(allModalToggle);
+		activeAllModals();
 
-		// Escuchar el evento de apertura del modal
-		document.querySelectorAll(editOwnerData).forEach((btn) => {
-			btn.addEventListener("click", () => {
-				// Pequeño retraso para asegurar que los datos ya estén en sessionStorage
-				setTimeout(() => {
-					setParamsFromSession();
-				}, 100);
+		const applyEstadoPagoStyles = () => {
+			const editOwnerData: any = '[data-modal-toggle="edit-owner-modal"]';
+
+			// Escuchar el evento de apertura del modal
+			document.querySelectorAll(editOwnerData).forEach((btn) => {
+				btn.addEventListener("click", () => {
+					// Pequeño retraso para asegurar que los datos ya estén en sessionStorage
+					setTimeout(() => {
+						setParamsFromSession();
+					}, 100);
+				});
 			});
-		});
+		};
 
-		// Botón que cierra el modal
-		const closeModalButton = document.getElementById("close-edit-owner-modal");
-		if (closeModalButton) {
-			closeModalButton.addEventListener("click", (event) => {
-				event.preventDefault();
-				clearSessionData();
-			});
-		}
+		applyEstadoPagoStyles();
 
-		// Botón que confirma la edición
-		const updateOwnerForm = document.getElementById("update-owner-form");
-		if (updateOwnerForm) {
-			updateOwnerForm.addEventListener("submit", async (event) => {
-				event.preventDefault();
-				// Ejecutar la lógica de actualización aquí
-				await execUpdateOwner(event);
-				// Cerrar el modal y limpiar los datos
-				cerrarModal("edit-owner-modal");
-				clearSessionData();
-			});
-		}
+		const confirmUpdateOwnerPayment = () => {
+			// Botón que confirma la edición
+			const updateOwnerForm = document.getElementById("update-owner-form");
+			if (updateOwnerForm) {
+				updateOwnerForm.addEventListener("submit", async (event) => {
+					event.preventDefault();
+					// Ejecutar la lógica de actualización aquí
+					await execUpdateOwner(event);
+					// Cerrar el modal y limpiar los datos
+					cerrarModal("edit-owner-modal");
+					clearSessionData();
+				});
+			}
+		};
+
+		confirmUpdateOwnerPayment();
+
+		const execCloseModal = () => {
+			// Botón que cierra el modal
+			const closeModalButton = document.getElementById(
+				"close-edit-owner-modal",
+			);
+			if (closeModalButton) {
+				closeModalButton.addEventListener("click", (event) => {
+					event.preventDefault();
+					clearSessionData();
+				});
+			}
+		};
+
+		execCloseModal();
 	});
 </script>
