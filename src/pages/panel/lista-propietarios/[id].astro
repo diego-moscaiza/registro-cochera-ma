@@ -1,33 +1,27 @@
 ---
 import LayoutSidebar from "../../../app/layout/LayoutSidebar.astro";
-import OwnerDailyPaymentTable from "../../../components/owner/daily/OwnerDailyPaymentTable.astro";
-import {
-	apiGetAllOwners,
-	apiGetOwnerById,
-} from "../../api/record/owner/getOwner";
+import OwnerDailyPaymentList from "../../../components/owner/daily/OwnerDailyPaymentList.astro";
+import { apiGetOwnerById } from "../../api/record/owner/getOwner";
 
 interface Props {
 	id: string;
 	nombre_dueno: string;
-	guarda_carreta: boolean;
 	monto_diario: number;
+	guarda_carreta: boolean;
 	monto_tarifa_agua: number;
+	tiene_tarifa_agua: boolean;
+	tipo_carreta: string;
+	descripcion_carreta: string;
 }
-
-const { id } = Astro?.params;
-const propietario: any = id ? await apiGetOwnerById({ id }) : [];
 
 export const prerender = false;
 
-export async function getStaticPaths() {
-	const propietarios: any = await apiGetAllOwners();
-	return propietarios.map((propietario: any) => ({
-		params: { id: propietario.id },
-	}));
-}
+const { id } = Astro?.params;
+const ownerData = id ? await apiGetOwnerById({ id }) : null;
+const propietario: Props | null = ownerData as Props | null;
 ---
 
-<LayoutSidebar title={`Informacion de ${propietario.nombre_dueno}`}>
+<LayoutSidebar title={`Información de ${propietario?.nombre_dueno}`}>
 	<main class="px-4 py-6 lg:px-10">
 		<h1
 			class:list={[
@@ -36,197 +30,332 @@ export async function getStaticPaths() {
 				"font-semibold text-xl sm:text-2xl text-center",
 			]}
 		>
-			Información de {propietario.nombre_dueno}
+			Información de {propietario?.nombre_dueno}
 		</h1>
 
 		<article class="flex flex-col gap-2">
-			<section id="owner-data">
-				<h2
-					class:list={[
-						"py-4",
-						"text-black dark:text-white",
-						"font-semibold text-lg sm:text-xl",
-					]}
+			<section>
+				<section id="owner-data">
+					<h2
+						class:list={[
+							"py-4",
+							"text-black dark:text-white",
+							"font-semibold text-lg sm:text-xl",
+						]}
+					>
+						Datos
+					</h2>
+					<aside
+						class:list={[
+							"overflow-hidden shadow-md rounded-2xl",
+							"rounded-lg",
+							"bg-white dark:bg-slate-800",
+						]}
+					>
+						<section class="p-6">
+							<aside class="grid grid-cols-9 gap-y-4 sm:gap-x-2 xl:gap-x-8">
+								<div-1 class="col-span-9 sm:col-span-3">
+									<label
+										class="block mb-2 text-xs sm:text-sm xl:text-base font-medium text-blue-900 dark:text-white"
+										>Nombre</label
+									>
+									<p
+										class:list={[
+											"block w-full p-2 rounded-lg",
+											"bg-white dark:bg-slate-800",
+											"text-xs sm:text-sm xl:text-base text-gray-900 dark:text-white",
+											"border border-gray-200 dark:border-gray-600",
+										]}
+									>
+										{propietario?.nombre_dueno}
+									</p>
+								</div-1>
+								<div-2 class="col-span-9 sm:col-span-3">
+									<label
+										class="block mb-2 text-xs sm:text-sm xl:text-base font-medium text-blue-900 dark:text-white"
+										>Tarifa diaria (si viene) <span class="text-gray-500"
+											>(S/.)</span
+										></label
+									>
+									<p
+										class:list={[
+											"block w-full p-2 rounded-lg",
+											"bg-white dark:bg-slate-800",
+											"font-bold",
+											"text-xs sm:text-sm xl:text-base text-gray-900 dark:text-white",
+											"border border-gray-200 dark:border-gray-600",
+										]}
+									>
+										{
+											propietario &&
+											propietario.monto_diario !== undefined &&
+											propietario.monto_tarifa_agua !== undefined
+												? Number(
+														propietario.monto_diario +
+															propietario.monto_tarifa_agua,
+													).toFixed(2)
+												: "0.00"
+										}
+									</p>
+								</div-2>
+								<div-3 class="col-span-9 sm:col-span-3">
+									<label
+										class="block mb-2 text-xs sm:text-sm xl:text-base font-medium text-blue-900 dark:text-white"
+										>Tarifa diaria (si no viene) <span class="text-gray-500"
+											>(S/.)</span
+										></label
+									>
+									<p
+										class:list={[
+											"block w-full p-2 rounded-lg",
+											"bg-white dark:bg-slate-800",
+											"text-xs sm:text-sm xl:text-base text-gray-900 dark:text-white",
+											"border border-gray-200 dark:border-gray-600",
+										]}
+									>
+										{
+											propietario?.monto_diario !== undefined
+												? Number(propietario.monto_diario).toFixed(2)
+												: "0.00"
+										}
+									</p>
+								</div-3>
+								<div-4 class="col-span-9 sm:col-span-3">
+									<label
+										class="block mb-2 text-xs sm:text-sm xl:text-base font-medium text-blue-900 dark:text-white"
+										>¿Paga por agua?</label
+									>
+									<p
+										class:list={[
+											"block w-full p-2 rounded-lg",
+											"bg-white dark:bg-slate-800",
+											"text-xs sm:text-sm xl:text-base text-gray-900 dark:text-white",
+											"border border-gray-200 dark:border-gray-600",
+										]}
+									>
+										{
+											propietario?.tiene_tarifa_agua
+												? "Sí paga por agua"
+												: "No paga por agua"
+										}
+									</p>
+								</div-4>
+								<div-5 class="col-span-9 sm:col-span-3">
+									<label
+										class="block mb-2 text-xs sm:text-sm xl:text-base font-medium text-blue-900 dark:text-white"
+										>Tarifa de agua <span class="text-gray-500">(S/.)</span
+										></label
+									>
+									<p
+										class:list={[
+											"block w-full p-2 rounded-lg",
+											"bg-white dark:bg-slate-800",
+											"text-xs sm:text-sm xl:text-base text-gray-900 dark:text-white",
+											"border border-gray-200 dark:border-gray-600",
+										]}
+									>
+										{
+											propietario?.monto_tarifa_agua !== undefined
+												? Number(propietario.monto_tarifa_agua).toFixed(2)
+												: "0.00"
+										}
+									</p>
+								</div-5>
+								<div-6 class="col-span-9 sm:col-span-3">
+									<label
+										class="block mb-2 text-xs sm:text-sm xl:text-base font-medium text-blue-900 dark:text-white"
+										>¿Sigue guardando carreta?</label
+									>
+									<p
+										class:list={[
+											"block w-full p-2 rounded-lg",
+											"bg-white dark:bg-slate-800",
+											"text-xs sm:text-sm xl:text-base text-gray-900 dark:text-white",
+											"border border-gray-200 dark:border-gray-600",
+										]}
+									>
+										{propietario?.guarda_carreta ? "Sí guarda" : "Ya no guarda"}
+									</p>
+								</div-6>
+								<div-7 class="col-span-9 sm:col-span-3">
+									<label
+										class="block mb-2 text-xs sm:text-sm xl:text-base font-medium text-blue-900 dark:text-white"
+										>Tipo de carreta</label
+									>
+									<p
+										class:list={[
+											"block w-full p-2 rounded-lg",
+											"bg-white dark:bg-slate-800",
+											"text-xs sm:text-sm xl:text-base text-gray-900 dark:text-white",
+											"border border-gray-200 dark:border-gray-600",
+										]}
+									>
+										{propietario?.tipo_carreta}
+									</p>
+								</div-7>
+								<div-8 class="col-span-9 sm:col-span-6">
+									<label
+										class="block mb-2 text-xs sm:text-sm xl:text-base font-medium text-blue-900 dark:text-white"
+										>Descripción</label
+									>
+									<p
+										class:list={[
+											"block w-full p-2 rounded-lg",
+											"bg-white dark:bg-slate-800",
+											"text-xs sm:text-sm xl:text-base text-gray-900 dark:text-white",
+											"border border-gray-200 dark:border-gray-600",
+										]}
+									>
+										{propietario?.descripcion_carreta}
+									</p>
+								</div-8>
+							</aside>
+							<aside class="flex items-center justify-end px-6 pt-4">
+								<button
+									type="button"
+									id="open-edit-owner-info-modal"
+									data-modal-toggle="edit-owner-info-modal"
+									onclick={`sessionStorage.setItem('editOwnerInfoData', JSON.stringify({
+															id: '${propietario?.id}',
+															nombrePropietario: '${propietario?.nombre_dueno}',
+															montoDiario: '${propietario?.monto_diario !== undefined ? Number(propietario.monto_diario).toFixed(2) : "0.00"}',
+															guardaCarreta: ${propietario?.guarda_carreta}
+													}));`}
+									class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-blue-600 hover:bg-blue-700 focus:ring-2 focus:ring-blue-400 dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-blue-700"
+								>
+									<svg
+										class="w-4 h-4 mr-2"
+										fill="currentColor"
+										viewBox="0 0 20 20"
+										xmlns="http://www.w3.org/2000/svg"
+									>
+										<path
+											d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"
+										></path>
+										<path
+											fill-rule="evenodd"
+											d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"
+											clip-rule="evenodd"></path>
+									</svg>
+									Editar
+								</button>
+							</aside>
+						</section>
+					</aside>
+				</section>
+
+				<!-- Edit User Modal -->
+				<div
+					class="fixed inset-0 z-50 items-center justify-center bg-black bg-opacity-50 transition-opacity duration-300 ease-in-out hidden"
+					id="edit-owner-info-modal"
 				>
-					Datos
-				</h2>
-				<aside
-					class:list={[
-						"overflow-hidden shadow-md rounded-2xl",
-						"rounded-lg",
-						"bg-white dark:bg-slate-800",
-					]}
-				>
-					<section class="p-6">
-						<aside class="grid grid-cols-9 gap-6">
-							<div-1 class="col-span-9 sm:col-span-3">
-								<label
-									class="block mb-2 text-sm font-medium text-blue-900 dark:text-white"
-									>Nombre</label
-								>
-								<p
-									class:list={[
-										"block w-full p-2 rounded-lg",
-										"bg-white dark:bg-slate-800",
-										"text-xs sm:text-sm text-gray-900 dark:text-white",
-										"border border-gray-200 dark:border-gray-600",
-									]}
-								>
-									{propietario.nombre_dueno}
-								</p>
-							</div-1>
-							<div-2 class="col-span-9 sm:col-span-3">
-								<label
-									class="block mb-2 text-sm font-medium text-blue-900 dark:text-white"
-									>Tarifa diaria (si viene) <span class="text-gray-500"
-										>(S/.)</span
-									></label
-								>
-								<p
-									class:list={[
-										"block w-full p-2 rounded-lg",
-										"bg-white dark:bg-slate-800",
-										"font-bold",
-										"text-xs sm:text-sm text-gray-900 dark:text-white",
-										"border border-gray-200 dark:border-gray-600",
-									]}
-								>
-									{
-										(
-											propietario.monto_diario + propietario.monto_tarifa_agua
-										).toFixed(2)
-									}
-								</p>
-							</div-2>
-							<div-3 class="col-span-9 sm:col-span-3">
-								<label
-									class="block mb-2 text-sm font-medium text-blue-900 dark:text-white"
-									>Tarifa diaria (si no viene) <span class="text-gray-500"
-										>(S/.)</span
-									></label
-								>
-								<p
-									class:list={[
-										"block w-full p-2 rounded-lg",
-										"bg-white dark:bg-slate-800",
-										"text-xs sm:text-sm text-gray-900 dark:text-white",
-										"border border-gray-200 dark:border-gray-600",
-									]}
-								>
-									{propietario.monto_diario.toFixed(2)}
-								</p>
-							</div-3>
-							<div-4 class="col-span-9 sm:col-span-3">
-								<label
-									class="block mb-2 text-sm font-medium text-blue-900 dark:text-white"
-									>¿Paga por agua?</label
-								>
-								<p
-									class:list={[
-										"block w-full p-2 rounded-lg",
-										"bg-white dark:bg-slate-800",
-										"text-xs sm:text-sm text-gray-900 dark:text-white",
-										"border border-gray-200 dark:border-gray-600",
-									]}
-								>
-									{
-										propietario.tiene_tarifa_agua
-											? "Sí paga por agua"
-											: "No paga por agua"
-									}
-								</p>
-							</div-4>
-							<div-5 class="col-span-9 sm:col-span-3">
-								<label
-									class="block mb-2 text-sm font-medium text-blue-900 dark:text-white"
-									>Tarifa de agua <span class="text-gray-500">(S/.)</span
-									></label
-								>
-								<p
-									class:list={[
-										"block w-full p-2 rounded-lg",
-										"bg-white dark:bg-slate-800",
-										"text-xs sm:text-sm text-gray-900 dark:text-white",
-										"border border-gray-200 dark:border-gray-600",
-									]}
-								>
-									{propietario.monto_tarifa_agua.toFixed(2)}
-								</p>
-							</div-5>
-							<div-6 class="col-span-9 sm:col-span-3">
-								<label
-									class="block mb-2 text-sm font-medium text-blue-900 dark:text-white"
-									>¿Sigue guardando carreta?</label
-								>
-								<p
-									class:list={[
-										"block w-full p-2 rounded-lg",
-										"bg-white dark:bg-slate-800",
-										"text-xs sm:text-sm text-gray-900 dark:text-white",
-										"border border-gray-200 dark:border-gray-600",
-									]}
-								>
-									{propietario.guarda_carreta ? "Sí guarda" : "Ya no guarda"}
-								</p>
-							</div-6>
-							<div-7 class="col-span-9 sm:col-span-3">
-								<label
-									class="block mb-2 text-sm font-medium text-blue-900 dark:text-white"
-									>Tipo de carreta</label
-								>
-								<p
-									class:list={[
-										"block w-full p-2 rounded-lg",
-										"bg-white dark:bg-slate-800",
-										"text-xs sm:text-sm text-gray-900 dark:text-white",
-										"border border-gray-200 dark:border-gray-600",
-									]}
-								>
-									{propietario.tipo_carreta}
-								</p>
-							</div-7>
-							<div-8 class="col-span-9 sm:col-span-6">
-								<label
-									class="block mb-2 text-sm font-medium text-blue-900 dark:text-white"
-									>Descripción</label
-								>
-								<p
-									class:list={[
-										"block w-full p-2 rounded-lg",
-										"bg-white dark:bg-slate-800",
-										"text-xs sm:text-sm text-gray-900 dark:text-white",
-										"border border-gray-200 dark:border-gray-600",
-									]}
-								>
-									{propietario.descripcion_carreta}
-								</p>
-							</div-8>
-						</aside>
-						<aside class="flex items-center justify-end px-6 pt-4">
-							<button
-								type="button"
-								id=""
-								class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-blue-600 hover:bg-blue-700 focus:ring-2 focus:ring-blue-400 dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-blue-700"
+					<div
+						class="relative w-full max-w-2xl px-4 transform transition-all duration-300 ease-in-out scale-95 opacity-0"
+					>
+						<!-- Modal content -->
+						<div
+							class="relative bg-white rounded-lg shadow-lg dark:bg-gray-800"
+						>
+							<!-- Modal header -->
+							<div
+								class="flex items-start justify-between p-5 border-b border-gray-200 rounded-t dark:border-gray-700"
 							>
-								<svg
-									class="w-4 h-4 mr-2"
-									fill="currentColor"
-									viewBox="0 0 20 20"
-									xmlns="http://www.w3.org/2000/svg"
+								<h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+									Editar información del propietario
+								</h3>
+								<button
+									type="button"
+									id="close-edit-owner-info-modal"
+									class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-700 dark:hover:text-white"
+									data-modal-toggle="edit-owner-info-modal"
 								>
-									<path
-										d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"
-									></path>
-									<path
-										fill-rule="evenodd"
-										d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"
-										clip-rule="evenodd"></path>
-								</svg>
-								Editar
-							</button>
-						</aside>
-					</section>
-				</aside>
+									<svg
+										class="w-5 h-5"
+										fill="currentColor"
+										viewBox="0 0 20 20"
+										xmlns="http://www.w3.org/2000/svg"
+									>
+										<path
+											fill-rule="evenodd"
+											d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+											clip-rule="evenodd"></path>
+									</svg>
+								</button>
+							</div>
+
+							<!-- Modal body -->
+							<div>
+								<form id="update-owner-info-form" class="p-6 space-y-6">
+									<div class="grid grid-cols-6 gap-6">
+										<div class="col-span-6 sm:col-span-6">
+											<label
+												for="edit-full-name"
+												class="block mb-2 text-sm font-medium text-blue-900 dark:text-white"
+												>Nombre</label
+											>
+											<input
+												type="text"
+												name="nombre-Dueno"
+												id="edit-full-name"
+												class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
+												placeholder="Nombre del propietario"
+												required
+											/>
+										</div>
+										<div class="col-span-6 sm:col-span-3">
+											<label
+												for="edit-monto-diario"
+												class="block mb-2 text-sm font-medium text-blue-900 dark:text-white"
+												>Monto diario <span class="text-gray-500">(S/.)</span
+												></label
+											>
+											<input
+												type="text"
+												name="monto-diario"
+												id="edit-monto-diario"
+												class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
+												placeholder="Monto diario de pago"
+												required
+											/>
+										</div>
+										<div class="col-span-6 sm:col-span-3">
+											<label
+												for="edit-estado"
+												class="block mb-2 text-sm font-medium text-blue-900 dark:text-white"
+												>Estado</label
+											>
+											<select
+												name="estado"
+												id="edit-estado"
+												class="shadow-sm bg-gray-50 rounded-lg border border-gray-300 text-gray-900 sm:text-sm focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500 appearance-none"
+												required
+											>
+												<option value="" disabled selected>
+													Seleccione el estado</option
+												>
+												<option value="Sí guarda">Sí guarda</option>
+												<option value="Ya no guarda">Ya no guarda</option>
+											</select>
+										</div>
+									</div>
+									<!-- Modal footer -->
+									<div
+										class="flex items-center justify-end px-6 pt-4 border-t border-gray-200 rounded-b dark:border-gray-700"
+									>
+										<button
+											id="close-edit-owner-info-modal-2"
+											class="text-white bg-blue-600 hover:bg--700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-blue-800"
+											type="submit"
+											data-modal-toggle="edit-owner-info-modal"
+										>
+											Guardar
+										</button>
+									</div>
+								</form>
+							</div>
+						</div>
+					</div>
+				</div>
 			</section>
 
 			<section id="table-owner-payments">
@@ -239,8 +368,308 @@ export async function getStaticPaths() {
 				>
 					Listado de pagos
 				</h2>
-				<OwnerDailyPaymentTable id={id} />
+				<OwnerDailyPaymentList id={id || ""} />
 			</section>
 		</article>
 	</main>
 </LayoutSidebar>
+
+<script>
+	// Input nonto_diario
+	const editMontoDiarioElement = document.getElementById("edit-monto-diario");
+	if (editMontoDiarioElement) {
+		editMontoDiarioElement.addEventListener("input", (event) => {
+			const input: any = event.target;
+			const regex = /^\d{0,2}(\.\d{0,2})?$/; // Permite hasta 2 cifras enteras y 2 decimales
+			const previousValue = input.getAttribute("data-previous-value") || ""; // Obtiene el valor anterior
+
+			if (!regex.test(input.value)) {
+				input.value = previousValue; // Restaura el valor anterior si no es válido
+			} else {
+				input.setAttribute("data-previous-value", input.value); // Guarda el valor actual como válido
+			}
+		});
+	}
+
+	// Espera a que cargue toda la pagina para ejecutarse
+	document.addEventListener("DOMContentLoaded", () => {
+		// Función para mostrar una notificación temporal
+		function mostrarNotificacion(mensaje: any, tipo: any) {
+			// Crear un elemento de notificación
+			const notificacion = document.createElement("div");
+
+			// Establecer clases según el tipo
+			const baseClasses =
+				"fixed bottom-4 right-4 py-2 px-4 rounded-lg shadow-lg z-50 transition-all duration-300 transform opacity-0 scale-95";
+			const typeClasses =
+				tipo === "success"
+					? "bg-green-600 text-white"
+					: tipo === "error"
+						? "bg-red-500 text-white"
+						: "bg-orange-700 text-white";
+
+			const setTimeoutValue = tipo === "success" ? 800 : 5000;
+
+			notificacion.className = `${baseClasses} ${typeClasses}`;
+			notificacion.textContent = mensaje;
+
+			// Añadir al DOM
+			document.body.appendChild(notificacion);
+
+			// Animación para aparecer
+			setTimeout(() => {
+				notificacion.classList.add("opacity-100", "scale-100");
+				notificacion.classList.remove("opacity-0", "scale-95");
+			}, 10);
+
+			// Eliminar después del tiempo configurado
+			setTimeout(() => {
+				notificacion.classList.add("translate-y-10", "opacity-0");
+				notificacion.classList.remove("opacity-100", "scale-100");
+				setTimeout(() => {
+					document.body.removeChild(notificacion);
+				}, 200);
+			}, setTimeoutValue);
+		}
+
+		// Función para alternar el estado del modal
+		function toggleModalVisibility(modalId: string, show: boolean) {
+			const modal = document.getElementById(modalId);
+			if (modal) {
+				const modalContent = modal.querySelector(".transform");
+				if (show) {
+					modal.classList.remove("hidden");
+					modal.classList.add("flex");
+					setTimeout(() => {
+						modal.classList.add("opacity-100");
+						modalContent?.classList.add("scale-100", "opacity-100");
+						modalContent?.classList.remove("scale-95", "opacity-0");
+					}, 10);
+				} else {
+					modal.classList.remove("opacity-100");
+					modalContent?.classList.remove("scale-100", "opacity-100");
+					modalContent?.classList.add("scale-95", "opacity-0");
+					setTimeout(() => {
+						modal.classList.remove("flex");
+						modal.classList.add("hidden");
+					}, 300);
+				}
+			}
+		}
+
+		// Función para abrir un modal
+		function abrirModal(modalId: string) {
+			toggleModalVisibility(modalId, true);
+		}
+
+		// Función para cerrar un modal
+		function cerrarModal(modalId: string) {
+			toggleModalVisibility(modalId, false);
+		}
+
+		// Función para inicializar los eventos de los botones de toggle
+		function initializeModalToggles(selectorValue: any) {
+			const modalToggles = document.querySelectorAll(selectorValue);
+			modalToggles.forEach((toggle) => {
+				toggle.addEventListener("click", () => {
+					const modalId = toggle.getAttribute("data-modal-toggle");
+					if (modalId) {
+						const modal = document.getElementById(modalId);
+						if (modal && modal.classList.contains("hidden")) {
+							abrirModal(modalId);
+						} else {
+							cerrarModal(modalId);
+						}
+					}
+				});
+			});
+		}
+
+		// Función para establecer los parámetros en los inputs del modal
+		function setParamsFromSession() {
+			const editOwnerInfoData = sessionStorage.getItem("editOwnerInfoData");
+			if (editOwnerInfoData) {
+				const { nombrePropietario, montoDiario, guardaCarreta } =
+					JSON.parse(editOwnerInfoData);
+
+				const inputNombre = document.getElementById(
+					"edit-full-name",
+				) as HTMLInputElement;
+				const inputMonto = document.getElementById(
+					"edit-monto-diario",
+				) as HTMLInputElement;
+				const inputEstado = document.getElementById(
+					"edit-estado",
+				) as HTMLSelectElement;
+
+				if (inputNombre) inputNombre.value = nombrePropietario;
+				if (inputMonto) inputMonto.value = montoDiario;
+				if (inputEstado) {
+					// Convert the boolean value to the corresponding string option value
+					const estadoValue =
+						guardaCarreta === "true" || guardaCarreta === true
+							? "Sí guarda"
+							: "Ya no guarda";
+					inputEstado.value = estadoValue;
+				}
+			}
+		}
+
+		// Función para eliminar los parámetros del modal
+		function clearSessionData() {
+			sessionStorage.removeItem("editOwnerInfoData");
+		}
+
+		// Evento para actualizar los datos y cerrar el modal al hacer clic en el botón de Guardar
+		async function execUpdateOwner(event: any) {
+			event.preventDefault();
+			const editData = sessionStorage.getItem("editOwnerInfoData");
+			if (!editData) return console.error("No hay datos en sessionStorage");
+
+			const { id, nombrePropietario, montoDiario, guardaCarreta } =
+				JSON.parse(editData);
+
+			const inputNombre = document.getElementById(
+				"edit-full-name",
+			) as HTMLInputElement;
+			const inputMonto = document.getElementById(
+				"edit-monto-diario",
+			) as HTMLInputElement;
+			const inputEstado = document.getElementById(
+				"edit-estado",
+			) as HTMLSelectElement;
+
+			if (!inputNombre || !inputMonto || !inputEstado) {
+				console.error("No se encontraron todos los elementos del formulario");
+				return;
+			}
+
+			const nombreValue = inputNombre.value;
+			const montoValue = inputMonto.value;
+			const guardaCarretaValue = inputEstado.value;
+			let guardaCarretaBoolean: boolean;
+
+			if (guardaCarretaValue === "Sí guarda") {
+				guardaCarretaBoolean = true;
+			} else if (guardaCarretaValue === "Ya no guarda") {
+				guardaCarretaBoolean = false;
+			} else {
+				console.error("Valor de estado no válido");
+				return;
+			}
+
+			// Comprobar si los datos no han cambiado
+			if (
+				nombrePropietario === nombreValue &&
+				montoDiario === montoValue &&
+				guardaCarreta === guardaCarretaValue
+			) {
+				// console.log("⚠️ No se detectaron cambios en los datos para actualizar.");
+				mostrarNotificacion(
+					"⚠️ No se detectaron cambios en los datos para actualizar.",
+					"other",
+				);
+				return; // No hacer nada si los datos son los mismos
+			}
+
+			try {
+				const res = await fetch("/api/record/owner/updateOwner", {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({
+						id: Number(id),
+						nombre_dueno: String(nombreValue),
+						monto_diario: Number(montoValue),
+						guarda_carreta: guardaCarretaBoolean,
+					}),
+				});
+
+				if (res.ok) {
+					//alert("✅ Datos actualizados correctamente.");
+					mostrarNotificacion(
+						"✅ Datos actualizados correctamente.",
+						"success",
+					);
+					setTimeout(() => {
+						window.location.reload();
+					}, 1000);
+				} else {
+					const error = await res.json();
+					//alert("❌ Error al actualizar: " + (error.error || "Error desconocido"));
+					mostrarNotificacion(
+						"❌ Error al actualizar: " + (error.error || "Error desconocido"),
+						"error",
+					);
+				}
+			} catch (error) {
+				console.error("Error en la petición:", error);
+				//alert("❌ Error en la comunicación con el servidor. Inténtelo de nuevo.");
+				mostrarNotificacion(
+					"❌ Error en la comunicación con el servidor. Inténtelo de nuevo.",
+					"error",
+				);
+			}
+		}
+
+		const activeAllModals = () => {
+			const allModalToggle: any = "[data-modal-toggle]";
+
+			// Inicializar los eventos de los botones de toggle
+			initializeModalToggles(allModalToggle);
+		};
+
+		activeAllModals();
+
+		const applyEstadoPagoStyles = () => {
+			const editOwnerInfoData: any =
+				'[data-modal-toggle="edit-owner-info-modal"]';
+
+			// Escuchar el evento de apertura del modal
+			document.querySelectorAll(editOwnerInfoData).forEach((btn) => {
+				btn.addEventListener("click", () => {
+					// Pequeño retraso para asegurar que los datos ya estén en sessionStorage
+					setTimeout(() => {
+						setParamsFromSession();
+					}, 100);
+				});
+			});
+		};
+
+		applyEstadoPagoStyles();
+
+		// Confirmar la actualización del pago del propietario
+		const confirmUpdateOwnerPayment = () => {
+			// Botón que confirma la edición
+			const updateOwnerForm = document.getElementById("update-owner-info-form");
+			if (updateOwnerForm) {
+				updateOwnerForm.addEventListener("submit", async (event) => {
+					event.preventDefault();
+					// Ejecutar la lógica de actualización aquí
+					await execUpdateOwner(event);
+					// Cerrar el modal y limpiar los datos
+					cerrarModal("edit-owner-info-modal");
+					clearSessionData();
+				});
+			}
+		};
+
+		confirmUpdateOwnerPayment();
+
+		// Ejecutar Cerrar Modal
+		const execCloseModal = () => {
+			// Botón que cierra el modal
+			const closeModalButton = document.getElementById(
+				"close-edit-owner-info-modal",
+			);
+			if (closeModalButton) {
+				closeModalButton.addEventListener("click", () => {
+					clearSessionData();
+				});
+			}
+		};
+
+		execCloseModal();
+	});
+</script>
