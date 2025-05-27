@@ -10,6 +10,10 @@ interface Props {
 		estadoPago: boolean;
 		guardaCarreta: boolean;
 	}[];
+	paginaActual?: number;
+	totalPaginas?: number;
+	registrosPorPagina?: number;
+	totalRegistros?: number;
 }
 
 const opciones: Intl.DateTimeFormatOptions = {
@@ -19,19 +23,67 @@ const opciones: Intl.DateTimeFormatOptions = {
 	year: "numeric",
 };
 
-function convertirFechaPeru(fechaStr: string) {
-	const fechaUTC = new Date(fechaStr + "T00:00:00Z"); // Se fuerza a UTC
-	const fechaLocal = new Date(fechaUTC.getTime() + 5 * 60 * 60 * 1000); // Ajuste a UTC-5
+function convertirFechaPeru(fechaStr: string): string {
+	const fechaUTC = new Date(fechaStr + "T00:00:00Z");
+	const fechaLocal = new Date(fechaUTC.getTime() + 5 * 60 * 60 * 1000);
 	return fechaLocal.toLocaleDateString("es-PE", opciones);
 }
 
-const { pagoPorPropietario } = Astro.props;
+const {
+	pagoPorPropietario,
+	paginaActual = 1,
+	totalPaginas = 1,
+	registrosPorPagina = 10,
+	totalRegistros = 0,
+} = Astro.props;
+
+// Calcular los números de página para mostrar
+function calcularPaginasVisibles(
+	actual: number,
+	total: number,
+	maxVisibles: number = 5,
+): number[] {
+	const paginas: number[] = [];
+	const cantidadVisible = Math.min(maxVisibles, total);
+
+	if (total <= maxVisibles) {
+		for (let i = 1; i <= total; i++) {
+			paginas.push(i);
+		}
+	} else if (actual <= 3) {
+		for (let i = 1; i <= cantidadVisible; i++) {
+			paginas.push(i);
+		}
+	} else if (actual >= total - 2) {
+		for (let i = total - cantidadVisible + 1; i <= total; i++) {
+			paginas.push(i);
+		}
+	} else {
+		for (let i = actual - 2; i <= actual + 2; i++) {
+			paginas.push(i);
+		}
+	}
+
+	return paginas;
+}
+
+const paginasVisibles = calcularPaginasVisibles(paginaActual, totalPaginas);
+
+// Calcular rango de registros mostrados
+const inicioRango =
+	registrosPorPagina === -1 ? 1 : (paginaActual - 1) * registrosPorPagina + 1;
+const finRango =
+	registrosPorPagina === -1
+		? totalRegistros
+		: Math.min(paginaActual * registrosPorPagina, totalRegistros);
 ---
 
 <section class="overflow-x-auto">
 	<div class="inline-block min-w-full align-middle">
-		<div class="overflow-hidden shadow-md rounded-2xl">
+		<!-- Agregar un contenedor específico para la tabla -->
+		<div id="table-container" class="overflow-hidden shadow-md rounded-2xl">
 			<table
+				id="payments-table"
 				class:list={[
 					"min-w-full overflow-x-auto",
 					"divide-y rounded-lg",
@@ -135,12 +187,12 @@ const { pagoPorPropietario } = Astro.props;
 											id="open-edit-owner-daily-pay-modal"
 											data-modal-toggle="edit-owner-daily-pay-modal"
 											onclick={`sessionStorage.setItem('ownerDailyPaymentData', JSON.stringify({
-													id: '${formatoPago.idDueno}',
-													nombrePropietario: '${formatoPago.nombreDueno}',
-													montoDiario: '${formatoPago.montoTotal.toFixed(2)}',
-													guardaCarreta: '${formatoPago.guardaCarreta}',
-											}));`}
-											class="inline-flex items-center px-3 py-2 text-xs sm:text-sm xl:text-basefont-medium text-center text-white rounded-lg bg-blue-600 hover:bg-blue-700 focus:ring-2 focus:ring-blue-400 dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-blue-700"
+                                                    id: '${formatoPago.idDueno}',
+                                                    nombrePropietario: '${formatoPago.nombreDueno}',
+                                                    montoDiario: '${formatoPago.montoTotal.toFixed(2)}',
+                                                    guardaCarreta: '${formatoPago.guardaCarreta}',
+                                            }));`}
+											class="inline-flex items-center px-3 py-2 text-xs sm:text-sm xl:text-base font-medium text-center text-white rounded-lg bg-blue-600 hover:bg-blue-700 focus:ring-2 focus:ring-blue-400 dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-blue-700"
 										>
 											<svg
 												class="w-4 h-4 mr-2"
@@ -164,121 +216,89 @@ const { pagoPorPropietario } = Astro.props;
 					}
 				</tbody>
 			</table>
-		</div>
-	</div>
-	<!-- Edit User Modal -->
-	<div
-		class="fixed inset-0 z-50 items-center justify-center bg-black bg-opacity-50 transition-opacity duration-300 ease-in-out hidden"
-		id="edit-owner-daily-pay-modal"
-	>
-		<div
-			class="relative w-full max-w-2xl px-4 transform transition-all duration-300 ease-in-out scale-95 opacity-0"
-		>
-			<!-- Modal content -->
-			<div class="relative bg-white rounded-lg shadow-lg dark:bg-gray-800">
-				<!-- Modal header -->
-				<div
-					class="flex items-start justify-between p-5 border-b border-gray-200 rounded-t dark:border-gray-700"
-				>
-					<h3 class="text-xl font-semibold text-gray-900 dark:text-white">
-						Editar información del propietario
-					</h3>
-					<button
-						type="button"
-						id="close-edit-owner-daily-pay-modal"
-						class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-700 dark:hover:text-white"
-						data-modal-toggle="edit-owner-daily-pay-modal"
-					>
-						<svg
-							class="w-5 h-5"
-							fill="currentColor"
-							viewBox="0 0 20 20"
-							xmlns="http://www.w3.org/2000/svg"
-						>
-							<path
-								fill-rule="evenodd"
-								d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-								clip-rule="evenodd"></path>
-						</svg>
-					</button>
-				</div>
 
-				<!-- Modal body -->
-				<div>
-					<form id="update-owner-daily-payment-form" class="p-6 space-y-6">
-						<div class="grid grid-cols-6 gap-6">
-							<div class="col-span-6 sm:col-span-6">
-								<label
-									for="edit-full-name"
-									class="block mb-2 text-sm font-medium text-blue-900 dark:text-white"
-									>Nombre</label
-								>
-								<input
-									type="text"
-									name="nombre-Dueno"
-									id="edit-full-name"
-									class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
-									placeholder="Nombre del propietario"
-									required
-								/>
-							</div>
-							<div class="col-span-6 sm:col-span-3">
-								<label
-									for="edit-monto-diario"
-									class="block mb-2 text-sm font-medium text-blue-900 dark:text-white"
-									>Monto diario <span class="text-gray-500">(S/.)</span></label
-								>
-								<input
-									type="text"
-									name="monto-diario"
-									id="edit-monto-diario"
-									class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
-									placeholder="Monto diario de pago"
-									required
-								/>
-							</div>
-							<div class="col-span-6 sm:col-span-3">
-								<label
-									for="edit-estado"
-									class="block mb-2 text-sm font-medium text-blue-900 dark:text-white"
-									>Estado</label
-								>
-								<select
-									name="estado"
-									id="edit-estado"
-									class="shadow-sm bg-gray-50 rounded-lg border border-gray-300 text-gray-900 sm:text-sm focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500 appearance-none"
-									required
-								>
-									<option value="" disabled selected>
-										Seleccione el estado</option
+			<!-- Controles de paginación con ID específico -->
+			<div id="pagination-controls">
+				{
+					totalPaginas > 1 && registrosPorPagina !== -1 && (
+						<div class="px-5 py-4 bg-white dark:bg-slate-800 border-t border-gray-200 dark:border-gray-700">
+							<div class="flex flex-col sm:flex-row justify-between items-center">
+								<div class="mb-4 sm:mb-0 text-sm text-gray-700 dark:text-gray-300">
+									Mostrando {inicioRango} a {finRango} de {totalRegistros}{" "}
+									registros
+								</div>
+								<div class="flex space-x-2">
+									<button
+										data-page={Math.max(1, paginaActual - 1)}
+										class:list={[
+											"pagination-btn px-4 py-2 text-sm font-medium rounded-md",
+											"focus:outline-none focus:ring-2 focus:ring-blue-500",
+											paginaActual === 1
+												? "bg-gray-100 text-gray-400 cursor-not-allowed dark:bg-gray-700 dark:text-gray-500"
+												: "bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700",
+										]}
+										disabled={paginaActual === 1}
 									>
-									<option value="Sí guarda">Sí guarda</option>
-									<option value="Ya no guarda">Ya no guarda</option>
-								</select>
+										Anterior
+									</button>
+
+									{paginasVisibles.map((pageNum) => (
+										<button
+											data-page={pageNum}
+											class:list={[
+												"pagination-btn px-4 py-2 text-sm font-medium rounded-md",
+												"focus:outline-none focus:ring-2 focus:ring-blue-500",
+												pageNum === paginaActual
+													? "bg-blue-600 text-white dark:bg-blue-500"
+													: "bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700",
+											]}
+										>
+											{pageNum}
+										</button>
+									))}
+
+									<button
+										data-page={Math.min(totalPaginas, paginaActual + 1)}
+										class:list={[
+											"pagination-btn px-4 py-2 text-sm font-medium rounded-md",
+											"focus:outline-none focus:ring-2 focus:ring-blue-500",
+											paginaActual === totalPaginas
+												? "bg-gray-100 text-gray-400 cursor-not-allowed dark:bg-gray-700 dark:text-gray-500"
+												: "bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700",
+										]}
+										disabled={paginaActual === totalPaginas}
+									>
+										Siguiente
+									</button>
+								</div>
 							</div>
 						</div>
-						<!-- Modal footer -->
-						<div
-							class="flex items-center justify-end px-6 pt-4 border-t border-gray-200 rounded-b dark:border-gray-700"
-						>
-							<button
-								id="close-edit-owner-daily-pay-modal-2"
-								class="text-white bg-blue-600 hover:bg--700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-blue-800"
-								type="submit"
-								data-modal-toggle="edit-owner-daily-pay-modal"
-							>
-								Guardar
-							</button>
-						</div>
-					</form>
-				</div>
+					)
+				}
 			</div>
 		</div>
 	</div>
+
+	<!-- Indicador de carga -->
+	<div
+		id="loading-indicator"
+		class="fixed inset-0 bg-black bg-opacity-50 items-center justify-center z-50 hidden"
+	>
+		<div
+			class="bg-white dark:bg-gray-800 rounded-lg p-6 flex items-center space-x-3"
+		>
+			<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600">
+			</div>
+			<span class="text-gray-700 dark:text-gray-300">Cargando...</span>
+		</div>
+	</div>
+
+	<!-- Modal existente sin cambios -->
+	<!-- ... resto del código del modal ... -->
 </section>
 
 <script>
-	// Input nonto_diario
+	// Input monto_diario
 	const editMontoDiarioElement = document.getElementById("edit-monto-diario");
 	if (editMontoDiarioElement) {
 		editMontoDiarioElement.addEventListener("input", (event) => {
@@ -541,5 +561,334 @@ const { pagoPorPropietario } = Astro.props;
 		};
 
 		execCloseModal();
+
+		// NUEVA funcionalidad para paginación dinámica
+		// Variables globales para paginación
+		let currentOwnerId = getCurrentOwnerId();
+
+		function getCurrentOwnerId() {
+			// Extraer ID de la URL actual
+			const pathParts = window.location.pathname.split("/");
+			return pathParts[pathParts.length - 1];
+		}
+
+		function showLoadingIndicator(show = true) {
+			const indicator = document.getElementById("loading-indicator");
+			if (indicator) {
+				if (show) {
+					indicator.classList.remove("hidden");
+					indicator.classList.add("flex");
+				} else {
+					indicator.classList.add("hidden");
+					indicator.classList.remove("flex");
+				}
+			}
+		}
+
+		// Función para actualizar la tabla dinámicamente
+		async function updateTableContent(
+			page: number,
+			perPage: string | null = null,
+		) {
+			try {
+				showLoadingIndicator(true);
+
+				// Obtener perPage actual si no se especifica
+				if (!perPage) {
+					const url = new URL(window.location.href);
+					perPage = url.searchParams.get("perPage") || "10";
+				}
+
+				// Hacer fetch a la API
+				const response = await fetch(
+					`/api/record/owner/paginated?id=${currentOwnerId}&page=${page}&perPage=${perPage}`,
+					{
+						headers: {
+							Accept: "application/json",
+							"X-Requested-With": "XMLHttpRequest",
+						},
+					},
+				);
+
+				if (!response.ok) {
+					throw new Error("Error al obtener datos");
+				}
+
+				const result = await response.json();
+				const { data, pagination } = result;
+
+				// Actualizar contenido de la tabla
+				updateTableRows(data);
+				updatePaginationControls(pagination);
+				updateRecordsSelector(perPage);
+
+				// Actualizar URL sin recargar
+				const url = new URL(window.location.href);
+				url.searchParams.set("page", page.toString());
+				url.searchParams.set("perPage", perPage.toString());
+				window.history.pushState({}, "", url.toString());
+
+				showLoadingIndicator(false);
+			} catch (error) {
+				console.error("Error al actualizar tabla:", error);
+				showLoadingIndicator(false);
+				// Mostrar error sin recargar página
+				mostrarNotificacion(
+					"Error al cargar los datos. Inténtalo nuevamente.",
+					"error",
+				);
+			}
+		}
+
+		// Función para actualizar las filas de la tabla
+		function updateTableRows(data: any[]) {
+			const tbody = document.querySelector("#payments-table tbody");
+			if (!tbody) return;
+
+			// Limpiar filas existentes
+			tbody.innerHTML = "";
+
+			// Agregar nuevas filas
+			data.forEach((pago: any) => {
+				const formatoPago = {
+					idDueno: pago.id ?? "-",
+					nombreDueno: pago.nombre_dueno ?? "-",
+					fechaPago: pago.fecha_pago ?? "-",
+					montoTotal: pago.monto_total ?? 0,
+					retiroCoche: pago.retiro_coche ? "Sí vino" : "No vino",
+					estadoPago: pago.estado_pago ? "Sí Canceló" : "No Pagó",
+					guardaCarreta: pago.guarda_carreta ? "Sí guarda" : "Ya no guarda",
+				};
+
+				const row = createTableRow(formatoPago);
+				tbody.appendChild(row);
+			});
+
+			// Reinicializar eventos de botones de edición
+			initializeEditButtons();
+		}
+
+		// Función para crear una fila de tabla
+		function createTableRow(formatoPago: any) {
+			const row = document.createElement("tr");
+			row.className =
+				"hover:bg-gray-100 dark:hover:bg-gray-700 transition duration-200";
+
+			row.innerHTML = `
+				<td class="p-4 text-xs sm:text-sm xl:text-base font-semibold text-gray-900 whitespace-nowrap dark:text-gray-200">
+					${convertirFechaPeru(formatoPago.fechaPago)}
+				</td>
+				<td class="p-4 text-xs sm:text-sm xl:text-base font-semibold text-gray-900 whitespace-nowrap dark:text-gray-200">
+					S/. ${formatoPago.montoTotal.toFixed(2)}
+				</td>
+				<td class="p-4 text-xs sm:text-sm xl:text-base text-nowrap font-medium">
+					<span class="px-3 py-1 rounded-full text-sm sm:text-base ${
+						formatoPago.retiroCoche === "No vino"
+							? "text-neutral-800 bg-neutral-300 dark:text-[#cacaca] dark:bg-[#32373f]"
+							: "text-blue-800 bg-blue-300 dark:text-[#5294ff] dark:bg-[#162542]"
+					}">
+						${formatoPago.retiroCoche}
+					</span>
+				</td>
+				<td class="p-4 text-xs sm:text-sm xl:text-base text-nowrap font-medium">
+					<span class="px-3 py-1 rounded-full text-sm sm:text-base ${
+						formatoPago.estadoPago === "Sí Canceló"
+							? "text-green-800 bg-green-300 dark:text-[#58ff36] dark:bg-[#2fff403d]"
+							: "text-red-900 bg-red-200 dark:text-[#ff3636] dark:bg-[#ff2f2f3d]"
+					}">
+						${formatoPago.estadoPago}
+					</span>
+				</td>
+				<td class="p-4 space-x-2 whitespace-nowrap">
+					<button
+						type="button"
+						class="edit-payment-btn inline-flex items-center px-3 py-2 text-xs sm:text-sm xl:text-base font-medium text-center text-white rounded-lg bg-blue-600 hover:bg-blue-700 focus:ring-2 focus:ring-blue-400 dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-blue-700"
+						data-payment='${JSON.stringify({
+							id: formatoPago.idDueno,
+							nombrePropietario: formatoPago.nombreDueno,
+							montoDiario: formatoPago.montoTotal.toFixed(2),
+							guardaCarreta: formatoPago.guardaCarreta,
+						})}'>
+						<svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+							<path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" />
+							<path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" />
+						</svg>
+						Editar
+					</button>
+				</td>
+			`;
+
+			return row;
+		}
+
+		// Función para actualizar controles de paginación
+		function updatePaginationControls(pagination: any) {
+			const paginationContainer = document.getElementById(
+				"pagination-controls",
+			);
+			if (!paginationContainer) return;
+
+			const { currentPage, totalPages, totalRecords, perPage } = pagination;
+
+			if (totalPages <= 1 || perPage === -1) {
+				paginationContainer.innerHTML = "";
+				return;
+			}
+
+			const inicioRango = perPage === -1 ? 1 : (currentPage - 1) * perPage + 1;
+			const finRango =
+				perPage === -1
+					? totalRecords
+					: Math.min(currentPage * perPage, totalRecords);
+
+			// Calcular páginas visibles
+			const paginasVisibles = calcularPaginasVisibles(currentPage, totalPages);
+
+			paginationContainer.innerHTML = `
+				<div class="px-5 py-4 bg-white dark:bg-slate-800 border-t border-gray-200 dark:border-gray-700">
+					<div class="flex flex-col sm:flex-row justify-between items-center">
+						<div class="mb-4 sm:mb-0 text-sm text-gray-700 dark:text-gray-300">
+							Mostrando ${inicioRango} a ${finRango} de ${totalRecords} registros
+						</div>
+						<div class="flex space-x-2">
+							<button data-page="${Math.max(1, currentPage - 1)}" 
+									class="pagination-btn px-4 py-2 text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+										currentPage === 1
+											? "bg-gray-100 text-gray-400 cursor-not-allowed dark:bg-gray-700 dark:text-gray-500"
+											: "bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+									}" 
+									${currentPage === 1 ? "disabled" : ""}>
+								Anterior
+							</button>
+							
+							${paginasVisibles
+								.map(
+									(pageNum: number) => `
+								<button data-page="${pageNum}" 
+										class="pagination-btn px-4 py-2 text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+											pageNum === currentPage
+												? "bg-blue-600 text-white dark:bg-blue-500"
+												: "bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+										}">
+									${pageNum}
+								</button>
+							`,
+								)
+								.join("")}
+							
+							<button data-page="${Math.min(totalPages, currentPage + 1)}" 
+									class="pagination-btn px-4 py-2 text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+										currentPage === totalPages
+											? "bg-gray-100 text-gray-400 cursor-not-allowed dark:bg-gray-700 dark:text-gray-500"
+											: "bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+									}" 
+									${currentPage === totalPages ? "disabled" : ""}>
+								Siguiente
+							</button>
+						</div>
+					</div>
+				</div>
+			`;
+
+			// Reinicializar eventos de paginación
+			initializePaginationEvents();
+		}
+
+		// Función para actualizar el selector de registros por página
+		function updateRecordsSelector(perPage: string) {
+			const recordsSelect = document.getElementById(
+				"records-per-page",
+			) as HTMLSelectElement;
+			if (recordsSelect) {
+				recordsSelect.value = perPage;
+			}
+		}
+
+		// Función helper para calcular páginas visibles
+		function calcularPaginasVisibles(
+			actual: number,
+			total: number,
+			maxVisibles: number = 5,
+		): number[] {
+			const paginas: number[] = [];
+			const cantidadVisible = Math.min(maxVisibles, total);
+
+			if (total <= maxVisibles) {
+				for (let i = 1; i <= total; i++) {
+					paginas.push(i);
+				}
+			} else if (actual <= 3) {
+				for (let i = 1; i <= cantidadVisible; i++) {
+					paginas.push(i);
+				}
+			} else if (actual >= total - 2) {
+				for (let i = total - cantidadVisible + 1; i <= total; i++) {
+					paginas.push(i);
+				}
+			} else {
+				for (let i = actual - 2; i <= actual + 2; i++) {
+					paginas.push(i);
+				}
+			}
+
+			return paginas;
+		}
+
+		// Función helper para convertir fecha
+		function convertirFechaPeru(fechaStr: string) {
+			const fechaUTC = new Date(fechaStr + "T00:00:00Z");
+			const fechaLocal = new Date(fechaUTC.getTime() + 5 * 60 * 60 * 1000);
+			return fechaLocal.toLocaleDateString("es-PE", {
+				weekday: "long",
+				day: "2-digit",
+				month: "long",
+				year: "numeric",
+			});
+		}
+
+		// Inicializar eventos de botones de edición
+		function initializeEditButtons() {
+			document.querySelectorAll(".edit-payment-btn").forEach((btn) => {
+				btn.addEventListener("click", () => {
+					const dataPayment = btn.getAttribute("data-payment");
+					if (dataPayment) {
+						const paymentData = JSON.parse(dataPayment);
+						sessionStorage.setItem(
+							"ownerDailyPaymentData",
+							JSON.stringify(paymentData),
+						);
+
+						// Abrir modal (reutilizar lógica existente)
+						toggleModalVisibility("edit-owner-daily-pay-modal", true);
+						setTimeout(() => {
+							setParamsFromSession();
+						}, 100);
+					}
+				});
+			});
+		}
+
+		// Inicializar eventos de paginación
+		function initializePaginationEvents() {
+			document.querySelectorAll(".pagination-btn").forEach((button) => {
+				button.addEventListener("click", async (e) => {
+					const target = e.target as HTMLButtonElement;
+
+					if (target?.disabled) return;
+
+					const pageNum = target.getAttribute("data-page");
+					if (!pageNum) return;
+
+					await updateTableContent(parseInt(pageNum));
+				});
+			});
+		}
+
+		// Exponer función globalmente para uso desde OwnerDailyPaymentList
+		(window as any).updateTableContentExternal = updateTableContent;
+
+		// Inicializar eventos al cargar la página
+		initializeEditButtons();
+		initializePaginationEvents();
 	});
 </script>

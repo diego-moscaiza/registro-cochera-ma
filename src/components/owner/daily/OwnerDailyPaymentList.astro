@@ -3,48 +3,141 @@ import { getAllPaymentsById } from "../../../pages/api/record/payment/getPayment
 import OwnerDailyPaymentTable from "./OwnerDailyPaymentTable.astro";
 
 interface Props {
-	id: string;
+    id: string;
 }
 
 interface PaymentEntry {
-	id: string;
-	nombre_dueno: string;
-	monto_total: number;
-	monto_tarifa_agua: number;
-	fecha_pago: string;
-	estado_pago: boolean;
-	retiro_coche: boolean;
-	guarda_carreta: boolean;
+    id: string;
+    nombre_dueno: string;
+    monto_total: number;
+    monto_tarifa_agua: number;
+    fecha_pago: string;
+    estado_pago: boolean;
+    retiro_coche: boolean;
+    guarda_carreta: boolean;
 }
 
 const { id } = Astro.props;
+
+// Parámetros de paginación desde URL
+const url = new URL(Astro.request.url);
+const pageParam = url.searchParams.get("page");
+const perPageParam = url.searchParams.get("perPage");
+
+const paginaActual = pageParam ? parseInt(pageParam) : 1;
+const registrosPorPagina = perPageParam ? parseInt(perPageParam) : 10;
+
+// Obtener todos los resultados
 const result = id ? await getAllPaymentsById({ id }) : [];
-const pagoPorPropietario: PaymentEntry[] = Array.isArray(result)
-	? result
-	: await result.json().catch(() => []);
+const todosLosPagos: PaymentEntry[] = Array.isArray(result)
+    ? result
+    : await result.json().catch(() => []);
+
+// Ordenar pagos por fecha más reciente
+todosLosPagos.sort(
+    (a, b) => new Date(b.fecha_pago).getTime() - new Date(a.fecha_pago).getTime(),
+);
+
+// Calcular paginación
+const totalRegistros = todosLosPagos.length;
+const totalPaginas = registrosPorPagina === -1 ? 1 : Math.ceil(totalRegistros / registrosPorPagina);
+
+// Obtener pagos para la página actual
+let pagosPaginados: PaymentEntry[];
+if (registrosPorPagina === -1) {
+    // Mostrar todos los registros
+    pagosPaginados = todosLosPagos;
+} else {
+    const inicio = (paginaActual - 1) * registrosPorPagina;
+    const fin = inicio + registrosPorPagina;
+    pagosPaginados = todosLosPagos.slice(inicio, fin);
+}
 ---
 
-<div>
-	{
-		pagoPorPropietario.length === 0 ? (
-			<div class="px-6 py-4 text-2xl text-center bg-white dark:bg-slate-700 rounded-lg border border-slate-400 dark:border-slate-600">
-				No hay registros de los pagos.
-			</div>
-		) : (
-			<OwnerDailyPaymentTable
-				pagoPorPropietario={pagoPorPropietario.map(
-					(propietario: PaymentEntry) => ({
-						idDueno: propietario.id,
-						nombreDueno: propietario.nombre_dueno,
-						montoTotal: propietario.monto_total,
-						montoTarifaAgua: propietario.monto_tarifa_agua,
-						fechaPago: propietario.fecha_pago,
-						retiroCoche: propietario.retiro_coche,
-						estadoPago: propietario.estado_pago,
-						guardaCarreta: propietario.guarda_carreta,
-					}),
-				)}
-			/>
-		)
-	}
+<div id="pagos-container">
+    {
+        todosLosPagos.length === 0 ? (
+            <div class="px-6 py-4 text-2xl text-center bg-white dark:bg-slate-700 rounded-lg border border-slate-400 dark:border-slate-600">
+                No hay registros de los pagos.
+            </div>
+        ) : (
+            <div>
+                <!-- Selector de registros por página -->
+                <div class="mb-4 flex justify-between items-center">
+                    <div class="flex items-center space-x-3">
+                        <label for="records-per-page" class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Mostrar:
+                        </label>
+                        <select
+                            id="records-per-page"
+                            class="px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300"
+                        >
+                            <option value="5" selected={registrosPorPagina === 5}>5 registros</option>
+                            <option value="10" selected={registrosPorPagina === 10}>10 registros</option>
+                            <option value="20" selected={registrosPorPagina === 20}>20 registros</option>
+                            <option value="-1" selected={registrosPorPagina === -1}>Todos</option>
+                        </select>
+                    </div>
+                    <div class="text-sm text-gray-600 dark:text-gray-400">
+                        Total: {totalRegistros} registros
+                    </div>
+                </div>
+
+                <!-- Tabla con paginación -->
+                <OwnerDailyPaymentTable
+                    pagoPorPropietario={pagosPaginados.map(
+                        (propietario: PaymentEntry) => ({
+                            idDueno: propietario.id,
+                            nombreDueno: propietario.nombre_dueno,
+                            montoTotal: propietario.monto_total,
+                            montoTarifaAgua: propietario.monto_tarifa_agua,
+                            fechaPago: propietario.fecha_pago,
+                            retiroCoche: propietario.retiro_coche,
+                            estadoPago: propietario.estado_pago,
+                            guardaCarreta: propietario.guarda_carreta,
+                        }),
+                    )}
+                    paginaActual={paginaActual}
+                    totalPaginas={totalPaginas}
+                    registrosPorPagina={registrosPorPagina}
+                    totalRegistros={totalRegistros}
+                />
+            </div>
+        )
+    }
 </div>
+
+<script>
+    // Manejar cambio de registros por página dinámicamente
+    document.addEventListener("DOMContentLoaded", () => {
+        const recordsSelect = document.getElementById("records-per-page") as HTMLSelectElement;
+        
+        if (recordsSelect) {
+            recordsSelect.addEventListener("change", async (e) => {
+                const target = e.target as HTMLSelectElement;
+                const newPerPage = target.value;
+                
+                // Verificar si existe la función updateTableContent en el componente tabla
+                const tableComponent = document.querySelector("#table-container");
+                if (tableComponent) {
+                    // Llamar a la función de actualización dinámica de la tabla
+                    if (typeof (window as any).updateTableContentExternal === 'function') {
+                        await (window as any).updateTableContentExternal(1, newPerPage);
+                    } else {
+                        // Fallback: actualizar URL y recargar
+                        const url = new URL(window.location.href);
+                        url.searchParams.set("perPage", newPerPage);
+                        url.searchParams.set("page", "1");
+                        window.location.href = url.toString();
+                    }
+                } else {
+                    // Fallback para compatibilidad
+                    const url = new URL(window.location.href);
+                    url.searchParams.set("perPage", newPerPage);
+                    url.searchParams.set("page", "1");
+                    window.location.href = url.toString();
+                }
+            });
+        }
+    });
+</script>

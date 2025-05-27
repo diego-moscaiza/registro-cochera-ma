@@ -374,6 +374,49 @@ const propietario: Props | null = ownerData as Props | null;
 	</main>
 </LayoutSidebar>
 
+<style>
+	/* Añadir estos estilos a tu archivo CSS principal */
+	.pagination-btn:disabled {
+		pointer-events: none;
+		opacity: 0.6;
+	}
+
+	.pagination-btn:not(:disabled):hover {
+		transform: translateY(-1px);
+		transition: transform 0.2s ease;
+	}
+
+	#records-per-page {
+		transition: all 0.2s ease;
+	}
+
+	#records-per-page:focus {
+		box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+	}
+
+	/* Indicador de carga para botones de paginación */
+	.pagination-btn:disabled::after {
+		content: "";
+		display: inline-block;
+		width: 12px;
+		height: 12px;
+		margin-left: 8px;
+		border: 2px solid transparent;
+		border-top: 2px solid currentColor;
+		border-radius: 50%;
+		animation: spin 1s linear infinite;
+	}
+
+	@keyframes spin {
+		0% {
+			transform: rotate(0deg);
+		}
+		100% {
+			transform: rotate(360deg);
+		}
+	}
+</style>
+
 <script>
 	// Input nonto_diario
 	const editMontoDiarioElement = document.getElementById("edit-monto-diario");
