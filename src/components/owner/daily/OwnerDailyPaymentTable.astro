@@ -293,8 +293,118 @@ const finRango =
 		</div>
 	</div>
 
-	<!-- Modal existente sin cambios -->
-	<!-- ... resto del código del modal ... -->
+	<!-- Modal para editar pagos de propietarios -->
+	<div
+		class="fixed inset-0 z-50 items-center justify-center bg-black bg-opacity-50 transition-opacity duration-300 ease-in-out hidden"
+		id="edit-owner-daily-pay-modal"
+	>
+		<div
+			class="relative w-full max-w-2xl px-4 transform transition-all duration-300 ease-in-out scale-95 opacity-0"
+		>
+			<!-- Modal content -->
+			<div class="relative bg-white rounded-lg shadow-lg dark:bg-gray-800">
+				<!-- Modal header -->
+				<div
+					class="flex items-start justify-between p-5 border-b border-gray-200 rounded-t dark:border-gray-700"
+				>
+					<h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+						Editar información del propietario
+					</h3>
+					<button
+						type="button"
+						id="close-edit-owner-daily-pay-modal"
+						class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-700 dark:hover:text-white"
+						data-modal-toggle="edit-owner-daily-pay-modal"
+					>
+						<svg
+							class="w-5 h-5"
+							fill="currentColor"
+							viewBox="0 0 20 20"
+							xmlns="http://www.w3.org/2000/svg"
+						>
+							<path
+								fill-rule="evenodd"
+								d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+								clip-rule="evenodd"></path>
+						</svg>
+					</button>
+				</div>
+
+				<!-- Modal body -->
+				<div>
+					<form id="update-owner-daily-payment-form" class="p-6 space-y-6">
+						<div class="grid grid-cols-6 gap-6">
+							<div class="col-span-6 sm:col-span-6">
+								<label
+									for="edit-full-name"
+									class="block mb-2 text-sm font-medium text-blue-900 dark:text-white"
+								>
+									Nombre
+								</label>
+								<input
+									type="text"
+									name="nombre-Dueno"
+									id="edit-full-name"
+									class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
+									placeholder="Nombre del propietario"
+									required
+								/>
+							</div>
+							<div class="col-span-6 sm:col-span-3">
+								<label
+									for="edit-monto-diario"
+									class="block mb-2 text-sm font-medium text-blue-900 dark:text-white"
+								>
+									Monto diario <span class="text-gray-500">(S/.)</span>
+								</label>
+								<input
+									type="text"
+									name="monto-diario"
+									id="edit-monto-diario"
+									class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
+									placeholder="Monto diario de pago"
+									required
+								/>
+							</div>
+							<div class="col-span-6 sm:col-span-3">
+								<label
+									for="edit-estado"
+									class="block mb-2 text-sm font-medium text-blue-900 dark:text-white"
+								>
+									Estado
+								</label>
+								<select
+									name="estado"
+									id="edit-estado"
+									class="shadow-sm bg-gray-50 rounded-lg border border-gray-300 text-gray-900 sm:text-sm focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500 appearance-none"
+									required
+								>
+									<option value="" disabled selected>
+										Seleccione el estado
+									</option>
+									<option value="Sí guarda">Sí guarda</option>
+									<option value="Ya no guarda">Ya no guarda</option>
+								</select>
+							</div>
+						</div>
+						<!-- Modal footer -->
+						<div
+							class="flex items-center justify-end px-6 pt-4 border-t border-gray-200 rounded-b dark:border-gray-700"
+						>
+							<button
+								id="close-edit-owner-daily-pay-modal-2"
+								class="text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-blue-800"
+								type="submit"
+								data-modal-toggle="edit-owner-daily-pay-modal"
+							>
+								Guardar
+							</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
 </section>
 
 <script>
@@ -565,6 +675,7 @@ const finRango =
 		// NUEVA funcionalidad para paginación dinámica
 		// Variables globales para paginación
 		let currentOwnerId = getCurrentOwnerId();
+		let isLoading = false; // Flag para evitar múltiples llamadas
 
 		function getCurrentOwnerId() {
 			// Extraer ID de la URL actual
@@ -572,16 +683,23 @@ const finRango =
 			return pathParts[pathParts.length - 1];
 		}
 
-		function showLoadingIndicator(show = true) {
+		function showLoadingIndicator(show: boolean = true) {
 			const indicator = document.getElementById("loading-indicator");
-			if (indicator) {
-				if (show) {
-					indicator.classList.remove("hidden");
-					indicator.classList.add("flex");
-				} else {
-					indicator.classList.add("hidden");
-					indicator.classList.remove("flex");
-				}
+			if (!indicator) {
+				console.warn("Loading indicator no encontrado");
+				return;
+			}
+
+			if (show) {
+				indicator.style.display = "flex";
+				indicator.classList.remove("hidden");
+				indicator.classList.add("flex");
+				console.log("Mostrando indicador de carga");
+			} else {
+				indicator.style.display = "none";
+				indicator.classList.add("hidden");
+				indicator.classList.remove("flex");
+				console.log("Ocultando indicador de carga");
 			}
 		}
 
@@ -590,8 +708,20 @@ const finRango =
 			page: number,
 			perPage: string | null = null,
 		) {
+			// Evitar múltiples llamadas simultáneas
+			if (isLoading) {
+				console.log("Ya hay una carga en progreso, ignorando solicitud");
+				return;
+			}
+
 			try {
+				isLoading = true;
 				showLoadingIndicator(true);
+
+				// Validar parámetros
+				if (isNaN(page) || page < 1) {
+					throw new Error("Número de página inválido");
+				}
 
 				// Obtener perPage actual si no se especifica
 				if (!perPage) {
@@ -599,7 +729,17 @@ const finRango =
 					perPage = url.searchParams.get("perPage") || "10";
 				}
 
-				// Hacer fetch a la API
+				// Actualizar ID del propietario por si cambió
+				currentOwnerId = getCurrentOwnerId();
+
+				console.log(
+					`Cargando página ${page} con ${perPage} registros por página`,
+				);
+
+				// Hacer fetch a la API con timeout
+				const controller = new AbortController();
+				const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 segundos timeout
+
 				const response = await fetch(
 					`/api/record/owner/paginated?id=${currentOwnerId}&page=${page}&perPage=${perPage}`,
 					{
@@ -607,15 +747,28 @@ const finRango =
 							Accept: "application/json",
 							"X-Requested-With": "XMLHttpRequest",
 						},
+						signal: controller.signal,
 					},
 				);
 
+				clearTimeout(timeoutId);
+
 				if (!response.ok) {
-					throw new Error("Error al obtener datos");
+					const errorText = await response.text();
+					throw new Error(
+						`Error del servidor: ${response.status} - ${errorText}`,
+					);
 				}
 
 				const result = await response.json();
+
+				if (!result || !result.data || !result.pagination) {
+					throw new Error("Respuesta del servidor incompleta");
+				}
+
 				const { data, pagination } = result;
+
+				console.log(`Datos recibidos: ${data.length} registros`);
 
 				// Actualizar contenido de la tabla
 				updateTableRows(data);
@@ -627,16 +780,25 @@ const finRango =
 				url.searchParams.set("page", page.toString());
 				url.searchParams.set("perPage", perPage.toString());
 				window.history.pushState({}, "", url.toString());
-
-				showLoadingIndicator(false);
-			} catch (error) {
+			} catch (error: unknown) {
 				console.error("Error al actualizar tabla:", error);
+
+				// Mostrar error específico
+				let errorMessage = "Error al cargar los datos.";
+				if (error instanceof Error) {
+					if (error.name === "AbortError") {
+						errorMessage =
+							"La solicitud ha tardado demasiado. Verifica tu conexión.";
+					} else if (error.message) {
+						errorMessage = error.message;
+					}
+				}
+
+				mostrarNotificacion(errorMessage, "error");
+			} finally {
+				// Asegurar que siempre se reinicie el estado
+				isLoading = false;
 				showLoadingIndicator(false);
-				// Mostrar error sin recargar página
-				mostrarNotificacion(
-					"Error al cargar los datos. Inténtalo nuevamente.",
-					"error",
-				);
 			}
 		}
 
@@ -744,15 +906,16 @@ const finRango =
 			// Calcular páginas visibles
 			const paginasVisibles = calcularPaginasVisibles(currentPage, totalPages);
 
+			// Crear HTML con atributos de datos para mejor manejo
 			paginationContainer.innerHTML = `
-				<div class="px-5 py-4 bg-white dark:bg-slate-800 border-t border-gray-200 dark:border-gray-700">
+				<div class="px-5 py-4 bg-white dark:bg-slate-800 border-t border-gray-200 dark:border-gray-700" data-total-pages="${totalPages}">
 					<div class="flex flex-col sm:flex-row justify-between items-center">
 						<div class="mb-4 sm:mb-0 text-sm text-gray-700 dark:text-gray-300">
 							Mostrando ${inicioRango} a ${finRango} de ${totalRecords} registros
 						</div>
 						<div class="flex space-x-2">
 							<button data-page="${Math.max(1, currentPage - 1)}" 
-									class="pagination-btn px-4 py-2 text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+									class="pagination-btn px-4 py-2 text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
 										currentPage === 1
 											? "bg-gray-100 text-gray-400 cursor-not-allowed dark:bg-gray-700 dark:text-gray-500"
 											: "bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
@@ -765,7 +928,7 @@ const finRango =
 								.map(
 									(pageNum: number) => `
 								<button data-page="${pageNum}" 
-										class="pagination-btn px-4 py-2 text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+										class="pagination-btn px-4 py-2 text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
 											pageNum === currentPage
 												? "bg-blue-600 text-white dark:bg-blue-500"
 												: "bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
@@ -777,7 +940,7 @@ const finRango =
 								.join("")}
 							
 							<button data-page="${Math.min(totalPages, currentPage + 1)}" 
-									class="pagination-btn px-4 py-2 text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+									class="pagination-btn px-4 py-2 text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
 										currentPage === totalPages
 											? "bg-gray-100 text-gray-400 cursor-not-allowed dark:bg-gray-700 dark:text-gray-500"
 											: "bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
@@ -790,8 +953,10 @@ const finRango =
 				</div>
 			`;
 
-			// Reinicializar eventos de paginación
-			initializePaginationEvents();
+			// Reinicializar eventos de paginación inmediatamente
+			setTimeout(() => {
+				initializePaginationEvents();
+			}, 50);
 		}
 
 		// Función para actualizar el selector de registros por página
@@ -870,15 +1035,36 @@ const finRango =
 
 		// Inicializar eventos de paginación
 		function initializePaginationEvents() {
+			// Remover eventos anteriores para evitar duplicados
+			document.querySelectorAll(".pagination-btn").forEach((button) => {
+				const newButton = button.cloneNode(true);
+				button.parentNode?.replaceChild(newButton, button);
+			});
+
+			// Agregar nuevos eventos
 			document.querySelectorAll(".pagination-btn").forEach((button) => {
 				button.addEventListener("click", async (e) => {
+					e.preventDefault();
+					e.stopPropagation();
+
 					const target = e.target as HTMLButtonElement;
 
-					if (target?.disabled) return;
+					// Verificar si el botón está deshabilitado o ya hay una carga en progreso
+					if (
+						target?.disabled ||
+						target?.hasAttribute("disabled") ||
+						isLoading
+					) {
+						return;
+					}
 
 					const pageNum = target.getAttribute("data-page");
-					if (!pageNum) return;
+					if (!pageNum || isNaN(parseInt(pageNum))) {
+						console.error("Número de página inválido:", pageNum);
+						return;
+					}
 
+					// Llamar a la función de actualización
 					await updateTableContent(parseInt(pageNum));
 				});
 			});
